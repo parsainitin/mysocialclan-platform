@@ -40,7 +40,7 @@ interface CommunityPublic {
   createdAt: string;
 }
 
-type SupportedLang = "en" | "es" | "fr" | "de" | "ja" | "pt" | "fil";
+type SupportedLang = "en" | "es" | "fr" | "de" | "ja" | "pt" | "fil" | "ar" | "hi" | "ur" | "ml";
 
 const translations: Record<
   SupportedLang,
@@ -92,7 +92,7 @@ const translations: Record<
     langAgnosticBadge: "Language-Agnostic Platform",
     langAgnosticTitle: "Operate Comfortably in Any International Language",
     langAgnosticDesc:
-      "MySocialClan is 100% language-agnostic. Whether your global members converse in English, Spanish, French, German, Japanese, Portuguese, Filipino, or any script, your community feed adapts seamlessly.",
+      "MySocialClan is 100% language-agnostic. Whether your global members converse in Arabic, English, Hindi, Urdu, Malayalam, Spanish, French, German, Japanese, Portuguese, or Filipino, your community feed adapts seamlessly.",
     modulesBadge: "Social Engine Modules",
     modulesTitle: "Powerful Features Included",
     modulesSubtitle: "Configure exactly which engagement tools your organization needs.",
@@ -100,6 +100,126 @@ const translations: Record<
     showcaseTitle: "Active Clans & Organizations",
     createClan: "Create Clan",
     superAdmin: "Super Admin Portal",
+  },
+  ar: {
+    badge: "منصة SaaS مستقلة عن اللغة للمجتمعات والمؤسسات العالمية والخليجية",
+    heroTitle: "أنشئ شبكتك الاجتماعية الخاصة في خلال",
+    minutes: "دقائق",
+    heroDesc:
+      "مكّن كليتك، أو شبكة الخريجين، أو جمعيتك المهنية، أو مجموعتك الاجتماعية، أو منظمتك غير الحكومية بشبكة خاصة موثقة تحت نطاقك الفرعي المخصص.",
+    buildSubdomain: "إنشاء نطاق فرعي للمجتمع",
+    exploreCommunities: "استكشاف المجتمعات الحية",
+    verifiedBadge: "شبكات خاصة موثقة 100%",
+    verifiedSub: "محل ثقة الكليات وشبكات الخريجين والصناديق الدولية",
+    audiencesBadge: "الجمهور المستهدف",
+    audiencesTitle: "مصممة لتناسب كل أنواع الشبكات والمؤسسات",
+    audiencesSubtitle:
+      "توفير تواصل اجتماعي خاص وعالي الثقة عبر المؤسسات التعليمية، والهيئات المهنية، والجمعيات العالمية.",
+    whyClosedBadge: "ميزة الشبكة المغلقة",
+    whyClosedTitle: "لماذا تختار شبكة خاصة مغلقة بدلاً من المنصات العامة؟",
+    whyClosedSubtitle:
+      "تعطي المنصات العامة الأولوية لتتبع الإعلانات وجمع البيانات. يوفر MySocialClan ملاذاً آمناً وخالياً من الإعلانات لمجتمعك.",
+    langAgnosticBadge: "منصة مستقلة عن اللغة",
+    langAgnosticTitle: "عمل بسلاسة بأي لغة عالمية",
+    langAgnosticDesc:
+      "منصة MySocialClan مستقلة تماماً عن اللغة. سواء يتحدث أعضاؤك بالعربية، الإنجليزية، الهندية، أردو، أو أي لغة أخرى، يتكيف التطبيق بسلاسة.",
+    modulesBadge: "وحدات المحرك الاجتماعي",
+    modulesTitle: "ميزات قوية متضمنة",
+    modulesSubtitle: "قم بإعداد أدوات التفاعل التي تحتاجها مؤسستك بالضبط.",
+    showcaseBadge: "شبكة المجتمعات الحية",
+    showcaseTitle: "المجتمعات والمؤسسات النشطة",
+    createClan: "إنشاء مجتمع (Clan)",
+    superAdmin: "بوابة المسؤول الفائق",
+  },
+  hi: {
+    badge: "वैश्विक समुदायों और संस्थानों के लिए भाषा-स्वतंत्र SaaS प्लेटफ़ॉर्म",
+    heroTitle: "अपना निजी सोशल नेटवर्क शुरू करें केवल कुछ",
+    minutes: "मिनटों में",
+    heroDesc:
+      "अपने कॉलेज, पूर्व छात्र नेटवर्क, पेशेवर संघ या एनजीओ को अपने कस्टम सबडोमेन के तहत एक सत्यापित निजी नेटवर्क के साथ सशक्त बनाएं।",
+    buildSubdomain: "समुदाय सबडोमेन बनाएं",
+    exploreCommunities: "लाइव समुदाय देखें",
+    verifiedBadge: "100% सत्यापित निजी नेटवर्क",
+    verifiedSub: "कॉलेजों, पूर्व छात्रों और अंतरराष्ट्रीय ट्रस्टों द्वारा विश्वसनीय",
+    audiencesBadge: "लक्षित दर्शक",
+    audiencesTitle: "हर प्रकार के संगठन के लिए अनुकूलित",
+    audiencesSubtitle:
+      "शैक्षणिक संस्थानों, पेशेवर निकायों और वैश्विक संघों में निजी और सुरक्षित जुड़ाव प्रदान करना।",
+    whyClosedBadge: "बंद नेटवर्क के लाभ",
+    whyClosedTitle: "सार्वजनिक सोशल मीडिया के बजाय बंद नेटवर्क क्यों चुनें?",
+    whyClosedSubtitle:
+      "सार्वजनिक प्लेटफॉर्म विज्ञापनों और डेटा ट्रैकिंग को प्राथमिकता देते हैं। MySocialClan आपके समुदाय के लिए एक विज्ञापन-मुक्त, सुरक्षित स्थान प्रदान करता है।",
+    langAgnosticBadge: "भाषा-स्वतंत्र प्लेटफ़ॉर्म",
+    langAgnosticTitle: "किसी भी अंतरराष्ट्रीय भाषा में आराम से काम करें",
+    langAgnosticDesc:
+      "MySocialClan 100% भाषा-स्वतंत्र है। आपके सदस्य अरबी, हिंदी, अंग्रेजी, उर्दू, मलयालम या किसी भी भाषा में संवाद कर सकते हैं।",
+    modulesBadge: "सोशल इंजन मॉड्यूल",
+    modulesTitle: "शक्तिशाली सुविधाएं शामिल",
+    modulesSubtitle: "अपनी आवश्यकतानुसार टूल कॉन्फ़िगर करें।",
+    showcaseBadge: "लाइव समुदाय नेटवर्क",
+    showcaseTitle: "सक्रिय क्लैन और संगठन",
+    createClan: "क्लैन बनाएं",
+    superAdmin: "सुपर एडमिन पोर्टल",
+  },
+  ur: {
+    badge: "عالمی برادریوں اور جی سی سی خطے کے لیے زبان سے آزاد SaaS پلیٹ فارم",
+    heroTitle: "صرف چند منٹوں میں اپنا پرائیویٹ سوشل نیٹ ورک",
+    minutes: "شروع کریں",
+    heroDesc:
+      "اپنے کالج، ایلومنائی نیٹ ورک، پیشہ ورانہ تنظیم، یا این جی او کو اپنے کسٹم سب ڈومین کے تحت ایک تصدیق شدہ پرائیویٹ نیٹ ورک سے بااختیار بنائیں۔",
+    buildSubdomain: "سب ڈومین بنائیں",
+    exploreCommunities: "لائیو کمیونٹیز دیکھیں",
+    verifiedBadge: "100% تصدیق شدہ پرائیویٹ نیٹ ورکس",
+    verifiedSub: "کالجوں، ایلومنائی اور بین الاقوامی ٹرسٹ کا قابل اعتماد پلیٹ فارم",
+    audiencesBadge: "ہدف گروپس",
+    audiencesTitle: "ہر قسم کی تنظیم کے لیے موزوں",
+    audiencesSubtitle:
+      "تعلیمی اداروں، پیشہ ورانہ اداروں اور عالمی تنظیموں میں پرائیویٹ اور محفوظ رابطے فراہم کرنا۔",
+    whyClosedBadge: "پرائیویٹ نیٹ ورک کے فوائد",
+    whyClosedTitle: "پبلک سوشل میڈیا کے بجائے پرائیویٹ نیٹ ورک کیوں منتخب کریں؟",
+    whyClosedSubtitle:
+      "پبلک پلیٹ فارم اشتہارات اور ڈیٹا ٹریکنگ کو ترجیح دیتے ہیں۔ MySocialClan آپ کی کمیونٹی کے لیے اشتہارات سے پاک محفوظ ماحول فراہم کرتا ہے۔",
+    langAgnosticBadge: "ہر زبان کے لیے موزوں پلیٹ فارم",
+    langAgnosticTitle: "کسی بھی عالمی زبان میں آسانی سے کام کریں",
+    langAgnosticDesc:
+      "MySocialClan 100% زبان سے آزاد ہے۔ آپ کے اراکین عربی، اردو، ہندی، انگریزی یا کسی بھی زبان میں بات چیت کر سکتے ہیں۔",
+    modulesBadge: "سوشل انجن ماڈیولز",
+    modulesTitle: "طاقتور خصوصیات شامل ہیں",
+    modulesSubtitle: "اپنی ضرورت کے مطابق خصوصیات کا انتخاب کریں۔",
+    showcaseBadge: "لائیو کمیونٹی نیٹ ورک",
+    showcaseTitle: "فعال کلینز اور تنظیمیں",
+    createClan: "کلین بنائیں",
+    superAdmin: "سپر ایڈمن پورٹل",
+  },
+  ml: {
+    badge: "ഗ്ലോബൽ & ജിസിസി കമ്മ്യൂണിറ്റികൾക്കായുള്ള ഭാഷാ-സ്വതന്ത്ര SaaS പ്ലാറ്റ്ഫോം",
+    heroTitle: "നിങ്ങളുടെ സ്വകാര്യ സോഷ്യൽ നെറ്റ്‌വർക്ക് ആരംഭിക്കൂ വെറും",
+    minutes: "മിനിറ്റുകൾക്കുള്ളിൽ",
+    heroDesc:
+      "നിങ്ങളുടെ കോളേജ്, അലുമിനൈ നെറ്റ്‌വർക്ക്, പ്രൊഫഷണൽ ഓർഗനൈസേഷൻ അല്ലെങ്കിൽ എൻ‌ജി‌ഓകൾക്കായി നിങ്ങളുടെ സ്വന്തം സബ്‌ഡൊമെയ്‌നിൽ ഒരു സ്വകാര്യ നെറ്റ്‌വർക്ക് നിർമ്മിക്കൂ.",
+    buildSubdomain: "സബ്‌ഡൊമെയ്‌ൻ നിർമ്മിക്കുക",
+    exploreCommunities: "കമ്മ്യൂണിറ്റികൾ കാണുക",
+    verifiedBadge: "100% വെരിഫൈഡ് പ്രൈവറ്റ് നെറ്റ്‌വർക്കുകൾ",
+    verifiedSub: "കോളേജുകളും അലുമിനൈ ഓർഗനൈസേഷനുകളും വിശ്വസിക്കുന്ന പ്ലാറ്റ്‌ഫോം",
+    audiencesBadge: "ടാർഗെറ്റ് ഗ്രൂപ്പുകൾ",
+    audiencesTitle: "എല്ലാ തരം ഓർഗനൈസേഷനുകൾക്കും അനുയോജ്യം",
+    audiencesSubtitle:
+      "വിദ്യാഭ്യാസ സ്ഥാപനങ്ങൾ, പ്രൊഫഷണൽ ഗ്രൂപ്പുകൾ, സാമൂഹിക കൂട്ടായ്മകൾ എന്നിവയ്ക്ക് സുരക്ഷിതമായ സോഷ്യൽ നെറ്റ്‌വർക്ക്.",
+    whyClosedBadge: "പ്രൈവറ്റ് നെറ്റ്‌വർക്കിന്റെ നേട്ടങ്ങൾ",
+    whyClosedTitle: "പൊതു സോഷ്യൽ മീഡിയകൾക്ക് പകരം പ്രൈവറ്റ് നെറ്റ്‌വർക്ക് തിരഞ്ഞെടുക്കുന്നത് എന്തുകൊണ്ട്?",
+    whyClosedSubtitle:
+      "പൊതു പ്ലാറ്റ്‌ഫോമുകൾ പരസ്യങ്ങൾക്കും ഡാറ്റ ട്രാക്കിംഗിനും മുൻഗണന നൽകുന്നു. MySocialClan പരസ്യങ്ങളില്ലാത്ത സുരക്ഷിത ഇടം നൽകുന്നു.",
+    langAgnosticBadge: "ഭാഷാ-സ്വതന്ത്ര പ്ലാറ്റ്‌ഫോം",
+    langAgnosticTitle: "ഏത് അന്താരാഷ്ട്ര ഭാഷയിലും എളുപ്പത്തിൽ ഉപയോഗിക്കാം",
+    langAgnosticDesc:
+      "MySocialClan പൂർണ്ണമായും ഭാഷാ-സ്വതന്ത്രമാണ്. അറബിക്, മലയാളം, ഹിന്ദി, ഉർദു, ഇംഗ്ലീഷ് തുടങ്ങി ഏത് ഭാഷയിലും അംഗങ്ങൾക്ക് ആശയവിനിമയം നടത്താം.",
+    modulesBadge: "സോഷ്യൽ എഞ്ചിൻ മൊഡ്യൂളുകൾ",
+    modulesTitle: "ശക്തമായ സവിശേഷതകൾ ഉൾപ്പെടുത്തിയിരിക്കുന്നു",
+    modulesSubtitle: "നിങ്ങളുടെ ഓർഗനൈസേഷന് ആവശ്യമായ ടൂളുകൾ തിരഞ്ഞെക്കുക.",
+    showcaseBadge: "ലൈവ് കമ്മ്യൂണിറ്റി നെറ്റ്‌വർക്ക്",
+    showcaseTitle: "ആക്ടീവ് കൂട്ടായ്മകൾ",
+    createClan: "ക്ലാൻ ഉണ്ടാക്കുക",
+    superAdmin: "സൂപ്പർ അഡ്മിൻ പോർട്ടൽ",
   },
   es: {
     badge: "Plataforma SaaS Multilingüe para Comunidades e Instituciones Globales",
@@ -121,7 +241,7 @@ const translations: Record<
     langAgnosticBadge: "Plataforma Independiente del Idioma",
     langAgnosticTitle: "Opere Cómodamente en Cualquier Idioma Internacional",
     langAgnosticDesc:
-      "MySocialClan es 100% independiente del idioma. Sus miembros pueden publicar y comunicarse en español, inglés, francés, alemán, japonés, portugués o filipino.",
+      "MySocialClan es 100% independiente del idioma. Sus miembros pueden publicar y comunicarse en español, árabe, hindi, urdu, malayalam, inglés, francés, alemán, japonés, portugués o filipino.",
     modulesBadge: "Módulos Sociales",
     modulesTitle: "Características Potentes Incluidas",
     modulesSubtitle: "Configure exactamente las herramientas que necesita.",
@@ -150,7 +270,7 @@ const translations: Record<
     langAgnosticBadge: "Plateforme indépendante de la langue",
     langAgnosticTitle: "Fonctionne dans toutes les langues internationales",
     langAgnosticDesc:
-      "MySocialClan s'adapte à n'importe quelle langue internationale : français, anglais, espagnol, allemand, japonais, portugais, filipino, etc.",
+      "MySocialClan s'adapte à n'importe quelle langue internationale : arabe, hindi, ourdou, malayalam, français, anglais, espagnol, allemand, japonais, portugais, filipino, etc.",
     modulesBadge: "Modules sociaux",
     modulesTitle: "Fonctionnalités puissantes incluses",
     modulesSubtitle: "Configurez les outils adaptés à vos besoins.",
@@ -179,7 +299,7 @@ const translations: Record<
     langAgnosticBadge: "Sprachenunabhängige Plattform",
     langAgnosticTitle: "Nativ in jeder internationalen Sprache nutzbar",
     langAgnosticDesc:
-      "MySocialClan ist vollständig sprachenunabhängig und unterstützt Deutsch, Englisch, Spanisch, Französisch, Japanisch, Portugiesisch und Filipino.",
+      "MySocialClan ist vollständig sprachenunabhängig und unterstützt Arabisch, Hindi, Urdu, Malayalam, Deutsch, Englisch, Spanisch, Französisch, Japanisch, Portugiesisch und Filipino.",
     modulesBadge: "Soziale Module",
     modulesTitle: "Leistungsstarke Funktionen enthalten",
     modulesSubtitle: "Konfigurieren Sie genau die Tools, die Sie benötigen.",
@@ -208,7 +328,7 @@ const translations: Record<
     langAgnosticBadge: "言語非依存プラットフォーム",
     langAgnosticTitle: "あらゆる国際言語で快適に運用",
     langAgnosticDesc:
-      "日本語、英語、フィリピン語、ポルトガル語、スペイン語、フランス語、ドイツ語など、グローバルな言語に完全対応しています。",
+      "アラビア語、ヒンディー語、ウルドゥー語、マラヤーラム語、日本語、英語、フィリピン語、ポルトガル語、スペイン語、フランス語、ドイツ語など、グローバルな言語に完全対応しています。",
     modulesBadge: "ソーシャル機能",
     modulesTitle: "充実したモジュール機能",
     modulesSubtitle: "組織のニーズに合わせて必要な機能を自由に設定できます。",
@@ -237,7 +357,7 @@ const translations: Record<
     langAgnosticBadge: "Plataforma Independente de Idioma",
     langAgnosticTitle: "Opere em Qualquer Idioma Internacional",
     langAgnosticDesc:
-      "O MySocialClan suporta nativamente português do Brasil, inglês, espanhol, francês, alemão, japonês, filipino e qualquer outro idioma internacional.",
+      "O MySocialClan suporta nativamente árabe, híndi, urdu, malaiala, português do Brasil, inglês, espanhol, francês, alemão, japonês, filipino e qualquer outro idioma internacional.",
     modulesBadge: "Módulos Sociais",
     modulesTitle: "Recursos Potentes Incluídos",
     modulesSubtitle: "Configure exatamente as ferramentas que sua organização precisa.",
@@ -267,7 +387,7 @@ const translations: Record<
     langAgnosticBadge: "Platform na Suportado ang Lahat ng Wika",
     langAgnosticTitle: "Gumana nang Kumportable sa Anumang Wikang Pandaigdig",
     langAgnosticDesc:
-      "100% hindi nakadepende sa wika ang MySocialClan. Ang iyong mga miyembro ay makakapag-usap sa Filipino, Ingles, Hapon, Portuges, Espanyol, at higit pa.",
+      "100% hindi nakadepende sa wika ang MySocialClan. Ang iyong mga miyembro ay makakapag-usap sa Arabic, Hindi, Urdu, Malayalam, Filipino, Ingles, Hapon, Portuges, Espanyol, at higit pa.",
     modulesBadge: "Mga Modyul ng Social Engine",
     modulesTitle: "Kasama ang mga Makapangyarihang Tampok",
     modulesSubtitle: "I-configure ang eksaktong mga tool na kailangan ng iyong organisasyon.",
@@ -401,8 +521,13 @@ export default function LandingPage() {
     },
   ];
 
+  const isRtl = lang === "ar" || lang === "ur";
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-600 selection:text-white relative overflow-hidden">
+    <div
+      dir={isRtl ? "rtl" : "ltr"}
+      className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-600 selection:text-white relative overflow-hidden"
+    >
       {/* Ambient Glows */}
       <div className="absolute -top-40 -left-40 w-[32rem] h-[32rem] bg-indigo-200/50 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 -right-40 w-[32rem] h-[32rem] bg-blue-200/40 rounded-full blur-3xl pointer-events-none" />
@@ -437,6 +562,10 @@ export default function LandingPage() {
                 className="bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer pr-1"
               >
                 <option value="en">English (EN)</option>
+                <option value="ar">العربية (Arabic - GCC)</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+                <option value="ur">اردو (Urdu)</option>
+                <option value="ml">മലയാളം (Malayalam)</option>
                 <option value="es">Español (ES)</option>
                 <option value="fr">Français (FR)</option>
                 <option value="de">Deutsch (DE)</option>
@@ -752,6 +881,10 @@ export default function LandingPage() {
             className="bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg px-2.5 py-1 outline-none cursor-pointer shadow-2xs"
           >
             <option value="en">English (EN)</option>
+            <option value="ar">العربية (Arabic - GCC)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="ur">اردو (Urdu)</option>
+            <option value="ml">മലയാളം (Malayalam)</option>
             <option value="es">Español (ES)</option>
             <option value="fr">Français (FR)</option>
             <option value="de">Deutsch (DE)</option>
