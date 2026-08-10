@@ -15,12 +15,14 @@ export async function POST(request: NextRequest) {
       subdomain,
       description,
       logo,
+      primaryLanguage,
       cities,
       gotras,
       kulDevis,
       upiId,
       modules,
       adminName,
+      adminEmail,
       adminMobile,
     } = body;
 
@@ -55,11 +57,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate Admin details
-    if (!adminName?.trim() || !adminMobile?.trim()) {
-      return Response.json({ error: "Admin Name and Mobile Number are required" }, { status: 400 });
+    // Validate Admin contact details
+    if (!adminName?.trim() || !adminEmail?.trim() || !adminMobile?.trim()) {
+      return Response.json(
+        { error: "Admin Name, Contact Email, and Contact Mobile Number are required" },
+        { status: 400 }
+      );
     }
 
+    const cleanEmail = adminEmail.trim().toLowerCase();
     const cleanMobile = adminMobile.trim();
 
     // Create Community Request for offline provisioning
@@ -68,6 +74,7 @@ export async function POST(request: NextRequest) {
       subdomain: slug,
       description: description?.trim() || undefined,
       logo: logo?.trim() || undefined,
+      primaryLanguage: primaryLanguage?.trim() || "en",
       cities: Array.isArray(cities) ? cities.map((c: string) => c.trim()).filter(Boolean) : [],
       gotras: Array.isArray(gotras) ? gotras.map((g: string) => g.trim()).filter(Boolean) : [],
       kulDevis: Array.isArray(kulDevis) ? kulDevis.map((k: string) => k.trim()).filter(Boolean) : [],
@@ -81,6 +88,7 @@ export async function POST(request: NextRequest) {
         donations: modules?.donations ?? true,
       },
       adminName: adminName.trim(),
+      adminEmail: cleanEmail,
       adminMobile: cleanMobile,
       status: "pending",
     });
@@ -94,7 +102,9 @@ export async function POST(request: NextRequest) {
           id: creationRequest._id,
           name: creationRequest.name,
           subdomain: creationRequest.subdomain,
+          primaryLanguage: creationRequest.primaryLanguage,
           adminName: creationRequest.adminName,
+          adminEmail: creationRequest.adminEmail,
           adminMobile: creationRequest.adminMobile,
         },
       },

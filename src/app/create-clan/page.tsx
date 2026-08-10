@@ -38,6 +38,7 @@ export default function CreateClanPage() {
   // Step 2: Community Details
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [primaryLanguage, setPrimaryLanguage] = useState<string>("en");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [cities, setCities] = useState("New York, London, Tokyo, Berlin, Paris, Sydney");
@@ -48,6 +49,7 @@ export default function CreateClanPage() {
 
   // Step 3: Admin Account
   const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
   const [adminMobile, setAdminMobile] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
 
@@ -125,12 +127,14 @@ export default function CreateClanPage() {
           subdomain: subdomain.trim().toLowerCase(),
           description,
           logo: logoUrl,
+          primaryLanguage,
           cities: cities.split(",").map((s) => s.trim()).filter(Boolean),
           gotras: gotras.split(",").map((s) => s.trim()).filter(Boolean),
           kulDevis: kulDevis.split(",").map((s) => s.trim()).filter(Boolean),
           upiId: upiId.trim(),
           modules,
           adminName,
+          adminEmail,
           adminMobile,
           adminPassword,
         }),
@@ -382,6 +386,29 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    {t.primaryLanguageLabel}
+                  </label>
+                  <select
+                    value={primaryLanguage}
+                    onChange={(e) => setPrimaryLanguage(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
+                  >
+                    <option value="en">English (EN)</option>
+                    <option value="ar">العربية (Arabic - GCC)</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                    <option value="ur">اردو (Urdu)</option>
+                    <option value="ml">മലയാളം (Malayalam)</option>
+                    <option value="es">Español (ES)</option>
+                    <option value="fr">Français (FR)</option>
+                    <option value="de">Deutsch (DE)</option>
+                    <option value="ja">日本語 (Japanese)</option>
+                    <option value="pt">Português (Brasil)</option>
+                    <option value="fil">Filipino (Tagalog)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     {t.orgDescLabel}
                   </label>
                   <textarea
@@ -466,6 +493,19 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    {t.adminEmailLabel}
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="e.g. admin@organization.com"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     {t.adminMobileLabel}
                   </label>
                   <input
@@ -485,7 +525,7 @@ export default function CreateClanPage() {
                     {t.backBtn}
                   </button>
                   <button
-                    disabled={!adminName.trim() || !adminMobile.trim()}
+                    disabled={!adminName.trim() || !adminEmail.trim() || !adminMobile.trim()}
                     onClick={() => setStep(4)}
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
                   >

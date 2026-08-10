@@ -10,10 +10,13 @@ interface Community {
   subdomain: string;
   description?: string;
   logo?: string;
+  primaryLanguage?: string;
   cities?: string[];
   gotras?: string[];
   kulDevis?: string[];
   upiId?: string;
+  adminName?: string;
+  adminEmail?: string;
   adminMobile?: string;
   isActive: boolean;
   createdAt: string;
@@ -24,7 +27,9 @@ interface CommunityRequestItem {
   name: string;
   subdomain: string;
   description?: string;
+  primaryLanguage?: string;
   adminName: string;
+  adminEmail?: string;
   adminMobile: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
@@ -145,14 +150,21 @@ export default function PlatformAdminPage() {
                   className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs"
                 >
                   <div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                       <span className="font-black text-slate-900 text-sm">{req.name}</span>
                       <span className="font-mono text-indigo-600 font-bold bg-indigo-50 px-2.5 py-0.5 rounded-md text-[11px] border border-indigo-200/60">
                         {req.subdomain}.mysocialclan.com
                       </span>
+                      {req.primaryLanguage && (
+                        <span className="uppercase text-[10px] font-extrabold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md">
+                          LANG: {req.primaryLanguage}
+                        </span>
+                      )}
                     </div>
                     <p className="text-slate-600 mt-1.5">
-                      Applicant: <strong className="text-slate-900">{req.adminName}</strong> ({req.adminMobile})
+                      Applicant: <strong className="text-slate-900">{req.adminName}</strong>
+                      {req.adminEmail && <span> · Email: <strong className="text-indigo-700">{req.adminEmail}</strong></span>}
+                      {req.adminMobile && <span> · Phone: <strong className="text-slate-900">{req.adminMobile}</strong></span>}
                     </p>
                     <p className="text-[11px] text-slate-500 mt-1">
                       Submitted: {new Date(req.createdAt).toLocaleString()} · Status:{" "}

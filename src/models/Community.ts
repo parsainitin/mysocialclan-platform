@@ -5,6 +5,7 @@ export interface ICommunity extends Document {
   subdomain: string;
   description?: string;
   logo?: string;
+  primaryLanguage?: string;
   cities?: string[];
   gotras?: string[];
   kulDevis?: string[];
@@ -17,6 +18,8 @@ export interface ICommunity extends Document {
     events?: boolean;
     donations?: boolean;
   };
+  adminName?: string;
+  adminEmail?: string;
   adminMobile?: string;
   isActive: boolean;
   createdAt: Date;
@@ -35,6 +38,7 @@ const CommunitySchema: Schema<ICommunity> = new Schema(
     },
     description: { type: String, trim: true },
     logo: { type: String, trim: true },
+    primaryLanguage: { type: String, default: "en", trim: true },
     cities: [{ type: String, trim: true }],
     gotras: [{ type: String, trim: true }],
     kulDevis: [{ type: String, trim: true }],
@@ -47,6 +51,8 @@ const CommunitySchema: Schema<ICommunity> = new Schema(
       events: { type: Boolean, default: true },
       donations: { type: Boolean, default: true },
     },
+    adminName: { type: String, trim: true },
+    adminEmail: { type: String, trim: true, lowercase: true },
     adminMobile: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
   },

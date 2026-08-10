@@ -5,6 +5,7 @@ export interface ICommunityRequest extends Document {
   subdomain: string;
   description?: string;
   logo?: string;
+  primaryLanguage?: string;
   cities?: string[];
   gotras?: string[];
   kulDevis?: string[];
@@ -18,6 +19,7 @@ export interface ICommunityRequest extends Document {
     donations?: boolean;
   };
   adminName: string;
+  adminEmail: string;
   adminMobile: string;
   status: "pending" | "approved" | "rejected";
   notes?: string;
@@ -36,6 +38,7 @@ const CommunityRequestSchema: Schema<ICommunityRequest> = new Schema(
     },
     description: { type: String, trim: true },
     logo: { type: String, trim: true },
+    primaryLanguage: { type: String, default: "en", trim: true },
     cities: [{ type: String, trim: true }],
     gotras: [{ type: String, trim: true }],
     kulDevis: [{ type: String, trim: true }],
@@ -49,6 +52,7 @@ const CommunityRequestSchema: Schema<ICommunityRequest> = new Schema(
       donations: { type: Boolean, default: true },
     },
     adminName: { type: String, required: true, trim: true },
+    adminEmail: { type: String, required: true, trim: true, lowercase: true },
     adminMobile: { type: String, required: true, trim: true },
     status: {
       type: String,
