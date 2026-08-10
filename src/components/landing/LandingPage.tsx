@@ -398,12 +398,12 @@ const translations: Record<
   },
 };
 
+import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
+
 export default function LandingPage() {
   const [communities, setCommunities] = useState<CommunityPublic[]>([]);
   const [loadingCommunities, setLoadingCommunities] = useState(true);
-  const [lang, setLang] = useState<SupportedLang>("en");
-
-  const t = translations[lang] || translations.en;
+  const { lang, setLang, t, isRtl } = useLanguage();
 
   // Load public communities for live showcase
   useEffect(() => {
@@ -520,8 +520,6 @@ export default function LandingPage() {
       icon: Heart,
     },
   ];
-
-  const isRtl = lang === "ar" || lang === "ur";
 
   return (
     <div

@@ -23,7 +23,10 @@ import {
   CheckCircle,
 } from "lucide-react";
 
+import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
+
 export default function CreateClanPage() {
+  const { t, isRtl } = useLanguage();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   // Step 1: Subdomain
@@ -162,24 +165,27 @@ export default function CreateClanPage() {
 
       {/* Header Bar */}
       <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
           <a
             href="/"
             className="flex items-center space-x-2 text-slate-600 hover:text-indigo-600 transition-colors text-xs font-extrabold text-decoration-none group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span>Back to Homepage</span>
+            <span>{t.backHome}</span>
           </a>
 
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-sm">
-              <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
-                <Globe className="w-4 h-4 text-indigo-600" />
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-sm">
+                <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+                  <Globe className="w-4 h-4 text-indigo-600" />
+                </div>
               </div>
+              <span className="hidden md:inline-block text-sm font-black tracking-tight bg-gradient-to-r from-blue-700 via-indigo-600 to-slate-900 bg-clip-text text-transparent">
+                {t.wizardTitle}
+              </span>
             </div>
-            <span className="text-sm font-black tracking-tight bg-gradient-to-r from-blue-700 via-indigo-600 to-slate-900 bg-clip-text text-transparent">
-              MySocialClan Setup Wizard
-            </span>
+            <LanguageDropdown />
           </div>
 
           <div className="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200/80">
@@ -245,17 +251,17 @@ export default function CreateClanPage() {
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
                     <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Step 1 · Custom Subdomain Address</span>
+                    <span>{t.wizardSubdomainStep}</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">Choose Your Community Subdomain</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">{t.wizardSubdomainTitle}</h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    Your members and organization will access your portal via this custom domain address.
+                    {t.wizardSubdomainDesc}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Subdomain Address *
+                    {t.subdomainLabel}
                   </label>
                   <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-indigo-600 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
                     <input
@@ -278,13 +284,13 @@ export default function CreateClanPage() {
                     {checkingSubdomain && (
                       <p className="text-xs text-slate-500 flex items-center space-x-2 animate-pulse font-semibold">
                         <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping" />
-                        <span>Checking domain availability...</span>
+                        <span>{t.checkingAvailability}</span>
                       </p>
                     )}
                     {!checkingSubdomain && subdomainAvailable === true && (
                       <p className="text-xs text-emerald-600 font-bold flex items-center space-x-1.5">
                         <CheckCircle2 className="w-4.5 h-4.5" />
-                        <span>Subdomain <strong>{subdomain}.mysocialclan.com</strong> is available!</span>
+                        <span>Subdomain <strong>{subdomain}.mysocialclan.com</strong> {t.subdomainAvailableMsg}</span>
                       </p>
                     )}
                     {!checkingSubdomain && subdomainAvailable === false && (
@@ -302,7 +308,7 @@ export default function CreateClanPage() {
                     onClick={() => setStep(2)}
                     className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-600/25 border-0 cursor-pointer transition-all flex items-center justify-center space-x-2"
                   >
-                    <span>Next: Organization Details</span>
+                    <span>{t.nextOrgDetails}</span>
                     <ChevronRight className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
@@ -315,18 +321,18 @@ export default function CreateClanPage() {
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
                     <Building2 className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Step 2 · Branding & Information</span>
+                    <span>{t.wizardOrgStep}</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">Organization Information</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">{t.wizardOrgTitle}</h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    Configure public branding for <strong>{subdomain}.mysocialclan.com</strong>.
+                    {t.wizardOrgDesc} (<strong>{subdomain}.mysocialclan.com</strong>).
                   </p>
                 </div>
 
                 {/* Logo Upload */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Organization Logo
+                    {t.orgLogoLabel}
                   </label>
                   <div className="flex items-center space-x-4">
                     <button
@@ -363,7 +369,7 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Organization / Clan Name *
+                    {t.orgNameLabel}
                   </label>
                   <input
                     type="text"
@@ -376,7 +382,7 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Description & Tagline
+                    {t.orgDescLabel}
                   </label>
                   <textarea
                     rows={2}
@@ -389,7 +395,7 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Predefined Regional Cities (Comma-separated)
+                    {t.orgCitiesLabel}
                   </label>
                   <input
                     type="text"
@@ -401,7 +407,7 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    UPI ID or Account for Direct Member Support (Optional)
+                    {t.orgUpiLabel}
                   </label>
                   <input
                     type="text"
@@ -417,14 +423,14 @@ export default function CreateClanPage() {
                     onClick={() => setStep(1)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
                   >
-                    Back
+                    {t.backBtn}
                   </button>
                   <button
                     disabled={!name.trim()}
                     onClick={() => setStep(3)}
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
                   >
-                    <span>Next: Admin Details</span>
+                    <span>{t.nextAdminDetails}</span>
                     <ChevronRight className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
@@ -437,17 +443,17 @@ export default function CreateClanPage() {
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
                     <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Step 3 · Applicant Contact Info</span>
+                    <span>{t.wizardAdminStep}</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">Administrator Contact Details</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">{t.wizardAdminTitle}</h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    We will notify you at this phone number once your dedicated database and subdomain deployment is active.
+                    {t.wizardAdminDesc}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Admin Full Name *
+                    {t.adminNameLabel}
                   </label>
                   <input
                     type="text"
@@ -460,7 +466,7 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Admin Mobile / Phone Number (For Activation SMS / Call) *
+                    {t.adminMobileLabel}
                   </label>
                   <input
                     type="tel"
@@ -476,14 +482,14 @@ export default function CreateClanPage() {
                     onClick={() => setStep(2)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
                   >
-                    Back
+                    {t.backBtn}
                   </button>
                   <button
                     disabled={!adminName.trim() || !adminMobile.trim()}
                     onClick={() => setStep(4)}
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
                   >
-                    <span>Next: Configure Modules</span>
+                    <span>{t.nextModules}</span>
                     <ChevronRight className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
@@ -496,11 +502,11 @@ export default function CreateClanPage() {
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
                     <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Step 4 · Feature Configuration</span>
+                    <span>{t.wizardModulesStep}</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">Select Enabled Modules</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">{t.wizardModulesTitle}</h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    Choose which social feature modules should be provisioned for <strong>{name}</strong>.
+                    {t.wizardModulesDesc} (<strong>{name}</strong>).
                   </p>
                 </div>
 
@@ -557,7 +563,7 @@ export default function CreateClanPage() {
                     onClick={() => setStep(3)}
                     className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
                   >
-                    Back
+                    {t.backBtn}
                   </button>
                   <button
                     disabled={submitting}
@@ -565,10 +571,10 @@ export default function CreateClanPage() {
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-black text-xs shadow-lg shadow-indigo-600/25 border-0 cursor-pointer transition-all flex items-center space-x-2"
                   >
                     {submitting ? (
-                      <span>Submitting Setup Request...</span>
+                      <span>{t.submittingRequest}</span>
                     ) : (
                       <>
-                        <span>Submit Setup Request</span>
+                        <span>{t.submitSetupRequest}</span>
                         <Sparkles className="w-4 h-4" />
                       </>
                     )}
@@ -584,9 +590,9 @@ export default function CreateClanPage() {
                   <CheckCircle className="w-12 h-12 stroke-[2.5]" />
                 </div>
 
-                <h2 className="text-2xl font-black text-slate-900">Community Setup Request Submitted!</h2>
+                <h2 className="text-2xl font-black text-slate-900">{t.wizardSuccessTitle}</h2>
                 <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                  Your request for <strong>{createdCommunityName}</strong> has been successfully received by our platform team.
+                  {t.wizardSuccessDesc} (<strong>{createdCommunityName}</strong>)
                 </p>
 
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-3 max-w-md mx-auto">
@@ -609,7 +615,7 @@ export default function CreateClanPage() {
                     href="/"
                     className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-black text-xs border-0 text-decoration-none transition-all shadow-lg shadow-indigo-600/25"
                   >
-                    Done & Return to Homepage
+                    {t.doneReturnHome}
                   </a>
                 </div>
               </div>

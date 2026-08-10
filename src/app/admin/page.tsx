@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Globe, Users, CheckCircle2, ShieldAlert, Heart, Building2, MapPin } from "lucide-react";
+import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
 
 interface Community {
   _id: string;
@@ -30,6 +31,7 @@ interface CommunityRequestItem {
 }
 
 export default function PlatformAdminPage() {
+  const { t } = useLanguage();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [creationRequests, setCreationRequests] = useState<CommunityRequestItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,20 +102,23 @@ export default function PlatformAdminPage() {
       )}
 
       {/* Header */}
-      <div className="max-w-5xl mx-auto flex items-center justify-between pb-6 border-b border-slate-200 mb-8">
+      <div className="max-w-5xl mx-auto flex items-center justify-between pb-6 border-b border-slate-200 mb-8 gap-4 flex-wrap sm:flex-nowrap">
         <div>
           <div className="flex items-center space-x-2">
-            <Globe className="w-5 h-5 text-indigo-600" />
-            <h1 className="text-xl font-black text-slate-900">MySocialClan Platform Administration</h1>
+            <Globe className="w-5 h-5 text-indigo-600 shrink-0" />
+            <h1 className="text-xl font-black text-slate-900">{t.adminPortalTitle}</h1>
           </div>
-          <p className="text-xs text-slate-600 mt-1">Standalone SaaS Platform Portal & Offline Provisioning Queue</p>
+          <p className="text-xs text-slate-600 mt-1">{t.adminPortalSub}</p>
         </div>
-        <a
-          href="/"
-          className="text-xs font-bold text-slate-600 hover:text-indigo-600 px-3.5 py-2 bg-white rounded-xl border border-slate-200 text-decoration-none shadow-2xs hover:bg-slate-50 transition-colors"
-        >
-          ← Back to Homepage
-        </a>
+        <div className="flex items-center space-x-3">
+          <LanguageDropdown />
+          <a
+            href="/"
+            className="text-xs font-bold text-slate-600 hover:text-indigo-600 px-3.5 py-2 bg-white rounded-xl border border-slate-200 text-decoration-none shadow-2xs hover:bg-slate-50 transition-colors whitespace-nowrap"
+          >
+            ← {t.backHome}
+          </a>
+        </div>
       </div>
 
       <div className="max-w-5xl mx-auto space-y-8">
@@ -123,7 +128,7 @@ export default function PlatformAdminPage() {
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 rounded-full bg-amber-500 animate-ping" />
               <h2 className="text-base font-black text-slate-900">
-                Pending Community Creation Requests ({creationRequests.filter((r) => r.status === "pending").length})
+                {t.pendingRequestsTitle} ({creationRequests.filter((r) => r.status === "pending").length})
               </h2>
             </div>
           </div>
@@ -131,7 +136,7 @@ export default function PlatformAdminPage() {
           {loading ? (
             <div className="text-center py-6 text-xs text-slate-500">Loading requests...</div>
           ) : creationRequests.length === 0 ? (
-            <p className="text-xs text-slate-500 italic py-2">No pending community creation requests.</p>
+            <p className="text-xs text-slate-500 italic py-2">{t.noPendingRequests}</p>
           ) : (
             <div className="space-y-3">
               {creationRequests.map((req) => (
@@ -171,13 +176,13 @@ export default function PlatformAdminPage() {
                         onClick={() => handleApproveRequest(req._id, true)}
                         className="py-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-xl text-xs border-0 cursor-pointer transition-all shadow-md shadow-indigo-500/20"
                       >
-                        Approve & Register
+                        {t.approveRegisterBtn}
                       </button>
                       <button
                         onClick={() => handleRejectRequest(req._id)}
                         className="py-2 px-3 bg-slate-200 hover:bg-rose-100 hover:text-rose-600 text-slate-700 font-bold rounded-xl text-xs border-0 cursor-pointer transition-all"
                       >
-                        Reject
+                        {t.rejectBtn}
                       </button>
                     </div>
                   )}
@@ -189,10 +194,10 @@ export default function PlatformAdminPage() {
 
         {/* Provisioned Active Communities Showcase */}
         <div className="bg-white border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-sm">
-          <h2 className="text-base font-black text-slate-900">Active Provisioned Communities ({communities.length})</h2>
+          <h2 className="text-base font-black text-slate-900">{t.activeCommunitiesTitle} ({communities.length})</h2>
 
           {communities.length === 0 ? (
-            <p className="text-xs text-slate-500 italic py-2">No provisioned communities registered yet.</p>
+            <p className="text-xs text-slate-500 italic py-2">{t.noCommunities}</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {communities.map((c) => (
