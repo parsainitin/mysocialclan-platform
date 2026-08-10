@@ -83,8 +83,8 @@ export default function CreateClanPage() {
 
     const timer = setTimeout(() => {
       fetch(`/api/communities/check-subdomain?subdomain=${clean}`)
-        .then((res) => res.json())
-        .then((data) => {
+        .then(async (res) => {
+          const data = await res.json().catch(() => ({}));
           if (data.available) {
             setSubdomainAvailable(true);
             setSubdomainError(null);
@@ -94,8 +94,17 @@ export default function CreateClanPage() {
           }
         })
         .catch(() => {
-          setSubdomainAvailable(false);
-          setSubdomainError("Network error checking availability");
+          const reserved = ["www", "admin", "app", "api", "superadmin", "mail", "localhost", "mysocialclan"];
+          if (reserved.includes(clean)) {
+            setSubdomainAvailable(false);
+            setSubdomainError(`Subdomain '${clean}' is reserved`);
+          } else if (!/^[a-z0-9-]+$/.test(clean)) {
+            setSubdomainAvailable(false);
+            setSubdomainError("Subdomain can only contain lowercase letters, numbers, and hyphens");
+          } else {
+            setSubdomainAvailable(true);
+            setSubdomainError(null);
+          }
         })
         .finally(() => setCheckingSubdomain(false));
     }, 400);

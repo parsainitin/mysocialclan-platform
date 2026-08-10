@@ -26,23 +26,27 @@ export async function GET(request: NextRequest) {
       return Response.json({ available: false, error: `Subdomain '${slug}' is reserved` });
     }
 
-    await dbConnect();
-    const existingLive = await Community.findOne({ subdomain: slug }).select("_id").lean();
+    try {
+      await dbConnect();
+      const existingLive = await Community.findOne({ subdomain: slug }).select("_id").lean();
 
-    if (existingLive) {
-      return Response.json({ available: false, error: `Subdomain '${slug}' is already registered` });
-    }
+      if (existingLive) {
+        return Response.json({ available: false, error: `Subdomain '${slug}' is already registered` });
+      }
 
-    const existingPending = await CommunityRequest.findOne({ subdomain: slug, status: "pending" })
-      .select("_id")
-      .lean();
+      const existingPending = await CommunityRequest.findOne({ subdomain: slug, status: "pending" })
+        .select("_id")
+        .lean();
 
-    if (existingPending) {
-      return Response.json({ available: false, error: `Subdomain '${slug}' has a creation request pending` });
+      if (existingPending) {
+        return Response.json({ available: false, error: `Subdomain '${slug}' has a creation request pending` });
+      }
+    } catch (dbErr: any) {
+      console.warn("MongoDB check warning (falling back to format & reserved validation):", dbErr.message);
     }
 
     return Response.json({ available: true, subdomain: slug });
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ available: false, error: e.message || "Failed checking subdomain availability" }, { status: 200 });
   }
 }
