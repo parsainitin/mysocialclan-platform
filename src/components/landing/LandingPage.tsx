@@ -40,7 +40,7 @@ interface CommunityPublic {
   createdAt: string;
 }
 
-type SupportedLang = "en" | "es" | "fr" | "de" | "ja" | "pt";
+type SupportedLang = "en" | "es" | "fr" | "de" | "ja" | "pt" | "fil";
 
 const translations: Record<
   SupportedLang,
@@ -92,7 +92,7 @@ const translations: Record<
     langAgnosticBadge: "Language-Agnostic Platform",
     langAgnosticTitle: "Operate Comfortably in Any International Language",
     langAgnosticDesc:
-      "MySocialClan is 100% language-agnostic. Whether your global members converse in English, Spanish, French, German, Japanese, or any international script, your community feed and custom forms adapt seamlessly.",
+      "MySocialClan is 100% language-agnostic. Whether your global members converse in English, Spanish, French, German, Japanese, Portuguese, Filipino, or any script, your community feed adapts seamlessly.",
     modulesBadge: "Social Engine Modules",
     modulesTitle: "Powerful Features Included",
     modulesSubtitle: "Configure exactly which engagement tools your organization needs.",
@@ -121,7 +121,7 @@ const translations: Record<
     langAgnosticBadge: "Plataforma Independiente del Idioma",
     langAgnosticTitle: "Opere Cómodamente en Cualquier Idioma Internacional",
     langAgnosticDesc:
-      "MySocialClan es 100% independiente del idioma. Sus miembros pueden publicar y comunicarse en español, inglés, francés, alemán o cualquier idioma internacional.",
+      "MySocialClan es 100% independiente del idioma. Sus miembros pueden publicar y comunicarse en español, inglés, francés, alemán, japonés, portugués o filipino.",
     modulesBadge: "Módulos Sociales",
     modulesTitle: "Características Potentes Incluidas",
     modulesSubtitle: "Configure exactamente las herramientas que necesita.",
@@ -150,7 +150,7 @@ const translations: Record<
     langAgnosticBadge: "Plateforme indépendante de la langue",
     langAgnosticTitle: "Fonctionne dans toutes les langues internationales",
     langAgnosticDesc:
-      "MySocialClan s'adapte à n'importe quelle langue internationale : français, anglais, espagnol, allemand, japonais, etc.",
+      "MySocialClan s'adapte à n'importe quelle langue internationale : français, anglais, espagnol, allemand, japonais, portugais, filipino, etc.",
     modulesBadge: "Modules sociaux",
     modulesTitle: "Fonctionnalités puissantes incluses",
     modulesSubtitle: "Configurez les outils adaptés à vos besoins.",
@@ -179,7 +179,7 @@ const translations: Record<
     langAgnosticBadge: "Sprachenunabhängige Plattform",
     langAgnosticTitle: "Nativ in jeder internationalen Sprache nutzbar",
     langAgnosticDesc:
-      "MySocialClan ist vollständig sprachenunabhängig und unterstützt Deutsch, Englisch, Spanisch, Französisch, Japanisch und mehr.",
+      "MySocialClan ist vollständig sprachenunabhängig und unterstützt Deutsch, Englisch, Spanisch, Französisch, Japanisch, Portugiesisch und Filipino.",
     modulesBadge: "Soziale Module",
     modulesTitle: "Leistungsstarke Funktionen enthalten",
     modulesSubtitle: "Konfigurieren Sie genau die Tools, die Sie benötigen.",
@@ -189,26 +189,26 @@ const translations: Record<
     superAdmin: "Super Admin Portal",
   },
   ja: {
-    badge: "グローバルコミュニティ向け言語非依存SaaSプラットフォーム",
+    badge: "グローバルコミュニティおよび機関向け言語非依存SaaSプラットフォーム",
     heroTitle: "プライベートなSNSをわずか数",
     minutes: "分で開設",
     heroDesc:
-      "大学、同窓会、業界団体、NGO向けに、専用サブドメイン下で認証付きプライベートネットワークを提供します。",
+      "大学、同窓会、業界団体、ソーシャルグループ、NGO向けに、専用サブドメイン下で認証付きプライベートネットワークを提供します。",
     buildSubdomain: "サブドメインを作成",
     exploreCommunities: "ライブコミュニティを見る",
     verifiedBadge: "100%認証済み非公開ネットワーク",
-    verifiedSub: "大学や世界的な同窓会組織が信頼",
+    verifiedSub: "大学や世界的な同窓会組織が信頼する安全なプラットフォーム",
     audiencesBadge: "対象組織",
     audiencesTitle: "あらゆる組織の形態に対応",
     audiencesSubtitle: "教育機関、専門団体、同窓会、NPOのプライベートな交流を支援します。",
     whyClosedBadge: "非公開ネットワークの強み",
     whyClosedTitle: "パブリックSNSではなく非公開ネットワークを選ぶ理由",
     whyClosedSubtitle:
-      "パブリックSNSは広告追跡と拡散アルゴリズムを優先します。MySocialClanは広告のない安全な環境を提供します。",
+      "パブリックSNSは広告追跡と拡散アルゴリズムを優先します。MySocialClanは広告のない安全で信頼性の高い環境を提供します。",
     langAgnosticBadge: "言語非依存プラットフォーム",
     langAgnosticTitle: "あらゆる国際言語で快適に運用",
     langAgnosticDesc:
-      "日本語、英語、スペイン語、フランス語、ドイツ語など、グローバルな言語に完全対応しています。",
+      "日本語、英語、フィリピン語、ポルトガル語、スペイン語、フランス語、ドイツ語など、グローバルな言語に完全対応しています。",
     modulesBadge: "ソーシャル機能",
     modulesTitle: "充実したモジュール機能",
     modulesSubtitle: "組織のニーズに合わせて必要な機能を自由に設定できます。",
@@ -222,22 +222,22 @@ const translations: Record<
     heroTitle: "Crie sua Rede Social Privada em apenas",
     minutes: "Minutos",
     heroDesc:
-      "Capacite sua universidade, rede de ex-alunos, associação comercial ou ONG com uma rede privada verificada no seu subdomínio.",
+      "Capacite sua universidade, rede de ex-alunos, associação comercial, grupo social ou ONG com uma rede privada verificada no seu próprio subdomínio.",
     buildSubdomain: "Criar Subdomínio",
     exploreCommunities: "Explorar Comunidades",
     verifiedBadge: "Redes Privadas 100% Verificadas",
-    verifiedSub: "Confiança garantida para instituições e ex-alunos",
+    verifiedSub: "Confiança garantida para faculdades, ex-alunos e associações",
     audiencesBadge: "Públicos-Alvo",
     audiencesTitle: "Projetado para Todos os Tipos de Organizações",
-    audiencesSubtitle: "Conectando instituições de ensino, associações profissionais e ONGs.",
+    audiencesSubtitle: "Conectando instituições de ensino, associações profissionais, grupos culturais e ONGs.",
     whyClosedBadge: "Vantagens da Rede Fechada",
-    whyClosedTitle: "Por que escolher uma Rede Fechada em vez de Redes Públicas?",
+    whyClosedTitle: "Por que escolher uma Rede Privada Fechada em vez de Redes Públicas?",
     whyClosedSubtitle:
-      "O MySocialClan oferece um ambiente seguro, privado e livre de anúncios.",
+      "Plataformas públicas rastreiam dados e exibem anúncios. O MySocialClan oferece um espaço seguro, privado e livre de anúncios construído para sua comunidade.",
     langAgnosticBadge: "Plataforma Independente de Idioma",
     langAgnosticTitle: "Opere em Qualquer Idioma Internacional",
     langAgnosticDesc:
-      "O MySocialClan suporta nativamente inglês, espanhol, francês, alemão, japonês, português e qualquer idioma internacional.",
+      "O MySocialClan suporta nativamente português do Brasil, inglês, espanhol, francês, alemão, japonês, filipino e qualquer outro idioma internacional.",
     modulesBadge: "Módulos Sociais",
     modulesTitle: "Recursos Potentes Incluídos",
     modulesSubtitle: "Configure exatamente as ferramentas que sua organização precisa.",
@@ -245,6 +245,36 @@ const translations: Record<
     showcaseTitle: "Comunidades Ativas",
     createClan: "Criar Clan",
     superAdmin: "Portal Super Admin",
+  },
+  fil: {
+    badge: "Platform na Hindi Nakadepende sa Wika para sa mga Pandaigdigang Komunidad",
+    heroTitle: "Simulan ang Iyong Pribadong Social Network sa Loob Lamang ng Ilang",
+    minutes: "Minuto",
+    heroDesc:
+      "Bigyan ng kapangyarihan ang iyong kolehiyo, alumni network, asosasyon, o NGO gamit ang isang na-verify na pribadong network sa ilalim ng iyong sariling subdomain.",
+    buildSubdomain: "Gumawa ng Subdomain",
+    exploreCommunities: "Tuklasin ang mga Komunidad",
+    verifiedBadge: "100% Na-verify na Pribadong Network",
+    verifiedSub: "Pinagkakatiwalaan ng mga kolehiyo at alumni network",
+    audiencesBadge: "Mga Target na Grupo",
+    audiencesTitle: "Idinisenyo para sa Lahat ng Uri ng Organisasyon",
+    audiencesSubtitle:
+      "Paghahatid ng pribado at ligtas na koneksyon sa mga institusyong pang-edukasyon, propesyonal na grupo, at NGO.",
+    whyClosedBadge: "Kalamangan ng Pribadong Network",
+    whyClosedTitle: "Bakit Piliin ang Pribadong Network Kaysa sa Pampublikong Social Media?",
+    whyClosedSubtitle:
+      "Ang mga pampublikong platform ay nagpapakita ng mga ad at nag-oorganisa ng data. Ang MySocialClan ay nagbibigay ng ligtas at walang ad na lugar para sa iyong komunidad.",
+    langAgnosticBadge: "Platform na Suportado ang Lahat ng Wika",
+    langAgnosticTitle: "Gumana nang Kumportable sa Anumang Wikang Pandaigdig",
+    langAgnosticDesc:
+      "100% hindi nakadepende sa wika ang MySocialClan. Ang iyong mga miyembro ay makakapag-usap sa Filipino, Ingles, Hapon, Portuges, Espanyol, at higit pa.",
+    modulesBadge: "Mga Modyul ng Social Engine",
+    modulesTitle: "Kasama ang mga Makapangyarihang Tampok",
+    modulesSubtitle: "I-configure ang eksaktong mga tool na kailangan ng iyong organisasyon.",
+    showcaseBadge: "Live na Network ng Komunidad",
+    showcaseTitle: "Mga Aktibong Clan at Organisasyon",
+    createClan: "Lumikha ng Clan",
+    superAdmin: "Super Admin Portal",
   },
 };
 
@@ -410,8 +440,9 @@ export default function LandingPage() {
                 <option value="es">Español (ES)</option>
                 <option value="fr">Français (FR)</option>
                 <option value="de">Deutsch (DE)</option>
-                <option value="ja">日本語 (JA)</option>
-                <option value="pt">Português (PT)</option>
+                <option value="ja">日本語 (Japanese)</option>
+                <option value="pt">Português (Brasil)</option>
+                <option value="fil">Filipino (Tagalog)</option>
               </select>
             </div>
 
@@ -724,8 +755,9 @@ export default function LandingPage() {
             <option value="es">Español (ES)</option>
             <option value="fr">Français (FR)</option>
             <option value="de">Deutsch (DE)</option>
-            <option value="ja">日本語 (JA)</option>
-            <option value="pt">Português (PT)</option>
+            <option value="ja">日本語 (Japanese)</option>
+            <option value="pt">Português (Brasil)</option>
+            <option value="fil">Filipino (Tagalog)</option>
           </select>
         </div>
         <p>© 2026 Vyanamics Technologies Pvt. Ltd India</p>
