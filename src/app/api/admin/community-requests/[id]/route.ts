@@ -98,6 +98,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           description: reqDoc.description,
           logo: reqDoc.logo,
           primaryLanguage: reqDoc.primaryLanguage || "en",
+          country: reqDoc.country,
           cities: reqDoc.cities,
           gotras: reqDoc.gotras,
           kulDevis: reqDoc.kulDevis,

@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       description,
       logo,
       primaryLanguage,
+      country,
       cities,
       gotras,
       kulDevis,
@@ -75,7 +76,9 @@ export async function POST(request: NextRequest) {
       description: description?.trim() || undefined,
       logo: logo?.trim() || undefined,
       primaryLanguage: primaryLanguage?.trim() || "en",
+      country: country?.trim() || undefined,
       cities: Array.isArray(cities) ? cities.map((c: string) => c.trim()).filter(Boolean) : [],
+
       gotras: Array.isArray(gotras) ? gotras.map((g: string) => g.trim()).filter(Boolean) : [],
       kulDevis: Array.isArray(kulDevis) ? kulDevis.map((k: string) => k.trim()).filter(Boolean) : [],
       upiId: upiId?.trim() || undefined,

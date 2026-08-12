@@ -21,9 +21,111 @@ import {
   ArrowLeft,
   ShieldCheck,
   CheckCircle,
+  MapPin,
+  Plus,
+  X,
+  RotateCcw,
 } from "lucide-react";
 
 import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
+
+const COUNTRY_OPTIONS: { code: string; label: string; cities: string[] }[] = [
+  {
+    code: "IN",
+    label: "India 🇮🇳",
+    cities: ["Mumbai", "Delhi NCR", "Bengaluru", "Hyderabad", "Chennai", "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Surat"],
+  },
+  {
+    code: "US",
+    label: "United States 🇺🇸",
+    cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "San Francisco", "Dallas", "Seattle", "Miami"],
+  },
+  {
+    code: "AE",
+    label: "United Arab Emirates 🇦🇪",
+    cities: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Al Ain"],
+  },
+  {
+    code: "SA",
+    label: "Saudi Arabia 🇸🇦",
+    cities: ["Riyadh", "Jeddah", "Mecca", "Medina", "Dammam", "Khobar"],
+  },
+  {
+    code: "GB",
+    label: "United Kingdom 🇬🇧",
+    cities: ["London", "Manchester", "Birmingham", "Edinburgh", "Glasgow", "Leeds"],
+  },
+  {
+    code: "CA",
+    label: "Canada 🇨🇦",
+    cities: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa", "Edmonton"],
+  },
+  {
+    code: "AU",
+    label: "Australia 🇦🇺",
+    cities: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"],
+  },
+  {
+    code: "DE",
+    label: "Germany 🇩🇪",
+    cities: ["Berlin", "Munich", "Frankfurt", "Hamburg", "Cologne"],
+  },
+  {
+    code: "SG",
+    label: "Singapore 🇸🇬",
+    cities: ["Singapore"],
+  },
+  {
+    code: "QA",
+    label: "Qatar 🇶🇦",
+    cities: ["Doha", "Al Wakrah", "Al Khor"],
+  },
+  {
+    code: "OM",
+    label: "Oman 🇴🇲",
+    cities: ["Muscat", "Salalah", "Sohar"],
+  },
+  {
+    code: "KW",
+    label: "Kuwait 🇰🇼",
+    cities: ["Kuwait City", "Hawalli", "Salmiya"],
+  },
+  {
+    code: "BH",
+    label: "Bahrain 🇧🇭",
+    cities: ["Manama", "Riffa", "Muharraq"],
+  },
+  {
+    code: "PH",
+    label: "Philippines 🇵🇭",
+    cities: ["Manila", "Quezon City", "Davao City", "Cebu City"],
+  },
+  {
+    code: "JP",
+    label: "Japan 🇯🇵",
+    cities: ["Tokyo", "Osaka", "Yokohama", "Kyoto", "Nagoya"],
+  },
+  {
+    code: "BR",
+    label: "Brazil 🇧🇷",
+    cities: ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"],
+  },
+  {
+    code: "ES",
+    label: "Spain 🇪🇸",
+    cities: ["Madrid", "Barcelona", "Valencia", "Seville"],
+  },
+  {
+    code: "FR",
+    label: "France 🇫🇷",
+    cities: ["Paris", "Lyon", "Marseille", "Toulouse"],
+  },
+  {
+    code: "GLOBAL",
+    label: "Global / Multi-Country 🌐",
+    cities: ["Global Network", "North America", "Europe", "Middle East", "Asia Pacific"],
+  },
+];
 
 export default function CreateClanPage() {
   const { t, isRtl } = useLanguage();
@@ -39,9 +141,11 @@ export default function CreateClanPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [primaryLanguage, setPrimaryLanguage] = useState<string>("en");
+  const [countryCode, setCountryCode] = useState<string>("IN");
+  const [selectedCities, setSelectedCities] = useState<string[]>(COUNTRY_OPTIONS[0].cities);
+  const [customCityInput, setCustomCityInput] = useState<string>("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [cities, setCities] = useState("New York, London, Tokyo, Berlin, Paris, Sydney");
   const [gotras, setGotras] = useState("Chapter A, Chapter B, Chapter C, Guild North, Guild South");
   const [kulDevis, setKulDevis] = useState("Primary Hub, Secondary Hub, Regional Board");
   const [upiId, setUpiId] = useState("");
@@ -51,6 +155,33 @@ export default function CreateClanPage() {
   useEffect(() => {
     subdomainInputRef.current?.focus();
   }, []);
+
+  const handleCountryChange = (newCode: string) => {
+    setCountryCode(newCode);
+    const countryObj = COUNTRY_OPTIONS.find((c) => c.code === newCode);
+    if (countryObj) {
+      setSelectedCities([...countryObj.cities]);
+    }
+  };
+
+  const handleAddCustomCity = () => {
+    const trimmed = customCityInput.trim();
+    if (trimmed && !selectedCities.includes(trimmed)) {
+      setSelectedCities([...selectedCities, trimmed]);
+      setCustomCityInput("");
+    }
+  };
+
+  const handleRemoveCity = (cityToRemove: string) => {
+    setSelectedCities(selectedCities.filter((c) => c !== cityToRemove));
+  };
+
+  const handleRestoreDefaultCities = () => {
+    const countryObj = COUNTRY_OPTIONS.find((c) => c.code === countryCode);
+    if (countryObj) {
+      setSelectedCities([...countryObj.cities]);
+    }
+  };
 
   // Step 3: Admin Account
   const [adminName, setAdminName] = useState("");
@@ -80,14 +211,18 @@ export default function CreateClanPage() {
     if (!clean) {
       setSubdomainAvailable(null);
       setSubdomainError(null);
+      setCheckingSubdomain(false);
       return;
     }
 
     setCheckingSubdomain(true);
     setSubdomainError(null);
 
+    const controller = new AbortController();
+    const abortTimeout = setTimeout(() => controller.abort(), 2000);
+
     const timer = setTimeout(() => {
-      fetch(`/api/communities/check-subdomain?subdomain=${clean}`)
+      fetch(`/api/communities/check-subdomain?subdomain=${clean}`, { signal: controller.signal })
         .then(async (res) => {
           const data = await res.json().catch(() => ({}));
           if (data.available) {
@@ -111,11 +246,19 @@ export default function CreateClanPage() {
             setSubdomainError(null);
           }
         })
-        .finally(() => setCheckingSubdomain(false));
-    }, 400);
+        .finally(() => {
+          clearTimeout(abortTimeout);
+          setCheckingSubdomain(false);
+        });
+    }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(abortTimeout);
+      controller.abort();
+    };
   }, [subdomain, step]);
+
 
   const handleLogoUpload = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -132,6 +275,7 @@ export default function CreateClanPage() {
 
     try {
       let logoUrl: string | undefined = undefined;
+      const selectedCountryObj = COUNTRY_OPTIONS.find((c) => c.code === countryCode);
 
       const res = await fetch("/api/communities/register", {
         method: "POST",
@@ -142,7 +286,8 @@ export default function CreateClanPage() {
           description,
           logo: logoUrl,
           primaryLanguage,
-          cities: cities.split(",").map((s) => s.trim()).filter(Boolean),
+          country: selectedCountryObj?.label || countryCode,
+          cities: selectedCities,
           gotras: gotras.split(",").map((s) => s.trim()).filter(Boolean),
           kulDevis: kulDevis.split(",").map((s) => s.trim()).filter(Boolean),
           upiId: upiId.trim(),
@@ -291,6 +436,7 @@ export default function CreateClanPage() {
                         setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
                       }
                       className="w-full px-4 sm:px-5 py-3.5 sm:py-4 bg-transparent text-sm sm:text-base font-mono text-slate-900 placeholder:text-slate-400 outline-none border-0 min-w-0"
+                      suppressHydrationWarning
                     />
                     <span className="px-4 sm:px-5 py-3.5 sm:py-4 bg-slate-100/90 border-l border-slate-200 text-xs sm:text-sm font-mono font-bold text-indigo-600 whitespace-nowrap select-none shrink-0">
                       .mysocialclan.com
@@ -417,28 +563,115 @@ export default function CreateClanPage() {
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.primaryLanguageLabel}
-                  </label>
-                  <select
-                    value={primaryLanguage}
-                    onChange={(e) => setPrimaryLanguage(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
-                    suppressHydrationWarning
-                  >
-                    <option value="en">English (EN)</option>
-                    <option value="ar">العربية (Arabic - GCC)</option>
-                    <option value="hi">हिन्दी (Hindi)</option>
-                    <option value="ur">اردو (Urdu)</option>
-                    <option value="ml">മലയാളം (Malayalam)</option>
-                    <option value="es">Español (ES)</option>
-                    <option value="fr">Français (FR)</option>
-                    <option value="de">Deutsch (DE)</option>
-                    <option value="ja">日本語 (Japanese)</option>
-                    <option value="pt">Português (Brasil)</option>
-                    <option value="fil">Filipino (Tagalog)</option>
-                  </select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Country *
+                    </label>
+                    <select
+                      value={countryCode}
+                      onChange={(e) => handleCountryChange(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
+                      suppressHydrationWarning
+                    >
+                      {COUNTRY_OPTIONS.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      {t.primaryLanguageLabel}
+                    </label>
+                    <select
+                      value={primaryLanguage}
+                      onChange={(e) => setPrimaryLanguage(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
+                      suppressHydrationWarning
+                    >
+                      <option value="en">English (EN)</option>
+                      <option value="ar">العربية (Arabic - GCC)</option>
+                      <option value="hi">हिन्दी (Hindi)</option>
+                      <option value="ur">اردو (Urdu)</option>
+                      <option value="ml">മലയാളം (Malayalam)</option>
+                      <option value="es">Español (ES)</option>
+                      <option value="fr">Français (FR)</option>
+                      <option value="de">Deutsch (DE)</option>
+                      <option value="ja">日本語 (Japanese)</option>
+                      <option value="pt">Português (Brasil)</option>
+                      <option value="fil">Filipino (Tagalog)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Predefined Regional Cities Selection & Custom Addition */}
+                <div className="space-y-3 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Predefined Regional Cities</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleRestoreDefaultCities}
+                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center space-x-1 border-0 bg-transparent cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset to Country Defaults</span>
+                    </button>
+                  </div>
+
+                  {/* Active City Chips */}
+                  <div className="flex flex-wrap gap-2 min-h-[36px] items-center">
+                    {selectedCities.map((city) => (
+                      <span
+                        key={city}
+                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-white border border-indigo-200 text-indigo-900 text-xs font-bold shadow-2xs group"
+                      >
+                        <span>{city}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCity(city)}
+                          className="w-4 h-4 rounded-full bg-slate-100 group-hover:bg-rose-500 group-hover:text-white text-slate-500 transition-colors flex items-center justify-center border-0 cursor-pointer text-[10px]"
+                        >
+                          <X className="w-2.5 h-2.5 stroke-[3]" />
+                        </button>
+                      </span>
+                    ))}
+                    {selectedCities.length === 0 && (
+                      <span className="text-xs text-slate-400 italic">No cities selected. Type below to add custom cities.</span>
+                    )}
+                  </div>
+
+                  {/* Custom City Input & Add Button */}
+                  <div className="flex items-center space-x-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder="Add custom city (e.g. Jaipur, Dubai, San Jose)..."
+                      value={customCityInput}
+                      onChange={(e) => setCustomCityInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddCustomCity();
+                        }
+                      }}
+                      className="flex-1 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 transition-all placeholder:text-slate-400"
+                      suppressHydrationWarning
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomCity}
+                      disabled={!customCityInput.trim()}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-1 shadow-2xs shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>Add City</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -451,19 +684,6 @@ export default function CreateClanPage() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-600 focus:bg-white resize-none transition-all"
-                    suppressHydrationWarning
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.orgCitiesLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={cities}
-                    onChange={(e) => setCities(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
                     suppressHydrationWarning
                   />
                 </div>

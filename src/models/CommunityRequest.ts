@@ -6,6 +6,7 @@ export interface ICommunityRequest extends Document {
   description?: string;
   logo?: string;
   primaryLanguage?: string;
+  country?: string;
   cities?: string[];
   gotras?: string[];
   kulDevis?: string[];
@@ -39,6 +40,7 @@ const CommunityRequestSchema: Schema<ICommunityRequest> = new Schema(
     description: { type: String, trim: true },
     logo: { type: String, trim: true },
     primaryLanguage: { type: String, default: "en", trim: true },
+    country: { type: String, trim: true },
     cities: [{ type: String, trim: true }],
     gotras: [{ type: String, trim: true }],
     kulDevis: [{ type: String, trim: true }],
@@ -63,6 +65,7 @@ const CommunityRequestSchema: Schema<ICommunityRequest> = new Schema(
   },
   { timestamps: true }
 );
+
 
 export const CommunityRequest: Model<ICommunityRequest> =
   mongoose.models.CommunityRequest ||

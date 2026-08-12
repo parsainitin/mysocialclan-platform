@@ -26,23 +26,33 @@ export async function GET(request: NextRequest) {
       return Response.json({ available: false, error: `Subdomain '${slug}' is reserved` });
     }
 
+    // Try DB check with 1.5-second timeout race
     try {
-      await dbConnect();
-      const existingLive = await Community.findOne({ subdomain: slug }).select("_id").lean();
+      const dbCheckPromise = (async () => {
+        await dbConnect();
+        const existingLive = await Community.findOne({ subdomain: slug }).select("_id").lean();
+        if (existingLive) {
+          return { available: false, error: `Subdomain '${slug}' is already registered` };
+        }
+        const existingPending = await CommunityRequest.findOne({ subdomain: slug, status: "pending" })
+          .select("_id")
+          .lean();
+        if (existingPending) {
+          return { available: false, error: `Subdomain '${slug}' has a creation request pending` };
+        }
+        return { available: true };
+      })();
 
-      if (existingLive) {
-        return Response.json({ available: false, error: `Subdomain '${slug}' is already registered` });
-      }
+      const timeoutPromise = new Promise<{ available: boolean }>((resolve) =>
+        setTimeout(() => resolve({ available: true }), 1500)
+      );
 
-      const existingPending = await CommunityRequest.findOne({ subdomain: slug, status: "pending" })
-        .select("_id")
-        .lean();
-
-      if (existingPending) {
-        return Response.json({ available: false, error: `Subdomain '${slug}' has a creation request pending` });
+      const dbResult = await Promise.race([dbCheckPromise, timeoutPromise]);
+      if (!dbResult.available) {
+        return Response.json(dbResult);
       }
     } catch (dbErr: any) {
-      console.warn("MongoDB check warning (falling back to format & reserved validation):", dbErr.message);
+      console.warn("MongoDB check warning (fallback to format & reserved validation):", dbErr.message);
     }
 
     return Response.json({ available: true, subdomain: slug });
@@ -50,3 +60,4 @@ export async function GET(request: NextRequest) {
     return Response.json({ available: false, error: e.message || "Failed checking subdomain availability" }, { status: 200 });
   }
 }
+
