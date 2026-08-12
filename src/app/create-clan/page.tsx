@@ -154,14 +154,33 @@ export default function CreateClanPage() {
 
   useEffect(() => {
     subdomainInputRef.current?.focus();
+    loadCountryCities("IN");
   }, []);
+
+  const loadCountryCities = async (code: string) => {
+    const countryObj = COUNTRY_OPTIONS.find((c) => c.code === code);
+    const baseCities = countryObj ? [...countryObj.cities] : [];
+
+    try {
+      const res = await fetch(`/api/communities/cities?country=${encodeURIComponent(code)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.cities && Array.isArray(data.cities)) {
+          data.cities.forEach((customCity: string) => {
+            if (customCity && !baseCities.includes(customCity)) {
+              baseCities.push(customCity);
+            }
+          });
+        }
+      }
+    } catch {}
+
+    setSelectedCities(baseCities);
+  };
 
   const handleCountryChange = (newCode: string) => {
     setCountryCode(newCode);
-    const countryObj = COUNTRY_OPTIONS.find((c) => c.code === newCode);
-    if (countryObj) {
-      setSelectedCities([...countryObj.cities]);
-    }
+    loadCountryCities(newCode);
   };
 
   const handleAddCustomCity = () => {
@@ -177,11 +196,9 @@ export default function CreateClanPage() {
   };
 
   const handleRestoreDefaultCities = () => {
-    const countryObj = COUNTRY_OPTIONS.find((c) => c.code === countryCode);
-    if (countryObj) {
-      setSelectedCities([...countryObj.cities]);
-    }
+    loadCountryCities(countryCode);
   };
+
 
   // Step 3: Admin Account
   const [adminName, setAdminName] = useState("");

@@ -40,6 +40,7 @@ interface Community {
   description?: string;
   logo?: string;
   primaryLanguage?: string;
+  country?: string;
   cities?: string[];
   gotras?: string[];
   kulDevis?: string[];
@@ -47,6 +48,14 @@ interface Community {
   adminName?: string;
   adminEmail?: string;
   adminMobile?: string;
+  modules?: {
+    directory?: boolean;
+    marketplace?: boolean;
+    panchang?: boolean;
+    booking?: boolean;
+    events?: boolean;
+    donations?: boolean;
+  };
   isActive: boolean;
   createdAt: string;
 }
@@ -89,11 +98,29 @@ export default function PlatformAdminPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Community Admin Edit Modal State
+  // Community Edit Modal State
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(null);
+  const [editTab, setEditTab] = useState<"identity" | "admin" | "modules">("identity");
+  const [editName, setEditName] = useState("");
+  const [editSubdomain, setEditSubdomain] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPrimaryLanguage, setEditPrimaryLanguage] = useState("en");
+  const [editCountry, setEditCountry] = useState("");
+  const [editCities, setEditCities] = useState("");
+  const [editUpiId, setEditUpiId] = useState("");
+
   const [editAdminName, setEditAdminName] = useState("");
   const [editAdminEmail, setEditAdminEmail] = useState("");
   const [editAdminMobile, setEditAdminMobile] = useState("");
+
+  const [editModules, setEditModules] = useState({
+    directory: true,
+    marketplace: true,
+    panchang: true,
+    booking: true,
+    events: true,
+    donations: true,
+  });
   const [editIsActive, setEditIsActive] = useState(true);
   const [savingAdmin, setSavingAdmin] = useState(false);
 
@@ -274,13 +301,31 @@ export default function PlatformAdminPage() {
 
   const openEditModal = (c: Community) => {
     setEditingCommunity(c);
+    setEditName(c.name || "");
+    setEditSubdomain(c.subdomain || "");
+    setEditDescription(c.description || "");
+    setEditPrimaryLanguage(c.primaryLanguage || "en");
+    setEditCountry(c.country || "");
+    setEditCities(Array.isArray(c.cities) ? c.cities.join(", ") : "");
+    setEditUpiId(c.upiId || "");
+
     setEditAdminName(c.adminName || "");
     setEditAdminEmail(c.adminEmail || "");
     setEditAdminMobile(c.adminMobile || "");
+
+    setEditModules({
+      directory: c.modules?.directory ?? true,
+      marketplace: c.modules?.marketplace ?? true,
+      panchang: c.modules?.panchang ?? true,
+      booking: c.modules?.booking ?? true,
+      events: c.modules?.events ?? true,
+      donations: c.modules?.donations ?? true,
+    });
     setEditIsActive(c.isActive !== false);
+    setEditTab("identity");
   };
 
-  const handleSaveCommunityAdmin = async (e: React.FormEvent) => {
+  const handleSaveCommunity = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCommunity) return;
 
@@ -290,27 +335,36 @@ export default function PlatformAdminPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name: editName,
+          subdomain: editSubdomain,
+          description: editDescription,
+          primaryLanguage: editPrimaryLanguage,
+          country: editCountry,
+          cities: editCities.split(",").map((s) => s.trim()).filter(Boolean),
+          upiId: editUpiId,
           adminName: editAdminName,
           adminEmail: editAdminEmail,
           adminMobile: editAdminMobile,
+          modules: editModules,
           isActive: editIsActive,
         }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        showToast("Community Admin details updated successfully!");
+        showToast("Community details updated successfully!");
         setEditingCommunity(null);
         fetchData();
       } else {
-        const data = await res.json();
-        alert(data.error || "Failed to update community admin");
+        alert(data.error || "Failed to update community");
       }
     } catch {
-      alert("Failed to update community admin. Please try again.");
+      alert("Failed to update community. Please try again.");
     } finally {
       setSavingAdmin(false);
     }
   };
+
 
   const handleToggleCommunityStatus = async (c: Community) => {
     const newStatus = !c.isActive;
@@ -559,18 +613,18 @@ export default function PlatformAdminPage() {
         </div>
       )}
 
-      {/* Edit Community Admin Modal */}
+      {/* Comprehensive Edit Community Modal */}
       {editingCommunity && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-6 relative animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 max-w-xl w-full shadow-2xl border border-slate-200 space-y-5 relative my-8 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="font-extrabold text-base text-slate-900 flex items-center space-x-2">
-                  <UserCheck className="w-5 h-5 text-indigo-600" />
-                  <span>Manage Community Admin</span>
+                  <Edit3 className="w-5 h-5 text-indigo-600" />
+                  <span>Edit Community Details</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Update administrator contact details for <strong>{editingCommunity.name}</strong>
+                  Updating configuration for <strong>{editingCommunity.name}</strong> ({editingCommunity.subdomain})
                 </p>
               </div>
               <button
@@ -581,55 +635,226 @@ export default function PlatformAdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveCommunityAdmin} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Community Admin Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={editAdminName}
-                  onChange={(e) => setEditAdminName(e.target.value)}
-                  placeholder="Admin full name"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                />
-              </div>
+            {/* Modal Tabs Navigation */}
+            <div className="flex items-center space-x-2 border-b border-slate-200 pb-3">
+              <button
+                type="button"
+                onClick={() => setEditTab("identity")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-0 cursor-pointer ${
+                  editTab === "identity"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                1. Identity & Config
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditTab("admin")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-0 cursor-pointer ${
+                  editTab === "admin"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                2. Admin Contact
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditTab("modules")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-0 cursor-pointer ${
+                  editTab === "modules"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                3. Feature Modules
+              </button>
+            </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Admin Email Address *</label>
-                <input
-                  type="email"
-                  required
-                  value={editAdminEmail}
-                  onChange={(e) => setEditAdminEmail(e.target.value)}
-                  placeholder="admin@example.com"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                />
-              </div>
+            <form onSubmit={handleSaveCommunity} className="space-y-4 text-xs">
+              {/* TAB 1: IDENTITY & CONFIG */}
+              {editTab === "identity" && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Community Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="e.g. NDS Clan"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
+                    />
+                  </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Admin Mobile / WhatsApp Number *</label>
-                <input
-                  type="text"
-                  required
-                  value={editAdminMobile}
-                  onChange={(e) => setEditAdminMobile(e.target.value)}
-                  placeholder="+1 234 567 890"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                />
-              </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Subdomain Slug *</label>
+                    <div className="flex items-center rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-indigo-600">
+                      <input
+                        type="text"
+                        required
+                        value={editSubdomain}
+                        onChange={(e) => setEditSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                        placeholder="nds"
+                        className="w-full px-3.5 py-2.5 bg-transparent font-mono text-slate-900 outline-none border-0"
+                      />
+                      <span className="px-3 py-2.5 bg-slate-200/80 font-mono font-bold text-slate-600 select-none text-[11px] shrink-0">
+                        .mysocialclan.com
+                      </span>
+                    </div>
+                  </div>
 
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span className="font-bold text-slate-700">Community Active Status</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={editIsActive}
-                    onChange={(e) => setEditIsActive(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600" />
-                </label>
-              </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Country</label>
+                      <input
+                        type="text"
+                        value={editCountry}
+                        onChange={(e) => setEditCountry(e.target.value)}
+                        placeholder="e.g. India 🇮🇳"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Primary Language</label>
+                      <select
+                        value={editPrimaryLanguage}
+                        onChange={(e) => setEditPrimaryLanguage(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-bold cursor-pointer"
+                      >
+                        <option value="en">English (EN)</option>
+                        <option value="ar">العربية (Arabic)</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                        <option value="ur">اردو (Urdu)</option>
+                        <option value="ml">മലയാളം (Malayalam)</option>
+                        <option value="es">Español (ES)</option>
+                        <option value="fr">Français (FR)</option>
+                        <option value="de">Deutsch (DE)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Predefined Regional Cities (comma separated)</label>
+                    <input
+                      type="text"
+                      value={editCities}
+                      onChange={(e) => setEditCities(e.target.value)}
+                      placeholder="Mumbai, Delhi NCR, Bengaluru, Jaipur"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Community Description / Tagline</label>
+                    <textarea
+                      rows={2}
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder="Brief overview of this clan network"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">UPI ID (Member Donations / Fees)</label>
+                    <input
+                      type="text"
+                      value={editUpiId}
+                      onChange={(e) => setEditUpiId(e.target.value)}
+                      placeholder="org@bank / upi"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-mono focus:outline-none focus:border-indigo-600 transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: ADMIN CONTACT */}
+              {editTab === "admin" && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Community Admin Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editAdminName}
+                      onChange={(e) => setEditAdminName(e.target.value)}
+                      placeholder="Admin full name"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Admin Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      value={editAdminEmail}
+                      onChange={(e) => setEditAdminEmail(e.target.value)}
+                      placeholder="admin@example.com"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Admin Mobile / WhatsApp Number *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editAdminMobile}
+                      onChange={(e) => setEditAdminMobile(e.target.value)}
+                      placeholder="+1 234 567 890"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: MODULES & STATUS */}
+              {editTab === "modules" && (
+                <div className="space-y-3">
+                  <p className="font-bold text-slate-700 mb-2">Enable / Disable Community Feature Modules:</p>
+                  <div className="grid grid-cols-2 gap-3.5 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                    {[
+                      { key: "directory", label: "Directory / Members" },
+                      { key: "marketplace", label: "Marketplace / Jobs" },
+                      { key: "panchang", label: "Panchang / Calendar" },
+                      { key: "booking", label: "Venue Booking" },
+                      { key: "events", label: "Events Hub" },
+                      { key: "donations", label: "Member Donations" },
+                    ].map((mod) => (
+                      <label key={mod.key} className="flex items-center space-x-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(editModules as any)[mod.key]}
+                          onChange={(e) =>
+                            setEditModules({ ...editModules, [mod.key]: e.target.checked })
+                          }
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="font-bold text-slate-800">{mod.label}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200 mt-2">
+                    <div>
+                      <span className="font-bold text-slate-800 block">Community Active Status</span>
+                      <span className="text-[11px] text-slate-500">Disabled communities cannot be accessed by members</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editIsActive}
+                        onChange={(e) => setEditIsActive(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600" />
+                    </label>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
                 <button
@@ -642,14 +867,14 @@ export default function PlatformAdminPage() {
                 <button
                   type="submit"
                   disabled={savingAdmin}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-1.5 shadow-md shadow-indigo-500/20 disabled:opacity-50"
+                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-1.5 shadow-md shadow-indigo-500/20 disabled:opacity-50"
                 >
                   {savingAdmin ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      <span>Save Changes</span>
+                      <span>Save Community Changes</span>
                     </>
                   )}
                 </button>
@@ -658,6 +883,7 @@ export default function PlatformAdminPage() {
           </div>
         </div>
       )}
+
 
       {/* Header */}
       <div className="max-w-5xl mx-auto flex items-center justify-between pb-6 border-b border-slate-200 mb-8 gap-4 flex-wrap sm:flex-nowrap">
@@ -871,8 +1097,9 @@ export default function PlatformAdminPage() {
                       className="py-1.5 px-3 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold rounded-xl border border-indigo-200/80 cursor-pointer transition-all flex items-center space-x-1.5"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
-                      <span>Manage Admin</span>
+                      <span>Edit Community</span>
                     </button>
+
 
                     <div className="flex items-center space-x-2">
                       <button

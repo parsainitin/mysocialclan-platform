@@ -23,11 +23,42 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return Response.json({ error: "Community not found" }, { status: 404 });
     }
 
-    if (typeof updates.adminName === "string") community.adminName = updates.adminName;
-    if (typeof updates.adminEmail === "string") community.adminEmail = updates.adminEmail;
-    if (typeof updates.adminMobile === "string") community.adminMobile = updates.adminMobile;
-    if (typeof updates.name === "string") community.name = updates.name;
-    if (typeof updates.description === "string") community.description = updates.description;
+    if (typeof updates.name === "string" && updates.name.trim()) {
+      community.name = updates.name.trim();
+    }
+    if (typeof updates.subdomain === "string" && updates.subdomain.trim()) {
+      const cleanSub = updates.subdomain.trim().toLowerCase();
+      if (cleanSub !== community.subdomain) {
+        const existing = await Community.findOne({ subdomain: cleanSub, _id: { $ne: id } });
+        if (existing) {
+          return Response.json({ error: `Subdomain '${cleanSub}' is already taken by another community` }, { status: 409 });
+        }
+        community.subdomain = cleanSub;
+      }
+    }
+    if (typeof updates.description === "string") community.description = updates.description.trim();
+    if (typeof updates.primaryLanguage === "string") community.primaryLanguage = updates.primaryLanguage.trim();
+    if (typeof updates.country === "string") community.country = updates.country.trim();
+    if (Array.isArray(updates.cities)) {
+      community.cities = updates.cities.map((c: string) => c.trim()).filter(Boolean);
+    }
+    if (typeof updates.upiId === "string") community.upiId = updates.upiId.trim();
+
+    if (typeof updates.adminName === "string") community.adminName = updates.adminName.trim();
+    if (typeof updates.adminEmail === "string") community.adminEmail = updates.adminEmail.trim().toLowerCase();
+    if (typeof updates.adminMobile === "string") community.adminMobile = updates.adminMobile.trim();
+
+    if (updates.modules && typeof updates.modules === "object") {
+      community.modules = {
+        directory: !!updates.modules.directory,
+        marketplace: !!updates.modules.marketplace,
+        panchang: !!updates.modules.panchang,
+        booking: !!updates.modules.booking,
+        events: !!updates.modules.events,
+        donations: !!updates.modules.donations,
+      };
+    }
+
     if (typeof updates.isActive === "boolean") community.isActive = updates.isActive;
 
     await community.save();
@@ -36,6 +67,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
+
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const session = verifyAdminSession(request);

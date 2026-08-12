@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import { Community } from "@/models/Community";
 import { CommunityRequest } from "@/models/CommunityRequest";
+import { CustomCity } from "@/models/CustomCity";
 
 const RESERVED_SUBDOMAINS = ["www", "admin", "app", "api", "superadmin", "mail", "localhost", "mysocialclan"];
 
@@ -55,8 +56,9 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = adminEmail.trim().toLowerCase();
     const cleanMobile = adminMobile.trim();
+    const parsedCities = Array.isArray(cities) ? cities.map((c: string) => c.trim()).filter(Boolean) : [];
 
-    // 2. Perform DB operations with a 5-second timeout race to prevent 504 Gateway Timeouts
+    // 2. Perform DB operations with an 8-second timeout race to prevent 504 Gateway Timeouts
     const dbTask = (async () => {
       await dbConnect();
 
@@ -74,6 +76,20 @@ export async function POST(request: NextRequest) {
         };
       }
 
+      // Save custom cities globally for future community creators
+      if (parsedCities.length > 0) {
+        const countryCode = (country || "IN").toLowerCase().trim();
+        for (const cityName of parsedCities) {
+          try {
+            await CustomCity.updateOne(
+              { countryCode, name: cityName },
+              { $setOnInsert: { countryCode, name: cityName } },
+              { upsert: true }
+            );
+          } catch {}
+        }
+      }
+
       // Create Community Request for offline provisioning
       const creationRequest = await CommunityRequest.create({
         name: name.trim(),
@@ -82,7 +98,8 @@ export async function POST(request: NextRequest) {
         logo: logo?.trim() || undefined,
         primaryLanguage: primaryLanguage?.trim() || "en",
         country: country?.trim() || undefined,
-        cities: Array.isArray(cities) ? cities.map((c: string) => c.trim()).filter(Boolean) : [],
+        cities: parsedCities,
+
         gotras: Array.isArray(gotras) ? gotras.map((g: string) => g.trim()).filter(Boolean) : [],
         kulDevis: Array.isArray(kulDevis) ? kulDevis.map((k: string) => k.trim()).filter(Boolean) : [],
         upiId: upiId?.trim() || undefined,
