@@ -2,12 +2,63 @@ import { NextRequest } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import { Community } from "@/models/Community";
 import { CommunityRequest } from "@/models/CommunityRequest";
+import { verifyAdminSession } from "@/lib/adminAuth";
+import { provisionCommunityAdmin, buildActivationUrl, buildWhatsAppInviteUrl } from "@/lib/tenantProvisioner";
+import { TenantUser } from "@/models/TenantUser";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  const session = verifyAdminSession(request);
+  if (!session) {
+    return Response.json({ error: "Unauthorized access." }, { status: 401 });
+  }
+
+  try {
+    await dbConnect();
+    const { id } = await params;
+    const reqDoc = await CommunityRequest.findById(id).lean();
+    if (!reqDoc) return Response.json({ error: "Not found" }, { status: 404 });
+
+    // Find tenant user if exists
+    const tenantUser = await TenantUser.findOne({
+      subdomain: reqDoc.subdomain.toLowerCase(),
+      email: reqDoc.adminEmail.toLowerCase(),
+    }).lean();
+
+    let activationUrl = "";
+    let whatsappUrl = "";
+
+    if (tenantUser && tenantUser.activationToken) {
+      activationUrl = buildActivationUrl(reqDoc.subdomain, tenantUser.activationToken);
+      whatsappUrl = buildWhatsAppInviteUrl(
+        reqDoc.adminMobile,
+        reqDoc.adminName,
+        reqDoc.name,
+        activationUrl
+      );
+    }
+
+    return Response.json({
+      ...reqDoc,
+      activationToken: tenantUser?.activationToken,
+      activationUrl,
+      whatsappUrl,
+      adminStatus: tenantUser?.status || "none",
+    });
+  } catch (e: any) {
+    return Response.json({ error: e.message }, { status: 500 });
+  }
+}
+
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  const session = verifyAdminSession(request);
+  if (!session) {
+    return Response.json({ error: "Unauthorized access. Super admin authentication required." }, { status: 401 });
+  }
+
   try {
     await dbConnect();
     const { id } = await params;
@@ -18,11 +69,24 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return Response.json({ error: "Creation request not found" }, { status: 404 });
     }
 
+    // Ensure fallback for legacy records missing required contact fields
+    if (!reqDoc.adminEmail) {
+      reqDoc.adminEmail = `admin@${reqDoc.subdomain}.com`;
+    }
+    if (!reqDoc.adminName) {
+      reqDoc.adminName = "Community Admin";
+    }
+    if (!reqDoc.adminMobile) {
+      reqDoc.adminMobile = "";
+    }
+
     if (status) reqDoc.status = status;
     if (notes) reqDoc.notes = notes;
     await reqDoc.save();
 
-    // If provisionNow is true, also register Community record for live showcase
+    let provisionData: any = null;
+
+    // If provisionNow is true and approved, register Community and seed Tenant Admin Account
     if (provisionNow && status === "approved") {
       const existingCommunity = await Community.findOne({ subdomain: reqDoc.subdomain });
       if (!existingCommunity) {
@@ -37,21 +101,34 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           kulDevis: reqDoc.kulDevis,
           upiId: reqDoc.upiId,
           modules: reqDoc.modules,
-          adminName: reqDoc.adminName,
-          adminEmail: reqDoc.adminEmail,
-          adminMobile: reqDoc.adminMobile,
+          adminName: reqDoc.adminName || "Community Admin",
+          adminEmail: reqDoc.adminEmail || `admin@${reqDoc.subdomain}.com`,
+          adminMobile: reqDoc.adminMobile || "",
           isActive: true,
         });
       }
+
+      // Provision Community Admin account & activation token
+      provisionData = await provisionCommunityAdmin(reqDoc);
     }
 
-    return Response.json(reqDoc);
+    return Response.json({
+      ...reqDoc.toObject(),
+      activationToken: provisionData?.token,
+      activationUrl: provisionData?.activationUrl,
+      whatsappUrl: provisionData?.whatsappUrl,
+    });
   } catch (e: any) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const session = verifyAdminSession(request);
+  if (!session) {
+    return Response.json({ error: "Unauthorized access. Super admin authentication required." }, { status: 401 });
+  }
+
   try {
     await dbConnect();
     const { id } = await params;

@@ -105,6 +105,13 @@ export interface Translations {
   rejectBtn: string;
   activeCommunitiesTitle: string;
   noCommunities: string;
+  adminLoginTitle?: string;
+  adminLoginSub?: string;
+  usernameLabel?: string;
+  passwordLabel?: string;
+  loginBtn?: string;
+  invalidCredentialsMsg?: string;
+  logoutBtn?: string;
 }
 
 const translations: Record<SupportedLang, Translations> = {
@@ -941,7 +948,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t, isRtl }}>
-      <div dir={isRtl ? "rtl" : "ltr"} className="w-full min-h-full">
+      <div dir={isRtl ? "rtl" : "ltr"} className="w-full min-h-full" suppressHydrationWarning>
         {children}
       </div>
     </LanguageContext.Provider>

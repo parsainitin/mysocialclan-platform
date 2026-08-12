@@ -403,7 +403,12 @@ import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
 export default function LandingPage() {
   const [communities, setCommunities] = useState<CommunityPublic[]>([]);
   const [loadingCommunities, setLoadingCommunities] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const { lang, setLang, t, isRtl } = useLanguage();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Load public communities for live showcase
   useEffect(() => {
@@ -573,12 +578,6 @@ export default function LandingPage() {
               </select>
             </div>
 
-            <a
-              href="/admin"
-              className="hidden md:inline-block text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-colors px-3 py-2 rounded-xl hover:bg-slate-100 text-decoration-none"
-            >
-              {t.superAdmin}
-            </a>
 
             <a
               href="/create-clan"
@@ -818,7 +817,7 @@ export default function LandingPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {communities.map((c) => {
-              const originHost = typeof window !== "undefined" ? window.location.host : "mysocialclan.com";
+              const originHost = mounted && typeof window !== "undefined" ? window.location.host : "mysocialclan.com";
               const isLocalhost = originHost.includes("localhost");
               const fullDomain = isLocalhost
                 ? `${c.subdomain}.localhost:3000`

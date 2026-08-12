@@ -46,6 +46,11 @@ export default function CreateClanPage() {
   const [kulDevis, setKulDevis] = useState("Primary Hub, Secondary Hub, Regional Board");
   const [upiId, setUpiId] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const subdomainInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    subdomainInputRef.current?.focus();
+  }, []);
 
   // Step 3: Admin Account
   const [adminName, setAdminName] = useState("");
@@ -278,8 +283,8 @@ export default function CreateClanPage() {
                   </label>
                   <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-indigo-600 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
                     <input
+                      ref={subdomainInputRef}
                       type="text"
-                      autoFocus
                       placeholder="e.g. college"
                       value={subdomain}
                       onChange={(e) =>
@@ -489,10 +494,11 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.adminNameLabel}
+                    {t.adminNameLabel} *
                   </label>
                   <input
                     type="text"
+                    required
                     placeholder="e.g. John Doe / Dr. Rajesh Shah"
                     value={adminName}
                     onChange={(e) => setAdminName(e.target.value)}
@@ -502,24 +508,29 @@ export default function CreateClanPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.adminEmailLabel}
+                    {t.adminEmailLabel} *
                   </label>
                   <input
                     type="email"
+                    required
                     placeholder="e.g. admin@organization.com"
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
                   />
+                  {adminEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim()) && (
+                    <p className="text-[11px] text-rose-500 font-semibold mt-1">Please enter a valid email address (e.g., admin@domain.com)</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.adminMobileLabel}
+                    {t.adminMobileLabel} *
                   </label>
                   <input
                     type="tel"
-                    placeholder="Contact mobile number"
+                    required
+                    placeholder="Contact mobile / WhatsApp number"
                     value={adminMobile}
                     onChange={(e) => setAdminMobile(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
@@ -534,7 +545,7 @@ export default function CreateClanPage() {
                     {t.backBtn}
                   </button>
                   <button
-                    disabled={!adminName.trim() || !adminEmail.trim() || !adminMobile.trim()}
+                    disabled={!adminName.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim()) || !adminMobile.trim()}
                     onClick={() => setStep(4)}
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
                   >
