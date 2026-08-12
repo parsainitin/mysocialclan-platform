@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     let whatsappUrl = "";
 
     if (tenantUser && tenantUser.activationToken) {
-      activationUrl = buildActivationUrl(reqDoc.subdomain, tenantUser.activationToken);
+      activationUrl = buildActivationUrl(reqDoc.subdomain, tenantUser.activationToken, request);
       whatsappUrl = buildWhatsAppInviteUrl(
         reqDoc.adminMobile,
         reqDoc.adminName,
@@ -41,6 +41,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         activationUrl
       );
     }
+
 
     return Response.json({
       ...reqDoc,
@@ -112,8 +113,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
 
       // Provision Community Admin account & activation token
-      provisionData = await provisionCommunityAdmin(reqDoc);
+      provisionData = await provisionCommunityAdmin(reqDoc, request);
     }
+
 
     return Response.json({
       ...reqDoc.toObject(),

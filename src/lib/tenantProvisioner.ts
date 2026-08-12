@@ -11,12 +11,40 @@ export function formatPhoneForWhatsApp(phone: string): string {
   return digits;
 }
 
-export function getAppBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+export function getAppBaseUrl(req?: any): string {
+  // 1. Explicit environment variable if configured
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+
+  // 2. Netlify / Vercel automatic deployment environment variables
+  if (process.env.URL) {
+    return process.env.URL.replace(/\/$/, "");
+  }
+  if (process.env.DEPLOY_PRIME_URL) {
+    return process.env.DEPLOY_PRIME_URL.replace(/\/$/, "");
+  }
+
+  // 3. Dynamic Host header from incoming HTTP request
+  if (req) {
+    try {
+      const getHeader = (name: string) => {
+        if (typeof req.headers?.get === "function") return req.headers.get(name);
+        return req.headers?.[name];
+      };
+      const host = getHeader("x-forwarded-host") || getHeader("host");
+      const proto = getHeader("x-forwarded-proto") || "https";
+      if (host && !host.includes("localhost")) {
+        return `${proto}://${host}`;
+      }
+    } catch {}
+  }
+
+  return "http://localhost:3000";
 }
 
-export function buildActivationUrl(subdomain: string, token: string): string {
-  const baseUrl = getAppBaseUrl();
+export function buildActivationUrl(subdomain: string, token: string, req?: any): string {
+  const baseUrl = getAppBaseUrl(req);
   return `${baseUrl}/activate?subdomain=${encodeURIComponent(subdomain)}&token=${encodeURIComponent(token)}`;
 }
 
@@ -31,7 +59,7 @@ export function buildWhatsAppInviteUrl(
   return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`;
 }
 
-export async function provisionCommunityAdmin(reqDoc: any) {
+export async function provisionCommunityAdmin(reqDoc: any, req?: any) {
   const subdomain = (reqDoc.subdomain || "").toLowerCase().trim();
   const adminEmail = (reqDoc.adminEmail || `admin@${subdomain}.com`).toLowerCase().trim();
   const adminName = (reqDoc.adminName || "Community Admin").trim();
@@ -69,7 +97,7 @@ export async function provisionCommunityAdmin(reqDoc: any) {
 
   await user.save();
 
-  const activationUrl = buildActivationUrl(subdomain, token);
+  const activationUrl = buildActivationUrl(subdomain, token, req);
   const whatsappUrl = buildWhatsAppInviteUrl(
     adminMobile,
     adminName,
@@ -84,4 +112,5 @@ export async function provisionCommunityAdmin(reqDoc: any) {
     user,
   };
 }
+
 
