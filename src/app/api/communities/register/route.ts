@@ -124,11 +124,12 @@ export async function POST(request: NextRequest) {
         () =>
           resolve({
             status: 503,
-            error: "Database connection timed out in production. Please verify MONGODB_URI connectivity or network whitelist.",
+            error: "Database connection timed out in production. Please check: 1) Is MONGODB_URI set in your production environment variables? 2) Is 0.0.0.0/0 allowed in MongoDB Atlas Network Access?",
           }),
-        5000
+        8000
       )
     );
+
 
     const result: { status: number; error?: string; data?: any } = await Promise.race([dbTask, timeoutTask]);
 
