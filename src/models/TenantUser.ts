@@ -6,8 +6,11 @@ export interface ITenantUser extends Document {
   name: string;
   email: string;
   mobile: string;
-  role: "COMMUNITY_ADMIN" | "MEMBER";
-  status: "invited" | "active" | "disabled";
+  phone?: string;
+  mobileNumber?: string;
+  role: "COMMUNITY_ADMIN" | "admin" | "MEMBER" | "member";
+  status: "invited" | "active" | "approved" | "disabled" | "pending" | "rejected";
+  password?: string;
   passwordHash?: string;
   activationToken?: string;
   tokenExpiresAt?: Date;
@@ -21,8 +24,11 @@ export const TenantUserSchema: Schema<ITenantUser> = new Schema(
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, lowercase: true, trim: true },
     mobile: { type: String, required: true, trim: true },
-    role: { type: String, enum: ["COMMUNITY_ADMIN", "MEMBER"], default: "COMMUNITY_ADMIN" },
-    status: { type: String, enum: ["invited", "active", "disabled"], default: "invited" },
+    phone: { type: String, trim: true },
+    mobileNumber: { type: String, trim: true },
+    role: { type: String, default: "admin" },
+    status: { type: String, default: "approved" },
+    password: { type: String },
     passwordHash: { type: String },
     activationToken: { type: String, trim: true },
     tokenExpiresAt: { type: Date },
@@ -37,4 +43,5 @@ export async function getTenantUserModel(subdomain: string): Promise<Model<ITena
   const tenantDb = await getTenantDb(subdomain);
   return tenantDb.models.User || tenantDb.model<ITenantUser>("User", TenantUserSchema);
 }
+
 

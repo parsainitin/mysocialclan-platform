@@ -82,7 +82,9 @@ export async function provisionCommunityAdmin(reqDoc: any, req?: any) {
       name: adminName,
       email: adminEmail,
       mobile: adminMobile,
-      role: "COMMUNITY_ADMIN",
+      phone: adminMobile,
+      mobileNumber: adminMobile,
+      role: "admin",
       status: "invited",
       activationToken: token,
       tokenExpiresAt: expiresAt,
@@ -90,12 +92,15 @@ export async function provisionCommunityAdmin(reqDoc: any, req?: any) {
   } else {
     user.name = adminName;
     user.mobile = adminMobile;
+    user.phone = adminMobile;
+    user.mobileNumber = adminMobile;
     user.activationToken = token;
     user.tokenExpiresAt = expiresAt;
-    user.status = user.status === "active" ? "active" : "invited";
+    user.status = user.status === "active" || user.status === "approved" ? "approved" : "invited";
   }
 
   await user.save();
+
 
   const activationUrl = buildActivationUrl(subdomain, token, req);
   const whatsappUrl = buildWhatsAppInviteUrl(

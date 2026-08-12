@@ -5,7 +5,9 @@ import { getTenantUserModel } from "@/models/TenantUser";
 import { Community } from "@/models/Community";
 
 function hashPassword(password: string): string {
-  return crypto.pbkdf2Sync(password, "mysocialclan-salt-2026", 1000, 64, "sha512").toString("hex");
+  const salt = crypto.randomBytes(16).toString("hex");
+  const derivedKey = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `scrypt:${salt}:${derivedKey}`;
 }
 
 export async function GET(request: NextRequest) {
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
       logo: community?.logo,
       adminName: user.name,
       adminEmail: user.email,
-      adminMobile: user.mobile,
+      adminMobile: user.mobile || user.mobileNumber || user.phone,
       status: user.status,
     });
   } catch (e: any) {
@@ -83,11 +85,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Activation token has expired" }, { status: 410 });
     }
 
-    user.passwordHash = hashPassword(cleanPassword);
-    user.status = "active";
+    const scryptHash = hashPassword(cleanPassword);
+    const mNum = user.mobile || user.mobileNumber || user.phone || "";
+
+    user.password = scryptHash;
+    user.passwordHash = scryptHash;
+    user.mobile = mNum;
+    user.phone = mNum;
+    user.mobileNumber = mNum;
+    user.status = "approved";
+    user.role = "admin";
     user.activationToken = undefined;
     user.tokenExpiresAt = undefined;
     await user.save();
+
 
     return NextResponse.json({
       success: true,
