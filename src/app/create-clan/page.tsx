@@ -299,7 +299,17 @@ export default function CreateClanPage() {
         }),
       });
 
-      const data = await res.json();
+      const responseText = await res.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        if (res.status === 504 || responseText.includes("504")) {
+          throw new Error("Server connection timed out (504 Gateway Timeout). Please verify MONGODB_URI connectivity or network whitelist.");
+        }
+        throw new Error(`Server returned status ${res.status}. Please try again later.`);
+      }
+
       if (!res.ok) {
         throw new Error(data.error || "Community registration failed");
       }
@@ -312,6 +322,7 @@ export default function CreateClanPage() {
       setSubmitting(false);
     }
   };
+
 
   const stepTabs = [
     { num: 1, title: "Subdomain" },

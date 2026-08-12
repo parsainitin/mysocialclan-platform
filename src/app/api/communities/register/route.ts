@@ -7,8 +7,10 @@ const RESERVED_SUBDOMAINS = ["www", "admin", "app", "api", "superadmin", "mail",
 
 export async function POST(request: NextRequest) {
   try {
-    await dbConnect();
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
 
     const {
       name,
@@ -27,7 +29,7 @@ export async function POST(request: NextRequest) {
       adminMobile,
     } = body;
 
-    // Validate Community details
+    // 1. Validate Community & Admin input details BEFORE attempting DB connection
     if (!name?.trim() || !subdomain?.trim()) {
       return Response.json({ error: "Community Name and Subdomain are required" }, { status: 400 });
     }
@@ -44,21 +46,6 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: `Subdomain '${slug}' is reserved` }, { status: 400 });
     }
 
-    // Check if subdomain exists in live communities or pending requests
-    const existingCommunity = await Community.findOne({ subdomain: slug });
-    if (existingCommunity) {
-      return Response.json({ error: `Subdomain '${slug}' is already taken` }, { status: 409 });
-    }
-
-    const existingPending = await CommunityRequest.findOne({ subdomain: slug, status: "pending" });
-    if (existingPending) {
-      return Response.json(
-        { error: `A creation request for subdomain '${slug}' is already pending review` },
-        { status: 409 }
-      );
-    }
-
-    // Validate Admin contact details
     if (!adminName?.trim() || !adminEmail?.trim() || !adminMobile?.trim()) {
       return Response.json(
         { error: "Admin Name, Contact Email, and Contact Mobile Number are required" },
@@ -69,51 +56,90 @@ export async function POST(request: NextRequest) {
     const cleanEmail = adminEmail.trim().toLowerCase();
     const cleanMobile = adminMobile.trim();
 
-    // Create Community Request for offline provisioning
-    const creationRequest = await CommunityRequest.create({
-      name: name.trim(),
-      subdomain: slug,
-      description: description?.trim() || undefined,
-      logo: logo?.trim() || undefined,
-      primaryLanguage: primaryLanguage?.trim() || "en",
-      country: country?.trim() || undefined,
-      cities: Array.isArray(cities) ? cities.map((c: string) => c.trim()).filter(Boolean) : [],
+    // 2. Perform DB operations with a 5-second timeout race to prevent 504 Gateway Timeouts
+    const dbTask = (async () => {
+      await dbConnect();
 
-      gotras: Array.isArray(gotras) ? gotras.map((g: string) => g.trim()).filter(Boolean) : [],
-      kulDevis: Array.isArray(kulDevis) ? kulDevis.map((k: string) => k.trim()).filter(Boolean) : [],
-      upiId: upiId?.trim() || undefined,
-      modules: {
-        directory: modules?.directory ?? true,
-        marketplace: modules?.marketplace ?? true,
-        panchang: modules?.panchang ?? true,
-        booking: modules?.booking ?? true,
-        events: modules?.events ?? true,
-        donations: modules?.donations ?? true,
-      },
-      adminName: adminName.trim(),
-      adminEmail: cleanEmail,
-      adminMobile: cleanMobile,
-      status: "pending",
-    });
+      // Check if subdomain exists in live communities or pending requests
+      const existingCommunity = await Community.findOne({ subdomain: slug });
+      if (existingCommunity) {
+        return { status: 409, error: `Subdomain '${slug}' is already taken` };
+      }
 
-    return Response.json(
-      {
-        success: true,
-        pendingApproval: true,
-        message: "Community setup request submitted for offline provisioning",
-        request: {
-          id: creationRequest._id,
-          name: creationRequest.name,
-          subdomain: creationRequest.subdomain,
-          primaryLanguage: creationRequest.primaryLanguage,
-          adminName: creationRequest.adminName,
-          adminEmail: creationRequest.adminEmail,
-          adminMobile: creationRequest.adminMobile,
+      const existingPending = await CommunityRequest.findOne({ subdomain: slug, status: "pending" });
+      if (existingPending) {
+        return {
+          status: 409,
+          error: `A creation request for subdomain '${slug}' is already pending review`,
+        };
+      }
+
+      // Create Community Request for offline provisioning
+      const creationRequest = await CommunityRequest.create({
+        name: name.trim(),
+        subdomain: slug,
+        description: description?.trim() || undefined,
+        logo: logo?.trim() || undefined,
+        primaryLanguage: primaryLanguage?.trim() || "en",
+        country: country?.trim() || undefined,
+        cities: Array.isArray(cities) ? cities.map((c: string) => c.trim()).filter(Boolean) : [],
+        gotras: Array.isArray(gotras) ? gotras.map((g: string) => g.trim()).filter(Boolean) : [],
+        kulDevis: Array.isArray(kulDevis) ? kulDevis.map((k: string) => k.trim()).filter(Boolean) : [],
+        upiId: upiId?.trim() || undefined,
+        modules: {
+          directory: modules?.directory ?? true,
+          marketplace: modules?.marketplace ?? true,
+          panchang: modules?.panchang ?? true,
+          booking: modules?.booking ?? true,
+          events: modules?.events ?? true,
+          donations: modules?.donations ?? true,
         },
-      },
-      { status: 202 }
+        adminName: adminName.trim(),
+        adminEmail: cleanEmail,
+        adminMobile: cleanMobile,
+        status: "pending",
+      });
+
+      return {
+        status: 202,
+        data: {
+          success: true,
+          pendingApproval: true,
+          message: "Community setup request submitted for offline provisioning",
+          request: {
+            id: creationRequest._id,
+            name: creationRequest.name,
+            subdomain: creationRequest.subdomain,
+            primaryLanguage: creationRequest.primaryLanguage,
+            adminName: creationRequest.adminName,
+            adminEmail: creationRequest.adminEmail,
+            adminMobile: creationRequest.adminMobile,
+          },
+        },
+      };
+    })();
+
+    const timeoutTask = new Promise<{ status: number; error?: string; data?: any }>((resolve) =>
+      setTimeout(
+        () =>
+          resolve({
+            status: 503,
+            error: "Database connection timed out in production. Please verify MONGODB_URI connectivity or network whitelist.",
+          }),
+        5000
+      )
     );
+
+    const result: { status: number; error?: string; data?: any } = await Promise.race([dbTask, timeoutTask]);
+
+    if (result.error) {
+      return Response.json({ error: result.error }, { status: result.status });
+    }
+
+    return Response.json(result.data, { status: result.status });
+
   } catch (e: any) {
     return Response.json({ error: e.message || "Failed to submit community request" }, { status: 500 });
   }
 }
+
