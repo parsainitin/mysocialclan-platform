@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { dbConnect } from "@/lib/mongodb";
-import { TenantUser } from "@/models/TenantUser";
+import { getTenantUserModel } from "@/models/TenantUser";
 import { Community } from "@/models/Community";
 
 function hashPassword(password: string): string {
@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
 
     await dbConnect();
 
-    const user = await TenantUser.findOne({
+    const TenantUserModel = await getTenantUserModel(subdomain);
+    const user = await TenantUserModel.findOne({
       subdomain,
       activationToken: token,
     });
@@ -68,7 +69,8 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    const user = await TenantUser.findOne({
+    const TenantUserModel = await getTenantUserModel(cleanSubdomain);
+    const user = await TenantUserModel.findOne({
       subdomain: cleanSubdomain,
       activationToken: cleanToken,
     });
@@ -97,3 +99,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
+

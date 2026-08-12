@@ -1,6 +1,5 @@
 import crypto from "crypto";
-import { dbConnect } from "@/lib/mongodb";
-import { TenantUser } from "@/models/TenantUser";
+import { getTenantUserModel } from "@/models/TenantUser";
 
 export function formatPhoneForWhatsApp(phone: string): string {
   if (!phone) return "";
@@ -33,23 +32,24 @@ export function buildWhatsAppInviteUrl(
 }
 
 export async function provisionCommunityAdmin(reqDoc: any) {
-  await dbConnect();
-
-  const token = crypto.randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-
   const subdomain = (reqDoc.subdomain || "").toLowerCase().trim();
   const adminEmail = (reqDoc.adminEmail || `admin@${subdomain}.com`).toLowerCase().trim();
   const adminName = (reqDoc.adminName || "Community Admin").trim();
   const adminMobile = (reqDoc.adminMobile || "").trim();
 
-  let user = await TenantUser.findOne({
+  // Get tenant-specific User model for comicircle_<subdomain>
+  const TenantUserModel = await getTenantUserModel(subdomain);
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+  let user = await TenantUserModel.findOne({
     subdomain,
     email: adminEmail,
   });
 
   if (!user) {
-    user = new TenantUser({
+    user = new TenantUserModel({
       subdomain,
       name: adminName,
       email: adminEmail,
@@ -60,6 +60,8 @@ export async function provisionCommunityAdmin(reqDoc: any) {
       tokenExpiresAt: expiresAt,
     });
   } else {
+    user.name = adminName;
+    user.mobile = adminMobile;
     user.activationToken = token;
     user.tokenExpiresAt = expiresAt;
     user.status = user.status === "active" ? "active" : "invited";
@@ -82,3 +84,4 @@ export async function provisionCommunityAdmin(reqDoc: any) {
     user,
   };
 }
+

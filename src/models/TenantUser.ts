@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import { getTenantDb } from "@/lib/mongodb";
 
 export interface ITenantUser extends Document {
   subdomain: string;
@@ -14,7 +15,7 @@ export interface ITenantUser extends Document {
   updatedAt: Date;
 }
 
-const TenantUserSchema: Schema<ITenantUser> = new Schema(
+export const TenantUserSchema: Schema<ITenantUser> = new Schema(
   {
     subdomain: { type: String, required: true, lowercase: true, trim: true },
     name: { type: String, required: true, trim: true },
@@ -26,8 +27,14 @@ const TenantUserSchema: Schema<ITenantUser> = new Schema(
     activationToken: { type: String, trim: true },
     tokenExpiresAt: { type: Date },
   },
-  { timestamps: true }
+  { timestamps: true, collection: "users" }
 );
 
 export const TenantUser: Model<ITenantUser> =
   mongoose.models.TenantUser || mongoose.model<ITenantUser>("TenantUser", TenantUserSchema);
+
+export async function getTenantUserModel(subdomain: string): Promise<Model<ITenantUser>> {
+  const tenantDb = await getTenantDb(subdomain);
+  return tenantDb.models.User || tenantDb.model<ITenantUser>("User", TenantUserSchema);
+}
+

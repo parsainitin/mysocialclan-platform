@@ -4,7 +4,7 @@ import { Community } from "@/models/Community";
 import { CommunityRequest } from "@/models/CommunityRequest";
 import { verifyAdminSession } from "@/lib/adminAuth";
 import { provisionCommunityAdmin, buildActivationUrl, buildWhatsAppInviteUrl } from "@/lib/tenantProvisioner";
-import { TenantUser } from "@/models/TenantUser";
+import { getTenantUserModel } from "@/models/TenantUser";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -22,8 +22,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const reqDoc = await CommunityRequest.findById(id).lean();
     if (!reqDoc) return Response.json({ error: "Not found" }, { status: 404 });
 
-    // Find tenant user if exists
-    const tenantUser = await TenantUser.findOne({
+    // Find tenant user in comicircle_<subdomain>.users collection
+    const TenantUserModel = await getTenantUserModel(reqDoc.subdomain.toLowerCase());
+    const tenantUser = await TenantUserModel.findOne({
       subdomain: reqDoc.subdomain.toLowerCase(),
       email: reqDoc.adminEmail.toLowerCase(),
     }).lean();
@@ -52,6 +53,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
+
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const session = verifyAdminSession(request);

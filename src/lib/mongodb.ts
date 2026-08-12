@@ -36,3 +36,15 @@ export async function dbConnect() {
 
   return cached.conn;
 }
+
+export function getTenantDbName(subdomain: string): string {
+  const cleanSubdomain = (subdomain || "").toLowerCase().trim().replace(/[^a-z0-9_-]/g, "");
+  return `comicircle_${cleanSubdomain}`;
+}
+
+export async function getTenantDb(subdomain: string) {
+  await dbConnect();
+  const tenantDbName = getTenantDbName(subdomain);
+  return mongoose.connection.useDb(tenantDbName, { useCache: true });
+}
+
