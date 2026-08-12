@@ -30,7 +30,9 @@ import {
   ExternalLink,
   Check,
   Send,
+  RotateCcw,
 } from "lucide-react";
+
 import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
 
 interface Community {
@@ -228,6 +230,37 @@ export default function PlatformAdminPage() {
   };
 
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [reinvitingId, setReinvitingId] = useState<string | null>(null);
+
+  const handleRegenerateInvite = async (id: string) => {
+    setReinvitingId(id);
+    try {
+      const res = await fetch(`/api/admin/communities/${id}/reinvite`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast("Fresh onboarding invite link generated!");
+        setDispatchData({
+          communityName: data.communityName,
+          subdomain: data.subdomain,
+          adminName: data.adminName,
+          adminEmail: data.adminEmail,
+          adminMobile: data.adminMobile,
+          activationUrl: data.activationUrl,
+          whatsappUrl: data.whatsappUrl,
+        });
+        fetchData();
+      } else {
+        alert(data.error || "Failed to regenerate invite link");
+      }
+    } catch (e: any) {
+      alert("Network Error: " + e.message);
+    } finally {
+      setReinvitingId(null);
+    }
+  };
+
 
   const handleApproveRequest = async (reqId: string, provisionNow: boolean = true) => {
     setApprovingId(reqId);
@@ -995,16 +1028,36 @@ export default function PlatformAdminPage() {
                       </>
                     )}
 
-                    {req.status === "approved" && req.whatsappUrl && (
-                      <a
-                        href={req.whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="py-2 px-3 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold rounded-xl border border-emerald-200 transition-all flex items-center space-x-1.5 text-decoration-none"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Send WhatsApp Invite</span>
-                      </a>
+                    {req.status === "approved" && (
+                      <>
+                        <button
+                          onClick={() => handleRegenerateInvite(req._id)}
+                          disabled={reinvitingId === req._id}
+                          title="Generate Fresh Onboarding Link"
+                          className="py-2 px-3 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold rounded-xl border border-indigo-200 transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                        >
+                          {reinvitingId === req._id ? (
+                            <div className="w-3.5 h-3.5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>Re-Invite</span>
+                            </>
+                          )}
+                        </button>
+
+                        {req.whatsappUrl && (
+                          <a
+                            href={req.whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="py-2 px-3 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold rounded-xl border border-emerald-200 transition-all flex items-center space-x-1.5 text-decoration-none"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>WhatsApp</span>
+                          </a>
+                        )}
+                      </>
                     )}
 
                     <button
@@ -1100,8 +1153,23 @@ export default function PlatformAdminPage() {
                       <span>Edit Community</span>
                     </button>
 
-
                     <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleRegenerateInvite(c._id)}
+                        disabled={reinvitingId === c._id}
+                        title="Generate Fresh Onboarding Link"
+                        className="py-1.5 px-2.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold rounded-xl border border-emerald-200 transition-all flex items-center space-x-1 cursor-pointer disabled:opacity-50"
+                      >
+                        {reinvitingId === c._id ? (
+                          <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Re-Invite</span>
+                          </>
+                        )}
+                      </button>
+
                       <button
                         onClick={() => handleToggleCommunityStatus(c)}
                         title={c.isActive !== false ? "Disable Community" : "Activate Community"}
@@ -1114,6 +1182,7 @@ export default function PlatformAdminPage() {
                         <Power className="w-3.5 h-3.5" />
                         <span>{c.isActive !== false ? "Disable" : "Enable"}</span>
                       </button>
+
 
                       <button
                         onClick={() => handleDeleteCommunity(c)}
