@@ -928,8 +928,10 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<SupportedLang>("en");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const saved = localStorage.getItem("mysocialclan_lang") as SupportedLang;
     if (saved && translations[saved]) {
       setLangState(saved);
@@ -943,7 +945,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const isRtl = lang === "ar" || lang === "ur";
+  const isRtl = mounted && (lang === "ar" || lang === "ur");
   const t = translations[lang] || translations.en;
 
   return (
@@ -965,13 +967,22 @@ export function useLanguage() {
 
 export function LanguageDropdown({ className = "" }: { className?: string }) {
   const { lang, setLang } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
-    <div className={`relative flex items-center bg-slate-100 border border-slate-200/80 rounded-xl px-2.5 py-1.5 space-x-1.5 shadow-2xs hover:bg-slate-200/60 transition-all ${className}`}>
+    <div
+      className={`relative flex items-center bg-slate-100 border border-slate-200/80 rounded-xl px-2.5 py-1.5 space-x-1.5 shadow-2xs hover:bg-slate-200/60 transition-all ${className}`}
+      suppressHydrationWarning
+    >
       <select
-        value={lang}
+        value={mounted ? lang : "en"}
         onChange={(e) => setLang(e.target.value as SupportedLang)}
         className="bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer pr-1"
+        suppressHydrationWarning
       >
         {LANGUAGE_OPTIONS.map((opt) => (
           <option key={opt.code} value={opt.code}>
@@ -982,3 +993,4 @@ export function LanguageDropdown({ className = "" }: { className?: string }) {
     </div>
   );
 }
+

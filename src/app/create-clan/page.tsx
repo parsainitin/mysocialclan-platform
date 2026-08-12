@@ -395,7 +395,26 @@ export default function CreateClanPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    suppressHydrationWarning
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    {t.adminEmailLabel} *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. admin@organization.com"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    suppressHydrationWarning
+                  />
+                  {adminEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim()) && (
+                    <p className="text-[11px] text-rose-500 font-semibold mt-1">Please enter a valid email address (e.g., admin@domain.com)</p>
+                  )}
                 </div>
 
                 <div>
@@ -406,6 +425,7 @@ export default function CreateClanPage() {
                     value={primaryLanguage}
                     onChange={(e) => setPrimaryLanguage(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
+                    suppressHydrationWarning
                   >
                     <option value="en">English (EN)</option>
                     <option value="ar">العربية (Arabic - GCC)</option>
@@ -431,6 +451,7 @@ export default function CreateClanPage() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-600 focus:bg-white resize-none transition-all"
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -443,6 +464,7 @@ export default function CreateClanPage() {
                     value={cities}
                     onChange={(e) => setCities(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -456,6 +478,7 @@ export default function CreateClanPage() {
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -467,7 +490,7 @@ export default function CreateClanPage() {
                     {t.backBtn}
                   </button>
                   <button
-                    disabled={!name.trim()}
+                    disabled={!name.trim() || !adminEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim())}
                     onClick={() => setStep(3)}
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
                   >
@@ -503,6 +526,7 @@ export default function CreateClanPage() {
                     value={adminName}
                     onChange={(e) => setAdminName(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -517,6 +541,7 @@ export default function CreateClanPage() {
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    suppressHydrationWarning
                   />
                   {adminEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim()) && (
                     <p className="text-[11px] text-rose-500 font-semibold mt-1">Please enter a valid email address (e.g., admin@domain.com)</p>
@@ -534,6 +559,7 @@ export default function CreateClanPage() {
                     value={adminMobile}
                     onChange={(e) => setAdminMobile(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -555,6 +581,7 @@ export default function CreateClanPage() {
                 </div>
               </div>
             )}
+
 
             {/* STEP 4: MODULE SELECTION */}
             {step === 4 && (
