@@ -22,6 +22,8 @@ export interface ICommunity extends Document {
   adminName?: string;
   adminEmail?: string;
   adminMobile?: string;
+  termsAccepted?: boolean;
+  termsAcceptedAt?: Date;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -56,6 +58,8 @@ const CommunitySchema: Schema<ICommunity> = new Schema(
     adminName: { type: String, trim: true },
     adminEmail: { type: String, trim: true, lowercase: true },
     adminMobile: { type: String, trim: true },
+    termsAccepted: { type: Boolean, default: false },
+    termsAcceptedAt: { type: Date },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

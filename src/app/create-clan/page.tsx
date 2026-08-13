@@ -28,104 +28,7 @@ import {
 } from "lucide-react";
 
 import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
-
-const COUNTRY_OPTIONS: { code: string; label: string; cities: string[] }[] = [
-  {
-    code: "IN",
-    label: "India 🇮🇳",
-    cities: ["Mumbai", "Delhi NCR", "Bengaluru", "Hyderabad", "Chennai", "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Surat"],
-  },
-  {
-    code: "US",
-    label: "United States 🇺🇸",
-    cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "San Francisco", "Dallas", "Seattle", "Miami"],
-  },
-  {
-    code: "AE",
-    label: "United Arab Emirates 🇦🇪",
-    cities: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Al Ain"],
-  },
-  {
-    code: "SA",
-    label: "Saudi Arabia 🇸🇦",
-    cities: ["Riyadh", "Jeddah", "Mecca", "Medina", "Dammam", "Khobar"],
-  },
-  {
-    code: "GB",
-    label: "United Kingdom 🇬🇧",
-    cities: ["London", "Manchester", "Birmingham", "Edinburgh", "Glasgow", "Leeds"],
-  },
-  {
-    code: "CA",
-    label: "Canada 🇨🇦",
-    cities: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa", "Edmonton"],
-  },
-  {
-    code: "AU",
-    label: "Australia 🇦🇺",
-    cities: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"],
-  },
-  {
-    code: "DE",
-    label: "Germany 🇩🇪",
-    cities: ["Berlin", "Munich", "Frankfurt", "Hamburg", "Cologne"],
-  },
-  {
-    code: "SG",
-    label: "Singapore 🇸🇬",
-    cities: ["Singapore"],
-  },
-  {
-    code: "QA",
-    label: "Qatar 🇶🇦",
-    cities: ["Doha", "Al Wakrah", "Al Khor"],
-  },
-  {
-    code: "OM",
-    label: "Oman 🇴🇲",
-    cities: ["Muscat", "Salalah", "Sohar"],
-  },
-  {
-    code: "KW",
-    label: "Kuwait 🇰🇼",
-    cities: ["Kuwait City", "Hawalli", "Salmiya"],
-  },
-  {
-    code: "BH",
-    label: "Bahrain 🇧🇭",
-    cities: ["Manama", "Riffa", "Muharraq"],
-  },
-  {
-    code: "PH",
-    label: "Philippines 🇵🇭",
-    cities: ["Manila", "Quezon City", "Davao City", "Cebu City"],
-  },
-  {
-    code: "JP",
-    label: "Japan 🇯🇵",
-    cities: ["Tokyo", "Osaka", "Yokohama", "Kyoto", "Nagoya"],
-  },
-  {
-    code: "BR",
-    label: "Brazil 🇧🇷",
-    cities: ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"],
-  },
-  {
-    code: "ES",
-    label: "Spain 🇪🇸",
-    cities: ["Madrid", "Barcelona", "Valencia", "Seville"],
-  },
-  {
-    code: "FR",
-    label: "France 🇫🇷",
-    cities: ["Paris", "Lyon", "Marseille", "Toulouse"],
-  },
-  {
-    code: "GLOBAL",
-    label: "Global / Multi-Country 🌐",
-    cities: ["Global Network", "North America", "Europe", "Middle East", "Asia Pacific"],
-  },
-];
+import { COUNTRY_OPTIONS } from "@/lib/countryOptions";
 
 export default function CreateClanPage() {
   const { t, isRtl } = useLanguage();
@@ -215,6 +118,10 @@ export default function CreateClanPage() {
     events: true,
     donations: true,
   });
+
+  // Terms & Conditions State
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   // Step 5: Submission & Result
   const [submitting, setSubmitting] = useState(false);
@@ -313,6 +220,7 @@ export default function CreateClanPage() {
           adminEmail,
           adminMobile,
           adminPassword,
+          termsAccepted: acceptedTerms,
         }),
       });
 
@@ -893,6 +801,32 @@ export default function CreateClanPage() {
                   })}
                 </div>
 
+                {/* Terms & Conditions Acceptance */}
+                <div className="p-4 bg-amber-50/80 border border-amber-200/90 rounded-2xl space-y-2">
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    <span className="text-xs text-slate-800 leading-relaxed font-medium">
+                      I agree to the{" "}
+                      <button
+                        type="button"
+                        onClick={() => setShowTermsModal(true)}
+                        className="font-bold text-indigo-600 hover:text-indigo-800 underline border-0 bg-transparent cursor-pointer p-0"
+                      >
+                        Terms & Conditions and Data Privacy Policy
+                      </button>{" "}
+                      for creating and administering this community clan network. *
+                    </span>
+                  </label>
+                  <p className="text-[11px] text-amber-800/90 font-semibold pl-7">
+                    <strong>Mandatory:</strong> Community member data privacy, consent, and management are the sole responsibility of the community admin and its members.
+                  </p>
+                </div>
+
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                   <button
                     onClick={() => setStep(3)}
@@ -901,7 +835,7 @@ export default function CreateClanPage() {
                     {t.backBtn}
                   </button>
                   <button
-                    disabled={submitting}
+                    disabled={submitting || !acceptedTerms}
                     onClick={handleRegisterCommunity}
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-black text-xs shadow-lg shadow-indigo-600/25 border-0 cursor-pointer transition-all flex items-center space-x-2"
                   >
@@ -958,6 +892,100 @@ export default function CreateClanPage() {
           </div>
         </div>
       </main>
+
+      {/* Terms & Conditions Modal Pop-up */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-slate-200 space-y-5 relative my-8 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+                  <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base sm:text-lg text-slate-900">
+                    Community Administration & Data Privacy Terms
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    MySocialClan Platform Service Agreement
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer border-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-y-auto space-y-4 text-xs text-slate-700 leading-relaxed pr-2 font-medium">
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 font-bold flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-black uppercase tracking-wider text-amber-800 mb-1">
+                    Data Privacy Responsibility Clause
+                  </p>
+                  <p className="text-xs font-semibold leading-relaxed">
+                    Community member data privacy, data collection, consent, member record safety, and data governance are the <strong>sole and exclusive responsibility of the community administrator and its members</strong>. MySocialClan provides technology hosting infrastructure but does not own, manage, or assume liability for member privacy compliance within your community.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-1">
+                  1. Member Data Governance & Consent
+                </h4>
+                <p>
+                  As the designated Community Admin, you explicitly represent and warrant that all personal data, family profiles, phone numbers, email addresses, gotra records, and member media uploaded into this platform are collected with the express knowledge and consent of the respective individuals.
+                </p>
+
+                <h4 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-1">
+                  2. Platform Infrastructure & Role
+                </h4>
+                <p>
+                  MySocialClan operates strictly as a Software-as-a-Service (SaaS) provider. The platform does not sell, trade, monetize, or harvest private member profiles. Data isolation is maintained across community subdomains, and data maintenance remains under the control of the community leadership.
+                </p>
+
+                <h4 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-1">
+                  3. Acceptable Use & Conduct
+                </h4>
+                <p>
+                  Communities must not utilize the platform for illegal activities, hate speech, unauthorized commercial solicitation, spamming members, or publishing non-consensual personal information. MySocialClan reserves the right to suspend or deactivate subdomains that violate these platform terms.
+                </p>
+
+                <h4 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-1">
+                  4. Security & Access Control
+                </h4>
+                <p>
+                  Community Admins are responsible for safeguarding their login credentials and administrative access. Any actions performed using admin credentials remain the responsibility of the community administration team.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(false)}
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAcceptedTerms(true);
+                  setShowTermsModal(false);
+                }}
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer transition-all shadow-md shadow-indigo-600/20 flex items-center space-x-1.5"
+              >
+                <Check className="w-4 h-4 stroke-[3]" />
+                <span>I Accept Terms & Conditions</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-200 py-6 px-4 text-center text-xs text-slate-500">

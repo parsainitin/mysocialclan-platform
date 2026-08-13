@@ -36,11 +36,18 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         community.subdomain = cleanSub;
       }
     }
+    if (typeof updates.logo === "string") community.logo = updates.logo.trim();
     if (typeof updates.description === "string") community.description = updates.description.trim();
     if (typeof updates.primaryLanguage === "string") community.primaryLanguage = updates.primaryLanguage.trim();
     if (typeof updates.country === "string") community.country = updates.country.trim();
     if (Array.isArray(updates.cities)) {
       community.cities = updates.cities.map((c: string) => c.trim()).filter(Boolean);
+    }
+    if (Array.isArray(updates.gotras)) {
+      community.gotras = updates.gotras.map((g: string) => g.trim()).filter(Boolean);
+    }
+    if (Array.isArray(updates.kulDevis)) {
+      community.kulDevis = updates.kulDevis.map((k: string) => k.trim()).filter(Boolean);
     }
     if (typeof updates.upiId === "string") community.upiId = updates.upiId.trim();
 

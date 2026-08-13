@@ -28,11 +28,16 @@ export async function POST(request: NextRequest) {
       adminName,
       adminEmail,
       adminMobile,
+      termsAccepted,
     } = body;
 
     // 1. Validate Community & Admin input details BEFORE attempting DB connection
     if (!name?.trim() || !subdomain?.trim()) {
       return Response.json({ error: "Community Name and Subdomain are required" }, { status: 400 });
+    }
+
+    if (!termsAccepted) {
+      return Response.json({ error: "Accepting Terms & Conditions is required to register a community." }, { status: 400 });
     }
 
     const slug = subdomain.trim().toLowerCase();
@@ -114,6 +119,8 @@ export async function POST(request: NextRequest) {
         adminName: adminName.trim(),
         adminEmail: cleanEmail,
         adminMobile: cleanMobile,
+        termsAccepted: !!termsAccepted,
+        termsAcceptedAt: new Date(),
         status: "pending",
       });
 

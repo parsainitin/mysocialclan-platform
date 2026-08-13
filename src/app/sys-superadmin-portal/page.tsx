@@ -31,9 +31,18 @@ import {
   Check,
   Send,
   RotateCcw,
+  ChevronRight,
+  ImagePlus,
+  Plus,
+  Calendar,
+  ShoppingBag,
+  Landmark,
+  Megaphone,
+  AlertCircle,
 } from "lucide-react";
 
 import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
+import { COUNTRY_OPTIONS } from "@/lib/countryOptions";
 
 interface Community {
   _id: string;
@@ -100,15 +109,20 @@ export default function PlatformAdminPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Community Edit Modal State
+  // Community Edit Wizard State
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(null);
-  const [editTab, setEditTab] = useState<"identity" | "admin" | "modules">("identity");
+  const [editStep, setEditStep] = useState<1 | 2 | 3 | 4>(1);
   const [editName, setEditName] = useState("");
   const [editSubdomain, setEditSubdomain] = useState("");
+  const [editLogo, setEditLogo] = useState("");
+  const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null);
   const [editDescription, setEditDescription] = useState("");
   const [editPrimaryLanguage, setEditPrimaryLanguage] = useState("en");
-  const [editCountry, setEditCountry] = useState("");
-  const [editCities, setEditCities] = useState("");
+  const [editCountryCode, setEditCountryCode] = useState("IN");
+  const [editSelectedCities, setEditSelectedCities] = useState<string[]>([]);
+  const [editCustomCityInput, setEditCustomCityInput] = useState("");
+  const [editGotras, setEditGotras] = useState("");
+  const [editKulDevis, setEditKulDevis] = useState("");
   const [editUpiId, setEditUpiId] = useState("");
 
   const [editAdminName, setEditAdminName] = useState("");
@@ -125,6 +139,49 @@ export default function PlatformAdminPage() {
   });
   const [editIsActive, setEditIsActive] = useState(true);
   const [savingAdmin, setSavingAdmin] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const loadEditCountryCities = async (code: string) => {
+    const countryObj = COUNTRY_OPTIONS.find((c) => c.code === code);
+    const baseCities = countryObj ? [...countryObj.cities] : [];
+
+    try {
+      const res = await fetch(`/api/communities/cities?country=${encodeURIComponent(code)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.cities && Array.isArray(data.cities)) {
+          data.cities.forEach((customCity: string) => {
+            if (customCity && !baseCities.includes(customCity)) {
+              baseCities.push(customCity);
+            }
+          });
+        }
+      }
+    } catch {}
+
+    setEditSelectedCities(baseCities);
+  };
+
+  const handleEditCountryChange = (newCode: string) => {
+    setEditCountryCode(newCode);
+    loadEditCountryCities(newCode);
+  };
+
+  const handleAddEditCustomCity = () => {
+    const trimmed = editCustomCityInput.trim();
+    if (trimmed && !editSelectedCities.includes(trimmed)) {
+      setEditSelectedCities([...editSelectedCities, trimmed]);
+      setEditCustomCityInput("");
+    }
+  };
+
+  const handleRemoveEditCity = (cityToRemove: string) => {
+    setEditSelectedCities(editSelectedCities.filter((c) => c !== cityToRemove));
+  };
+
+  const handleRestoreEditDefaultCities = () => {
+    loadEditCountryCities(editCountryCode);
+  };
 
   // WhatsApp & Onboarding Dispatch Modal State
   const [dispatchData, setDispatchData] = useState<{
@@ -334,12 +391,32 @@ export default function PlatformAdminPage() {
 
   const openEditModal = (c: Community) => {
     setEditingCommunity(c);
+    setEditStep(1);
+    setEditError(null);
     setEditName(c.name || "");
     setEditSubdomain(c.subdomain || "");
+    setEditLogo(c.logo || "");
+    setEditLogoPreview(c.logo || null);
     setEditDescription(c.description || "");
     setEditPrimaryLanguage(c.primaryLanguage || "en");
-    setEditCountry(c.country || "");
-    setEditCities(Array.isArray(c.cities) ? c.cities.join(", ") : "");
+
+    const foundCountry = COUNTRY_OPTIONS.find(
+      (co) => co.label === c.country || co.code === c.country
+    );
+    const initialCode = foundCountry ? foundCountry.code : "IN";
+    setEditCountryCode(initialCode);
+
+    setEditSelectedCities(
+      Array.isArray(c.cities) && c.cities.length > 0
+        ? [...c.cities]
+        : foundCountry
+        ? [...foundCountry.cities]
+        : [...COUNTRY_OPTIONS[0].cities]
+    );
+    setEditCustomCityInput("");
+
+    setEditGotras(Array.isArray(c.gotras) ? c.gotras.join(", ") : "");
+    setEditKulDevis(Array.isArray(c.kulDevis) ? c.kulDevis.join(", ") : "");
     setEditUpiId(c.upiId || "");
 
     setEditAdminName(c.adminName || "");
@@ -355,29 +432,34 @@ export default function PlatformAdminPage() {
       donations: c.modules?.donations ?? true,
     });
     setEditIsActive(c.isActive !== false);
-    setEditTab("identity");
   };
 
-  const handleSaveCommunity = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveCommunity = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!editingCommunity) return;
 
     setSavingAdmin(true);
+    setEditError(null);
+
+    const selectedCountryObj = COUNTRY_OPTIONS.find((c) => c.code === editCountryCode);
+
     try {
       const res = await fetch(`/api/admin/communities/${editingCommunity._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: editName,
-          subdomain: editSubdomain,
-          description: editDescription,
+          name: editName.trim(),
+          logo: editLogo.trim() || undefined,
+          description: editDescription.trim(),
           primaryLanguage: editPrimaryLanguage,
-          country: editCountry,
-          cities: editCities.split(",").map((s) => s.trim()).filter(Boolean),
-          upiId: editUpiId,
-          adminName: editAdminName,
-          adminEmail: editAdminEmail,
-          adminMobile: editAdminMobile,
+          country: selectedCountryObj?.label || editCountryCode,
+          cities: editSelectedCities,
+          gotras: editGotras.split(",").map((s) => s.trim()).filter(Boolean),
+          kulDevis: editKulDevis.split(",").map((s) => s.trim()).filter(Boolean),
+          upiId: editUpiId.trim(),
+          adminName: editAdminName.trim(),
+          adminEmail: editAdminEmail.trim().toLowerCase(),
+          adminMobile: editAdminMobile.trim(),
           modules: editModules,
           isActive: editIsActive,
         }),
@@ -385,14 +467,14 @@ export default function PlatformAdminPage() {
 
       const data = await res.json();
       if (res.ok) {
-        showToast("Community details updated successfully!");
+        showToast("Community configuration updated successfully!");
         setEditingCommunity(null);
         fetchData();
       } else {
-        alert(data.error || "Failed to update community");
+        setEditError(data.error || "Failed to update community");
       }
     } catch {
-      alert("Failed to update community. Please try again.");
+      setEditError("Failed to update community. Please check your network connection.");
     } finally {
       setSavingAdmin(false);
     }
@@ -646,19 +728,24 @@ export default function PlatformAdminPage() {
         </div>
       )}
 
-      {/* Comprehensive Edit Community Modal */}
+      {/* Comprehensive Edit Community Wizard Modal */}
       {editingCommunity && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl p-6 max-w-xl w-full shadow-2xl border border-slate-200 space-y-5 relative my-8 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="font-extrabold text-base text-slate-900 flex items-center space-x-2">
-                  <Edit3 className="w-5 h-5 text-indigo-600" />
-                  <span>Edit Community Details</span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Updating configuration for <strong>{editingCommunity.name}</strong> ({editingCommunity.subdomain})
-                </p>
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl border border-slate-200 space-y-6 relative my-8 animate-in fade-in zoom-in duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base sm:text-lg text-slate-900 flex items-center space-x-2">
+                    <span>Edit Community Wizard</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Updating configuration for <strong className="text-slate-800">{editingCommunity.name}</strong> ({editingCommunity.subdomain}.mysocialclan.com)
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setEditingCommunity(null)}
@@ -668,251 +755,533 @@ export default function PlatformAdminPage() {
               </button>
             </div>
 
-            {/* Modal Tabs Navigation */}
-            <div className="flex items-center space-x-2 border-b border-slate-200 pb-3">
-              <button
-                type="button"
-                onClick={() => setEditTab("identity")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-0 cursor-pointer ${
-                  editTab === "identity"
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                1. Identity & Config
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditTab("admin")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-0 cursor-pointer ${
-                  editTab === "admin"
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                2. Admin Contact
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditTab("modules")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-0 cursor-pointer ${
-                  editTab === "modules"
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                3. Feature Modules
-              </button>
+            {/* Progress Header & Step Tabs */}
+            <div className="bg-slate-50/80 border border-slate-200/80 p-4 rounded-2xl space-y-3">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-600 mb-1">
+                <span>Wizard Configuration Step</span>
+                <span className="font-mono text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                  Step {editStep} of 4
+                </span>
+              </div>
+
+              {/* Step Tab Buttons */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { num: 1 as const, title: "Subdomain (Locked)" },
+                  { num: 2 as const, title: "Organization Info" },
+                  { num: 3 as const, title: "Admin Contact" },
+                  { num: 4 as const, title: "Social Modules" },
+                ].map((tab) => (
+                  <button
+                    key={tab.num}
+                    type="button"
+                    onClick={() => setEditStep(tab.num)}
+                    className={`flex items-center space-x-2 p-2 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
+                      editStep === tab.num
+                        ? "bg-indigo-600 border-indigo-600 text-white shadow-xs"
+                        : editStep > tab.num
+                        ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 font-extrabold ${
+                        editStep === tab.num
+                          ? "bg-white text-indigo-600"
+                          : editStep > tab.num
+                          ? "bg-indigo-600 text-white"
+                          : "bg-slate-200 text-slate-600"
+                      }`}
+                    >
+                      {editStep > tab.num ? <Check className="w-3 h-3 stroke-[3]" /> : tab.num}
+                    </div>
+                    <span className="truncate">{tab.title}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Linear Progress Bar */}
+              <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 h-full transition-all duration-300"
+                  style={{ width: `${(editStep / 4) * 100}%` }}
+                />
+              </div>
             </div>
 
-            <form onSubmit={handleSaveCommunity} className="space-y-4 text-xs">
-              {/* TAB 1: IDENTITY & CONFIG */}
-              {editTab === "identity" && (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Community Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      placeholder="e.g. NDS Clan"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Subdomain Slug *</label>
-                    <div className="flex items-center rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-indigo-600">
-                      <input
-                        type="text"
-                        required
-                        value={editSubdomain}
-                        onChange={(e) => setEditSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                        placeholder="nds"
-                        className="w-full px-3.5 py-2.5 bg-transparent font-mono text-slate-900 outline-none border-0"
-                      />
-                      <span className="px-3 py-2.5 bg-slate-200/80 font-mono font-bold text-slate-600 select-none text-[11px] shrink-0">
-                        .mysocialclan.com
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Country</label>
-                      <input
-                        type="text"
-                        value={editCountry}
-                        onChange={(e) => setEditCountry(e.target.value)}
-                        placeholder="e.g. India 🇮🇳"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Primary Language</label>
-                      <select
-                        value={editPrimaryLanguage}
-                        onChange={(e) => setEditPrimaryLanguage(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-bold cursor-pointer"
-                      >
-                        <option value="en">English (EN)</option>
-                        <option value="ar">العربية (Arabic)</option>
-                        <option value="hi">हिन्दी (Hindi)</option>
-                        <option value="ur">اردو (Urdu)</option>
-                        <option value="ml">മലയാളം (Malayalam)</option>
-                        <option value="es">Español (ES)</option>
-                        <option value="fr">Français (FR)</option>
-                        <option value="de">Deutsch (DE)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Predefined Regional Cities (comma separated)</label>
-                    <input
-                      type="text"
-                      value={editCities}
-                      onChange={(e) => setEditCities(e.target.value)}
-                      placeholder="Mumbai, Delhi NCR, Bengaluru, Jaipur"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Community Description / Tagline</label>
-                    <textarea
-                      rows={2}
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      placeholder="Brief overview of this clan network"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">UPI ID (Member Donations / Fees)</label>
-                    <input
-                      type="text"
-                      value={editUpiId}
-                      onChange={(e) => setEditUpiId(e.target.value)}
-                      placeholder="org@bank / upi"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-mono focus:outline-none focus:border-indigo-600 transition-all"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 2: ADMIN CONTACT */}
-              {editTab === "admin" && (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Community Admin Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={editAdminName}
-                      onChange={(e) => setEditAdminName(e.target.value)}
-                      placeholder="Admin full name"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Admin Email Address *</label>
-                    <input
-                      type="email"
-                      required
-                      value={editAdminEmail}
-                      onChange={(e) => setEditAdminEmail(e.target.value)}
-                      placeholder="admin@example.com"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Admin Mobile / WhatsApp Number *</label>
-                    <input
-                      type="text"
-                      required
-                      value={editAdminMobile}
-                      onChange={(e) => setEditAdminMobile(e.target.value)}
-                      placeholder="+1 234 567 890"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 transition-all font-medium"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: MODULES & STATUS */}
-              {editTab === "modules" && (
-                <div className="space-y-3">
-                  <p className="font-bold text-slate-700 mb-2">Enable / Disable Community Feature Modules:</p>
-                  <div className="grid grid-cols-2 gap-3.5 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                    {[
-                      { key: "directory", label: "Directory / Members" },
-                      { key: "marketplace", label: "Marketplace / Jobs" },
-                      { key: "panchang", label: "Panchang / Calendar" },
-                      { key: "booking", label: "Venue Booking" },
-                      { key: "events", label: "Events Hub" },
-                      { key: "donations", label: "Member Donations" },
-                    ].map((mod) => (
-                      <label key={mod.key} className="flex items-center space-x-2.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={(editModules as any)[mod.key]}
-                          onChange={(e) =>
-                            setEditModules({ ...editModules, [mod.key]: e.target.checked })
-                          }
-                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="font-bold text-slate-800">{mod.label}</span>
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200 mt-2">
-                    <div>
-                      <span className="font-bold text-slate-800 block">Community Active Status</span>
-                      <span className="text-[11px] text-slate-500">Disabled communities cannot be accessed by members</span>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={editIsActive}
-                        onChange={(e) => setEditIsActive(e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600" />
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setEditingCommunity(null)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl border-0 cursor-pointer transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingAdmin}
-                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-1.5 shadow-md shadow-indigo-500/20 disabled:opacity-50"
-                >
-                  {savingAdmin ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      <span>Save Community Changes</span>
-                    </>
-                  )}
-                </button>
+            {/* Error banner if any */}
+            {editError && (
+              <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs font-semibold flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                <span>{editError}</span>
               </div>
-            </form>
+            )}
+
+            {/* STEP 1: SUBDOMAIN (READ-ONLY / LOCKED) */}
+            {editStep === 1 && (
+              <div className="space-y-5">
+                <div>
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Step 1: Subdomain Identifier (Locked)</span>
+                  </div>
+                  <h4 className="text-lg font-black text-slate-900">Community Subdomain Hostname</h4>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Subdomains are fixed network identifiers and cannot be altered after creation. All other details in steps 2, 3, and 4 are fully editable.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Subdomain Hostname (Read-Only)
+                  </label>
+                  <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-100/90 overflow-hidden cursor-not-allowed opacity-90">
+                    <input
+                      type="text"
+                      disabled
+                      value={editSubdomain}
+                      className="w-full px-4 py-3.5 bg-transparent text-sm font-mono font-bold text-slate-700 outline-none border-0 cursor-not-allowed"
+                    />
+                    <span className="px-4 py-3.5 bg-slate-200/80 border-l border-slate-200 text-xs font-mono font-bold text-indigo-700 whitespace-nowrap select-none shrink-0">
+                      .mysocialclan.com
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start space-x-3 text-xs text-amber-900 leading-relaxed font-medium">
+                  <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block text-amber-950 mb-0.5">Subdomain is Permanent</span>
+                    <span>
+                      The subdomain <strong>{editSubdomain}.mysocialclan.com</strong> is bound to the community database tenant and offline SSL routing. Click <strong>Next</strong> to edit organization details, admin contacts, and feature modules.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setEditStep(2)}
+                    className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-black text-xs shadow-lg shadow-indigo-600/25 border-0 cursor-pointer transition-all flex items-center justify-center space-x-2"
+                  >
+                    <span>Next: Organization Details</span>
+                    <ChevronRight className="w-4 h-4 stroke-[3]" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: ORGANIZATION DETAILS */}
+            {editStep === 2 && (
+              <div className="space-y-5">
+                <div>
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
+                    <Building2 className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Step 2: Organization Info</span>
+                  </div>
+                  <h4 className="text-lg font-black text-slate-900">Community & Regional Details</h4>
+                </div>
+
+                {/* Logo Image URL / Preview */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Community Logo URL / Image Link
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-14 h-14 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                      {editLogoPreview || editLogo ? (
+                        <img
+                          src={editLogoPreview || editLogo}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={() => setEditLogoPreview(null)}
+                        />
+                      ) : (
+                        <ImagePlus className="w-5 h-5 text-slate-400" />
+                      )}
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="https://example.com/logo.png"
+                      value={editLogo}
+                      onChange={(e) => {
+                        setEditLogo(e.target.value);
+                        setEditLogoPreview(e.target.value);
+                      }}
+                      className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Community Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Global Alumni Association / NDS Clan"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Country *
+                    </label>
+                    <select
+                      value={editCountryCode}
+                      onChange={(e) => handleEditCountryChange(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
+                    >
+                      {COUNTRY_OPTIONS.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Primary Language
+                    </label>
+                    <select
+                      value={editPrimaryLanguage}
+                      onChange={(e) => setEditPrimaryLanguage(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
+                    >
+                      <option value="en">English (EN)</option>
+                      <option value="ar">العربية (Arabic - GCC)</option>
+                      <option value="hi">हिन्दी (Hindi)</option>
+                      <option value="ur">اردو (Urdu)</option>
+                      <option value="ml">മലയാളം (Malayalam)</option>
+                      <option value="es">Español (ES)</option>
+                      <option value="fr">Français (FR)</option>
+                      <option value="de">Deutsch (DE)</option>
+                      <option value="ja">日本語 (Japanese)</option>
+                      <option value="pt">Português (Brasil)</option>
+                      <option value="fil">Filipino (Tagalog)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Predefined Regional Cities Chip Selector */}
+                <div className="space-y-2.5 p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Predefined Regional Cities</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleRestoreEditDefaultCities}
+                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center space-x-1 border-0 bg-transparent cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset to Country Defaults</span>
+                    </button>
+                  </div>
+
+                  {/* Active Chips */}
+                  <div className="flex flex-wrap gap-1.5 min-h-[32px] items-center">
+                    {editSelectedCities.map((city) => (
+                      <span
+                        key={city}
+                        className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white border border-indigo-200 text-indigo-900 text-xs font-bold shadow-2xs group"
+                      >
+                        <span>{city}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEditCity(city)}
+                          className="w-4 h-4 rounded-full bg-slate-100 group-hover:bg-rose-500 group-hover:text-white text-slate-500 transition-colors flex items-center justify-center border-0 cursor-pointer text-[10px]"
+                        >
+                          <X className="w-2.5 h-2.5 stroke-[3]" />
+                        </button>
+                      </span>
+                    ))}
+                    {editSelectedCities.length === 0 && (
+                      <span className="text-xs text-slate-400 italic">No cities selected. Type below to add custom cities.</span>
+                    )}
+                  </div>
+
+                  {/* Add Custom City Input */}
+                  <div className="flex items-center space-x-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder="Add custom city (e.g. Jaipur, Dubai, San Jose)..."
+                      value={editCustomCityInput}
+                      onChange={(e) => setEditCustomCityInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddEditCustomCity();
+                        }
+                      }}
+                      className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 transition-all placeholder:text-slate-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddEditCustomCity}
+                      disabled={!editCustomCityInput.trim()}
+                      className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-1 shadow-2xs shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>Add City</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Gotras / Guild Chapters (comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={editGotras}
+                      onChange={(e) => setEditGotras(e.target.value)}
+                      placeholder="Chapter A, Guild North, Guild South"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      KulDevis / Regional Hubs (comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={editKulDevis}
+                      onChange={(e) => setEditKulDevis(e.target.value)}
+                      placeholder="Primary Hub, Secondary Board"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Community Description / Tagline
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Short description or tagline of this community network"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white resize-none transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    UPI ID (Member Donations / Fees)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. organization@bank / upi"
+                    value={editUpiId}
+                    onChange={(e) => setEditUpiId(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setEditStep(1)}
+                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!editName.trim()}
+                    onClick={() => setEditStep(3)}
+                    className="px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
+                  >
+                    <span>Next: Admin Details</span>
+                    <ChevronRight className="w-4 h-4 stroke-[3]" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: ADMIN CONTACT */}
+            {editStep === 3 && (
+              <div className="space-y-5">
+                <div>
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
+                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Step 3: Admin Contact</span>
+                  </div>
+                  <h4 className="text-lg font-black text-slate-900">Community Lead Contact Information</h4>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Community Admin Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. John Doe / Dr. Rajesh Shah"
+                    value={editAdminName}
+                    onChange={(e) => setEditAdminName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Admin Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. admin@organization.com"
+                    value={editAdminEmail}
+                    onChange={(e) => setEditAdminEmail(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                  />
+                  {editAdminEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editAdminEmail.trim()) && (
+                    <p className="text-[11px] text-rose-500 font-semibold mt-1">Please enter a valid email address (e.g., admin@domain.com)</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Admin Mobile / WhatsApp Number *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="Contact mobile / WhatsApp number"
+                    value={editAdminMobile}
+                    onChange={(e) => setEditAdminMobile(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setEditStep(2)}
+                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!editAdminName.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editAdminEmail.trim()) || !editAdminMobile.trim()}
+                    onClick={() => setEditStep(4)}
+                    className="px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
+                  >
+                    <span>Next: Social Modules</span>
+                    <ChevronRight className="w-4 h-4 stroke-[3]" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 4: SOCIAL MODULES & ACTIVE STATUS */}
+            {editStep === 4 && (
+              <div className="space-y-5">
+                <div>
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Step 4: Social Modules & Status</span>
+                  </div>
+                  <h4 className="text-lg font-black text-slate-900">Feature Modules & Activation Status</h4>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { key: "directory" as const, label: "Verified Member Feed & Directory", icon: Users, desc: "Private member profiles, family trees, and verified identity badges." },
+                    { key: "marketplace" as const, label: "Social Business & Opportunities", icon: ShoppingBag, desc: "Community marketplace, business directory, and job listings." },
+                    { key: "panchang" as const, label: "Community Calendar & Timelines", icon: Calendar, desc: "Event schedules, daily updates, and auspicious dates." },
+                    { key: "booking" as const, label: "Venue & Space Bookings", icon: Landmark, desc: "Community hall & venue reservations with instant approval." },
+                    { key: "events" as const, label: "Announcements & Events Hub", icon: Megaphone, desc: "Official updates, member discussions, and event RSVPs." },
+                    { key: "donations" as const, label: "Direct Member Support Payments", icon: Heart, desc: "0% fee contributions directly into your organization's account." },
+                  ].map((mod) => {
+                    const Icon = mod.icon;
+                    const isChecked = editModules[mod.key];
+                    return (
+                      <label
+                        key={mod.key}
+                        onClick={() => setEditModules({ ...editModules, [mod.key]: !isChecked })}
+                        className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
+                          isChecked
+                            ? "bg-indigo-50/80 border-indigo-300 text-slate-900 shadow-2xs"
+                            : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-xl ${isChecked ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-500"}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold block">{mod.label}</span>
+                            <span className="text-[11px] text-slate-500">{mod.desc}</span>
+                          </div>
+                        </div>
+                        <div
+                          className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                            isChecked ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 bg-white"
+                          }`}
+                        >
+                          {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                {/* Active Status Toggle */}
+                <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                  <div>
+                    <span className="font-bold text-xs text-slate-800 block">Community Active Status</span>
+                    <span className="text-[11px] text-slate-500">Disabled communities cannot be accessed by members</span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editIsActive}
+                      onChange={(e) => setEditIsActive(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600" />
+                  </label>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setEditStep(3)}
+                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    disabled={savingAdmin}
+                    onClick={() => handleSaveCommunity()}
+                    className="px-8 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-black rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-2 shadow-lg shadow-indigo-600/25"
+                  >
+                    {savingAdmin ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        <span>Save Community Updates</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

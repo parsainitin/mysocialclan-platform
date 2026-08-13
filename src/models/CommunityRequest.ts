@@ -22,6 +22,8 @@ export interface ICommunityRequest extends Document {
   adminName: string;
   adminEmail: string;
   adminMobile: string;
+  termsAccepted?: boolean;
+  termsAcceptedAt?: Date;
   status: "pending" | "approved" | "rejected";
   notes?: string;
   createdAt: Date;
@@ -56,6 +58,8 @@ const CommunityRequestSchema: Schema<ICommunityRequest> = new Schema(
     adminName: { type: String, required: true, trim: true },
     adminEmail: { type: String, required: true, trim: true, lowercase: true },
     adminMobile: { type: String, required: true, trim: true },
+    termsAccepted: { type: Boolean, default: false },
+    termsAcceptedAt: { type: Date },
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
