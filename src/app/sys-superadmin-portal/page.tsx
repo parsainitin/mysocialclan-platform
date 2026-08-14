@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Globe,
   Users,
@@ -39,6 +39,7 @@ import {
   Landmark,
   Megaphone,
   AlertCircle,
+  Upload,
 } from "lucide-react";
 
 import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
@@ -116,6 +117,7 @@ export default function PlatformAdminPage() {
   const [editSubdomain, setEditSubdomain] = useState("");
   const [editLogo, setEditLogo] = useState("");
   const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null);
+  const editLogoInputRef = useRef<HTMLInputElement>(null);
   const [editDescription, setEditDescription] = useState("");
   const [editPrimaryLanguage, setEditPrimaryLanguage] = useState("en");
   const [editCountryCode, setEditCountryCode] = useState("IN");
@@ -387,6 +389,24 @@ export default function PlatformAdminPage() {
     } catch {
       alert("Failed to delete request. Please check network connection.");
     }
+  };
+
+  const handleEditLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Logo image size must be under 5MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        setEditLogo(dataUrl);
+        setEditLogoPreview(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const openEditModal = (c: Community) => {
@@ -882,34 +902,82 @@ export default function PlatformAdminPage() {
                   <h4 className="text-lg font-black text-slate-900">Community & Regional Details</h4>
                 </div>
 
-                {/* Logo Image URL / Preview */}
+                {/* Logo Image URL / Device Upload */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                     Community Logo URL / Image Link
                   </label>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-14 h-14 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                  <input
+                    type="file"
+                    ref={editLogoInputRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleEditLogoFileUpload}
+                  />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div
+                      onClick={() => editLogoInputRef.current?.click()}
+                      className="relative w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer transition-all group shadow-2xs"
+                      title="Click to upload logo from device"
+                    >
                       {editLogoPreview || editLogo ? (
-                        <img
-                          src={editLogoPreview || editLogo}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          onError={() => setEditLogoPreview(null)}
-                        />
+                        <>
+                          <img
+                            src={editLogoPreview || editLogo}
+                            alt="Community Logo"
+                            className="w-full h-full object-cover"
+                            onError={() => setEditLogoPreview(null)}
+                          />
+                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <Upload className="w-4 h-4 text-white" />
+                          </div>
+                        </>
                       ) : (
-                        <ImagePlus className="w-5 h-5 text-slate-400" />
+                        <div className="flex flex-col items-center justify-center text-slate-400 group-hover:text-indigo-600 transition-colors">
+                          <ImagePlus className="w-5 h-5" />
+                        </div>
                       )}
                     </div>
-                    <input
-                      type="url"
-                      placeholder="https://example.com/logo.png"
-                      value={editLogo}
-                      onChange={(e) => {
-                        setEditLogo(e.target.value);
-                        setEditLogoPreview(e.target.value);
-                      }}
-                      className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                    />
+
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          placeholder="Paste image URL (https://...) or click Upload"
+                          value={editLogo.startsWith("data:") ? "Local Image File Loaded" : editLogo}
+                          onChange={(e) => {
+                            setEditLogo(e.target.value);
+                            setEditLogoPreview(e.target.value);
+                          }}
+                          className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => editLogoInputRef.current?.click()}
+                          className="px-3.5 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-all flex items-center shrink-0 cursor-pointer"
+                        >
+                          <Upload className="w-3.5 h-3.5 mr-1.5" />
+                          Upload
+                        </button>
+                        {(editLogo || editLogoPreview) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditLogo("");
+                              setEditLogoPreview(null);
+                              if (editLogoInputRef.current) editLogoInputRef.current.value = "";
+                            }}
+                            className="p-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-xl transition-all shrink-0 cursor-pointer"
+                            title="Remove Logo"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[11px] font-medium text-slate-500">
+                        Upload an image file from your device (PNG, JPG, SVG up to 5MB) or enter a direct image URL.
+                      </p>
+                    </div>
                   </div>
                 </div>
 

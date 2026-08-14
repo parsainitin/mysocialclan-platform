@@ -28,6 +28,8 @@ import {
   Sliders,
   DollarSign,
   HeartHandshake,
+  Lock,
+  Zap,
 } from "lucide-react";
 
 interface CommunityPublic {
@@ -47,6 +49,7 @@ const translations: Record<
   {
     badge: string;
     heroTitle: string;
+    heroHighlight: string;
     minutes: string;
     heroDesc: string;
     buildSubdomain: string;
@@ -69,15 +72,21 @@ const translations: Record<
     showcaseTitle: string;
     createClan: string;
     superAdmin: string;
+    statMembers: string;
+    statCommunities: string;
+    statLanguages: string;
+    ctaTitle: string;
+    ctaDesc: string;
   }
 > = {
   en: {
     badge: "Language-Agnostic SaaS Platform for Global Communities & Institutions",
-    heroTitle: "Launch Your Private Social Network in",
+    heroTitle: "Your Private Social Network,",
+    heroHighlight: "Live in Minutes",
     minutes: "Minutes",
     heroDesc:
       "Empower your college, alumni network, industry association, social group, or NGO with a verified private network — featuring member directories, social feeds, event RSVPs, venue bookings, and cultural calendars under your custom subdomain.",
-    buildSubdomain: "Build Community Subdomain",
+    buildSubdomain: "Build Your Community",
     exploreCommunities: "Explore Live Communities",
     verifiedBadge: "100% Verified Closed Networks",
     verifiedSub: "Trusted by colleges, alumni & international trusts",
@@ -100,10 +109,16 @@ const translations: Record<
     showcaseTitle: "Active Clans & Organizations",
     createClan: "Create Clan",
     superAdmin: "Super Admin Portal",
+    statMembers: "Members Worldwide",
+    statCommunities: "Active Communities",
+    statLanguages: "Languages Supported",
+    ctaTitle: "Ready to Launch Your Community?",
+    ctaDesc: "Set up your private social network in minutes — no technical expertise required.",
   },
   ar: {
     badge: "منصة SaaS مستقلة عن اللغة للمجتمعات والمؤسسات العالمية والخليجية",
-    heroTitle: "أنشئ شبكتك الاجتماعية الخاصة في خلال",
+    heroTitle: "شبكتك الاجتماعية الخاصة،",
+    heroHighlight: "تنطلق في دقائق",
     minutes: "دقائق",
     heroDesc:
       "مكّن كليتك، أو شبكة الخريجين، أو جمعيتك المهنية، أو مجموعتك الاجتماعية، أو منظمتك غير الحكومية بشبكة خاصة موثقة تحت نطاقك الفرعي المخصص.",
@@ -130,10 +145,16 @@ const translations: Record<
     showcaseTitle: "المجتمعات والمؤسسات النشطة",
     createClan: "إنشاء مجتمع (Clan)",
     superAdmin: "بوابة المسؤول الفائق",
+    statMembers: "أعضاء حول العالم",
+    statCommunities: "مجتمعات نشطة",
+    statLanguages: "لغات مدعومة",
+    ctaTitle: "هل أنت مستعد لإطلاق مجتمعك؟",
+    ctaDesc: "أنشئ شبكتك الاجتماعية الخاصة في دقائق — دون الحاجة إلى خبرة تقنية.",
   },
   hi: {
     badge: "वैश्विक समुदायों और संस्थानों के लिए भाषा-स्वतंत्र SaaS प्लेटफ़ॉर्म",
-    heroTitle: "अपना निजी सोशल नेटवर्क शुरू करें केवल कुछ",
+    heroTitle: "आपका प्राइवेट सोशल नेटवर्क,",
+    heroHighlight: "मिनटों में तैयार",
     minutes: "मिनटों में",
     heroDesc:
       "अपने कॉलेज, पूर्व छात्र नेटवर्क, पेशेवर संघ या एनजीओ को अपने कस्टम सबडोमेन के तहत एक सत्यापित निजी नेटवर्क के साथ सशक्त बनाएं।",
@@ -160,10 +181,16 @@ const translations: Record<
     showcaseTitle: "सक्रिय क्लैन और संगठन",
     createClan: "क्लैन बनाएं",
     superAdmin: "सुपर एडमिन पोर्टल",
+    statMembers: "विश्वभर में सदस्य",
+    statCommunities: "सक्रिय समुदाय",
+    statLanguages: "समर्थित भाषाएं",
+    ctaTitle: "अपना समुदाय लॉन्च करने के लिए तैयार हैं?",
+    ctaDesc: "मिनटों में अपना प्राइवेट सोशल नेटवर्क सेट करें — कोई तकनीकी ज्ञान जरूरी नहीं।",
   },
   ur: {
     badge: "عالمی برادریوں اور جی سی سی خطے کے لیے زبان سے آزاد SaaS پلیٹ فارم",
-    heroTitle: "صرف چند منٹوں میں اپنا پرائیویٹ سوشل نیٹ ورک",
+    heroTitle: "آپ کا پرائیویٹ سوشل نیٹ ورک،",
+    heroHighlight: "چند منٹوں میں تیار",
     minutes: "شروع کریں",
     heroDesc:
       "اپنے کالج، ایلومنائی نیٹ ورک، پیشہ ورانہ تنظیم، یا این جی او کو اپنے کسٹم سب ڈومین کے تحت ایک تصدیق شدہ پرائیویٹ نیٹ ورک سے بااختیار بنائیں۔",
@@ -190,10 +217,16 @@ const translations: Record<
     showcaseTitle: "فعال کلینز اور تنظیمیں",
     createClan: "کلین بنائیں",
     superAdmin: "سپر ایڈمن پورٹل",
+    statMembers: "دنیا بھر میں اراکین",
+    statCommunities: "فعال کمیونٹیز",
+    statLanguages: "حمایت یافتہ زبانیں",
+    ctaTitle: "کیا آپ اپنی کمیونٹی شروع کرنے کے لیے تیار ہیں؟",
+    ctaDesc: "چند منٹوں میں اپنا پرائیویٹ سوشل نیٹ ورک ترتیب دیں — کوئی تکنیکی مہارت ضروری نہیں۔",
   },
   ml: {
     badge: "ഗ്ലോബൽ & ജിസിസി കമ്മ്യൂണിറ്റികൾക്കായുള്ള ഭാഷാ-സ്വതന്ത്ര SaaS പ്ലാറ്റ്ഫോം",
-    heroTitle: "നിങ്ങളുടെ സ്വകാര്യ സോഷ്യൽ നെറ്റ്‌വർക്ക് ആരംഭിക്കൂ വെറും",
+    heroTitle: "നിങ്ങളുടെ സ്വകാര്യ സോഷ്യൽ നെറ്റ്‌വർക്ക്,",
+    heroHighlight: "മിനിറ്റുകൾക്കുള്ളിൽ",
     minutes: "മിനിറ്റുകൾക്കുള്ളിൽ",
     heroDesc:
       "നിങ്ങളുടെ കോളേജ്, അലുമിനൈ നെറ്റ്‌വർക്ക്, പ്രൊഫഷണൽ ഓർഗനൈസേഷൻ അല്ലെങ്കിൽ എൻ‌ജി‌ഓകൾക്കായി നിങ്ങളുടെ സ്വന്തം സബ്‌ഡൊമെയ്‌നിൽ ഒരു സ്വകാര്യ നെറ്റ്‌വർക്ക് നിർമ്മിക്കൂ.",
@@ -220,10 +253,16 @@ const translations: Record<
     showcaseTitle: "ആക്ടീവ് കൂട്ടായ്മകൾ",
     createClan: "ക്ലാൻ ഉണ്ടാക്കുക",
     superAdmin: "സൂപ്പർ അഡ്മിൻ പോർട്ടൽ",
+    statMembers: "ലോകമെമ്പാടുമുള്ള അംഗങ്ങൾ",
+    statCommunities: "സജീവ കൂട്ടായ്മകൾ",
+    statLanguages: "പിന്തുണയ്ക്കുന്ന ഭാഷകൾ",
+    ctaTitle: "നിങ്ങളുടെ കമ്മ്യൂണിറ്റി ആരംഭിക്കാൻ തയ്യാറാണോ?",
+    ctaDesc: "മിനിറ്റുകൾക്കുള്ളിൽ നിങ്ങളുടെ പ്രൈവറ്റ് സോഷ്യൽ നെറ്റ്‌വർക്ക് സജ്ജമാക്കുക — സാങ്കേതിക വൈദഗ്ദ്ധ്യം ആവശ്യമില്ല.",
   },
   es: {
     badge: "Plataforma SaaS Multilingüe para Comunidades e Instituciones Globales",
-    heroTitle: "Cree su Red Social Privada en tan solo",
+    heroTitle: "Tu Red Social Privada,",
+    heroHighlight: "en Pocos Minutos",
     minutes: "Minutos",
     heroDesc:
       "Potencie su universidad, red de exalumnos, asociación industrial, grupo social o ONG con una red privada verificada bajo su propio subdominio.",
@@ -249,10 +288,16 @@ const translations: Record<
     showcaseTitle: "Comunidades Activas",
     createClan: "Crear Clan",
     superAdmin: "Portal Super Admin",
+    statMembers: "Miembros en el Mundo",
+    statCommunities: "Comunidades Activas",
+    statLanguages: "Idiomas Soportados",
+    ctaTitle: "¿Listo para lanzar tu comunidad?",
+    ctaDesc: "Configura tu red social privada en minutos — sin necesidad de experiencia técnica.",
   },
   fr: {
     badge: "Plateforme SaaS Multilingue pour Communautés et Institutions Globales",
-    heroTitle: "Lancez votre réseau social privé en quelques",
+    heroTitle: "Votre Réseau Social Privé,",
+    heroHighlight: "en Quelques Minutes",
     minutes: "Minutes",
     heroDesc:
       "Offrez à votre université, réseau d'anciens élèves, association professionnelle ou ONG un réseau privé sécurisé sous votre sous-domaine personnalisé.",
@@ -278,10 +323,16 @@ const translations: Record<
     showcaseTitle: "Communautés actives",
     createClan: "Créer un clan",
     superAdmin: "Portail Super Admin",
+    statMembers: "Membres dans le Monde",
+    statCommunities: "Communautés Actives",
+    statLanguages: "Langues Supportées",
+    ctaTitle: "Prêt à lancer votre communauté ?",
+    ctaDesc: "Configurez votre réseau social privé en quelques minutes — aucune expertise technique requise.",
   },
   de: {
     badge: "Sprachenunabhängige SaaS-Plattform für globale Gemeinschaften",
-    heroTitle: "Starten Sie Ihr privates soziales Netzwerk in",
+    heroTitle: "Ihr privates soziales Netzwerk,",
+    heroHighlight: "in wenigen Minuten",
     minutes: "Minuten",
     heroDesc:
       "Ermöglichen Sie Ihrer Hochschule, Ihrem Alumni-Netzwerk, Branchenverband oder Ihrer NGO ein verifiziertes privates Netzwerk unter Ihrer eigenen Subdomain.",
@@ -307,10 +358,16 @@ const translations: Record<
     showcaseTitle: "Aktive Communities",
     createClan: "Clan erstellen",
     superAdmin: "Super Admin Portal",
+    statMembers: "Mitglieder weltweit",
+    statCommunities: "Aktive Gemeinschaften",
+    statLanguages: "Unterstützte Sprachen",
+    ctaTitle: "Bereit, Ihre Community zu starten?",
+    ctaDesc: "Richten Sie Ihr privates soziales Netzwerk in Minuten ein — kein technisches Fachwissen erforderlich.",
   },
   ja: {
     badge: "グローバルコミュニティおよび機関向け言語非依存SaaSプラットフォーム",
-    heroTitle: "プライベートなSNSをわずか数",
+    heroTitle: "プライベートSNSを、",
+    heroHighlight: "わずか数分で開設",
     minutes: "分で開設",
     heroDesc:
       "大学、同窓会、業界団体、ソーシャルグループ、NGO向けに、専用サブドメイン下で認証付きプライベートネットワークを提供します。",
@@ -336,10 +393,16 @@ const translations: Record<
     showcaseTitle: "アクティブなコミュニティ",
     createClan: "クランを作成",
     superAdmin: "スーパー管理者ポータル",
+    statMembers: "世界中のメンバー",
+    statCommunities: "アクティブコミュニティ",
+    statLanguages: "対応言語数",
+    ctaTitle: "コミュニティを始める準備はできましたか？",
+    ctaDesc: "数分でプライベートSNSをセットアップ — 技術的な専門知識は不要です。",
   },
   pt: {
     badge: "Plataforma SaaS Multilíngue para Comunidades e Instituições Globais",
-    heroTitle: "Crie sua Rede Social Privada em apenas",
+    heroTitle: "Sua Rede Social Privada,",
+    heroHighlight: "no Ar em Minutos",
     minutes: "Minutos",
     heroDesc:
       "Capacite sua universidade, rede de ex-alunos, associação comercial, grupo social ou ONG com uma rede privada verificada no seu próprio subdomínio.",
@@ -365,10 +428,16 @@ const translations: Record<
     showcaseTitle: "Comunidades Ativas",
     createClan: "Criar Clan",
     superAdmin: "Portal Super Admin",
+    statMembers: "Membros no Mundo",
+    statCommunities: "Comunidades Ativas",
+    statLanguages: "Idiomas Suportados",
+    ctaTitle: "Pronto para lançar sua comunidade?",
+    ctaDesc: "Configure sua rede social privada em minutos — sem necessidade de experiência técnica.",
   },
   fil: {
     badge: "Platform na Hindi Nakadepende sa Wika para sa mga Pandaigdigang Komunidad",
-    heroTitle: "Simulan ang Iyong Pribadong Social Network sa Loob Lamang ng Ilang",
+    heroTitle: "Ang Iyong Pribadong Social Network,",
+    heroHighlight: "Handa sa Ilang Minuto",
     minutes: "Minuto",
     heroDesc:
       "Bigyan ng kapangyarihan ang iyong kolehiyo, alumni network, asosasyon, o NGO gamit ang isang na-verify na pribadong network sa ilalim ng iyong sariling subdomain.",
@@ -395,6 +464,11 @@ const translations: Record<
     showcaseTitle: "Mga Aktibong Clan at Organisasyon",
     createClan: "Lumikha ng Clan",
     superAdmin: "Super Admin Portal",
+    statMembers: "Miyembro sa Buong Mundo",
+    statCommunities: "Mga Aktibong Komunidad",
+    statLanguages: "Mga Wikang Sinusuportahan",
+    ctaTitle: "Handa ka na bang ilunsad ang iyong komunidad?",
+    ctaDesc: "I-set up ang iyong pribadong social network sa ilang minuto — walang kinakailangang teknikal na kaalaman.",
   },
 };
 
@@ -404,13 +478,15 @@ export default function LandingPage() {
   const [communities, setCommunities] = useState<CommunityPublic[]>([]);
   const [loadingCommunities, setLoadingCommunities] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const { lang, setLang, t, isRtl } = useLanguage();
+  const { lang, setLang, isRtl } = useLanguage();
+
+  // Use local translations map so we can access our extended fields
+  const tt = translations[lang] ?? translations["en"];
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Load public communities for live showcase
   useEffect(() => {
     fetch("/api/communities/public")
       .then((res) => res.json())
@@ -426,36 +502,55 @@ export default function LandingPage() {
       id: "colleges",
       title: "Colleges & Institutions",
       icon: GraduationCap,
-      color: "from-blue-500 to-indigo-600",
+      gradient: "from-blue-500 to-blue-700",
+      lightBg: "bg-blue-500/10",
+      border: "border-blue-500/20",
       desc: "Department boards, student clubs, campus event hubs, placement cells, and academic notifications.",
     },
     {
       id: "alumni",
       title: "Alumni Associations",
       icon: Award,
-      color: "from-indigo-600 to-violet-600",
+      gradient: "from-violet-500 to-violet-700",
+      lightBg: "bg-violet-500/10",
+      border: "border-violet-500/20",
       desc: "Global graduation chapters, career mentorship, reunion drives, career referrals, and alumni registries.",
     },
     {
       id: "industry",
       title: "Industry & Trade Guilds",
       icon: Briefcase,
-      color: "from-violet-600 to-purple-600",
+      gradient: "from-indigo-500 to-indigo-700",
+      lightBg: "bg-indigo-500/10",
+      border: "border-indigo-500/20",
       desc: "Professional syndicates, trade associations, corporate alumni networks, and verified member directories.",
     },
     {
       id: "social",
       title: "Social Groups & Cultural Clans",
       icon: Users,
-      color: "from-emerald-500 to-teal-600",
+      gradient: "from-emerald-500 to-emerald-700",
+      lightBg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
       desc: "Community trusts, cultural event RSVPs, member directories, and family trees.",
     },
     {
       id: "ngos",
       title: "NGOs & Non-Profits",
       icon: HeartHandshake,
-      color: "from-pink-500 to-rose-600",
+      gradient: "from-rose-500 to-rose-700",
+      lightBg: "bg-rose-500/10",
+      border: "border-rose-500/20",
       desc: "Volunteer coordination, fundraising campaigns, direct zero-fee member donations, and impact news.",
+    },
+    {
+      id: "languages",
+      title: "Global Language Communities",
+      icon: Languages,
+      gradient: "from-cyan-500 to-cyan-700",
+      lightBg: "bg-cyan-500/10",
+      border: "border-cyan-500/20",
+      desc: "MySocialClan is 100% language-agnostic. Arabic, Hindi, Urdu, Malayalam, English, Spanish — your feed adapts seamlessly.",
     },
   ];
 
@@ -463,27 +558,32 @@ export default function LandingPage() {
     {
       icon: Shield,
       title: "100% Data Privacy & No Algorithmic Tracking",
-      desc: "Unlike public social networks that sell user activity for ads, your clan's data is strictly private and never indexed by external search engines.",
+      desc: "Unlike public social networks, your clan's data is strictly private and never indexed by external search engines.",
     },
     {
       icon: UserCheck,
       title: "Mandatory Admin Verification & Zero Spammers",
-      desc: "Every member is verified by clan admins before gaining access. Eliminates anonymous trolls, fake profiles, and unwanted sales bots.",
+      desc: "Every member is verified by clan admins before gaining access. Eliminates anonymous trolls and fake profiles.",
     },
     {
       icon: Sliders,
       title: "Distraction-Free Community Feed",
-      desc: "No viral clickbait algorithms, doomscrolling traps, or third-party sponsored ads competing for members' attention.",
+      desc: "No viral clickbait algorithms, doomscrolling traps, or third-party sponsored ads competing for attention.",
     },
     {
       icon: Globe,
       title: "Dedicated Custom Subdomain Branding",
-      desc: "Own your independent digital ecosystem under your custom subdomain (e.g. yourclan.mysocialclan.com) with full logo branding.",
+      desc: "Own your independent digital ecosystem under your custom subdomain with full logo branding.",
     },
     {
       icon: DollarSign,
       title: "Direct Member Support Payments (0% Fee)",
-      desc: "Collect member dues, event tickets, or charitable contributions directly into your organization's account with zero middleman fees.",
+      desc: "Collect member dues, event tickets, or contributions directly into your account with zero middleman fees.",
+    },
+    {
+      icon: Lock,
+      title: "Fully Closed & Invite-Only Access",
+      desc: "No public sign-ups, no discoverable profiles. Your community remains a trusted, members-only sanctuary.",
     },
   ];
 
@@ -493,405 +593,920 @@ export default function LandingPage() {
       title: "Verified Member Feed & Directory",
       desc: "Private member profiles, family connection trees, occupation filters, and verified identity badges.",
       icon: Users,
+      color: "text-blue-400",
+      bg: "bg-blue-500/10",
     },
     {
       key: "marketplace" as const,
       title: "Social Business & Skill Hub",
       desc: "Community marketplace, local business listings, job referrals, and member service showcases.",
       icon: ShoppingBag,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
     },
     {
       key: "panchang" as const,
-      title: "Community Calendar & Event Schedule",
-      desc: "Daily updates, auspicious schedules, community timelines, and festival alerts.",
+      title: "Cultural & Events Calendar",
+      desc: "Hindu Panchang, Islamic Hijri calendar, regional festival alerts, and auspicious timing tools.",
       icon: Calendar,
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
     },
     {
       key: "booking" as const,
-      title: "Venue & Event Space Bookings",
-      desc: "Reserve community halls, guest rooms, and event spaces with real-time availability calendar.",
+      title: "Venue & Facility Booking",
+      desc: "Community halls, meeting rooms, sports courts, and event spaces directly bookable by members.",
       icon: Landmark,
+      color: "text-violet-400",
+      bg: "bg-violet-500/10",
     },
     {
       key: "events" as const,
-      title: "Announcements & Discussion Hubs",
-      desc: "Broadcast official updates, manage event RSVPs, post social updates, and foster member engagement.",
+      title: "Events & RSVP Management",
+      desc: "Reunion scheduling, event invites, RSVP tracking, QR check-ins, and post-event photo sharing.",
       icon: Megaphone,
+      color: "text-pink-400",
+      bg: "bg-pink-500/10",
     },
     {
       key: "donations" as const,
-      title: "Instant Direct Member Support",
-      desc: "Collect member contributions and donations directly into community accounts with 0% platform fees.",
+      title: "Member Donations & Crowdfunding",
+      desc: "0% fee direct UPI donation collection, transparent contribution ledger, and donor recognition wall.",
       icon: Heart,
+      color: "text-rose-400",
+      bg: "bg-rose-500/10",
     },
   ];
 
   return (
     <div
       dir={isRtl ? "rtl" : "ltr"}
-      className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-600 selection:text-white relative overflow-hidden"
+      className="min-h-screen font-sans"
+      style={{
+        background: "linear-gradient(160deg, #f8f5ff 0%, #fef9f5 40%, #f0f7ff 70%, #fdf4ff 100%)",
+        color: "#1e1b4b",
+      }}
     >
-      {/* Ambient Glows */}
-      <div className="absolute -top-40 -left-40 w-[32rem] h-[32rem] bg-indigo-200/50 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 -right-40 w-[32rem] h-[32rem] bg-blue-200/40 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 left-1/3 w-[32rem] h-[32rem] bg-violet-200/30 rounded-full blur-3xl pointer-events-none" />
+      {/* Ambient Background Glows */}
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden"
+      }}>
+        <div style={{
+          position: "absolute", top: "-10%", left: "-5%", width: "50rem", height: "50rem",
+          background: "radial-gradient(circle, rgba(167,139,250,0.18) 0%, transparent 65%)",
+          borderRadius: "50%"
+        }} />
+        <div style={{
+          position: "absolute", top: "35%", right: "-10%", width: "40rem", height: "40rem",
+          background: "radial-gradient(circle, rgba(251,146,60,0.12) 0%, transparent 65%)",
+          borderRadius: "50%"
+        }} />
+        <div style={{
+          position: "absolute", bottom: "5%", left: "25%", width: "38rem", height: "38rem",
+          background: "radial-gradient(circle, rgba(20,184,166,0.10) 0%, transparent 65%)",
+          borderRadius: "50%"
+        }} />
+      </div>
 
-      {/* Header Bar */}
-      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 p-0.5 shadow-md shadow-indigo-500/20">
-              <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-                <Globe className="w-5 h-5 text-indigo-600" />
-              </div>
+      {/* ─── NAVIGATION ─── */}
+      <header style={{
+        position: "sticky", top: 0, zIndex: 50,
+        background: "rgba(255,255,255,0.82)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(167,139,250,0.15)",
+        boxShadow: "0 1px 24px rgba(167,139,250,0.08)",
+      }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.5rem", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Logo */}
+          <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{
+              width: "38px", height: "38px", borderRadius: "12px",
+              background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 60%, #f97316 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 4px 16px rgba(139,92,246,0.3)",
+            }}>
+              <Globe style={{ width: "20px", height: "20px", color: "white" }} />
             </div>
             <div>
-              <span className="text-lg font-black tracking-tight bg-gradient-to-r from-blue-700 via-indigo-600 to-slate-900 bg-clip-text text-transparent">
+              <span style={{ fontSize: "18px", fontWeight: 800, letterSpacing: "-0.5px", color: "#1e1b4b" }}>
                 MySocialClan
               </span>
-              <span className="hidden sm:inline-block ml-2.5 text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 bg-indigo-50 border border-indigo-200/80 text-indigo-700 rounded-full shadow-2xs">
-                SaaS Social Platform
+              <span style={{
+                display: "none", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em",
+                textTransform: "uppercase", color: "#a78bfa", marginLeft: "8px"
+              }} className="sm-show">
+                Private Social SaaS
               </span>
             </div>
-          </div>
+          </a>
 
-          <div className="flex items-center space-x-3">
-            {/* Language Switcher Selector */}
-            <div className="relative flex items-center bg-slate-100 border border-slate-200/80 rounded-xl px-2.5 py-1.5 space-x-1.5 shadow-2xs hover:bg-slate-200/60 transition-all">
-              <Languages className="w-4 h-4 text-indigo-600 shrink-0" />
+          {/* Desktop Nav */}
+          <nav style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* Language Switcher */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.18)",
+              borderRadius: "10px", padding: "8px 12px",
+            }}>
+              <Languages style={{ width: "15px", height: "15px", color: "#8b5cf6", flexShrink: 0 }} />
               <select
                 value={lang}
                 onChange={(e) => setLang(e.target.value as SupportedLang)}
-                className="bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer pr-1"
+                style={{
+                  background: "transparent", color: "#4c1d95", fontSize: "12px", fontWeight: 600,
+                  outline: "none", cursor: "pointer", border: "none",
+                }}
               >
                 <option value="en">English (EN)</option>
-                <option value="ar">العربية (Arabic - GCC)</option>
+                <option value="ar">العربية (Arabic)</option>
                 <option value="hi">हिन्दी (Hindi)</option>
                 <option value="ur">اردو (Urdu)</option>
-                <option value="ml">മലയാളം (Malayalam)</option>
+                <option value="ml">മലയാളം</option>
                 <option value="es">Español (ES)</option>
                 <option value="fr">Français (FR)</option>
                 <option value="de">Deutsch (DE)</option>
-                <option value="ja">日本語 (Japanese)</option>
-                <option value="pt">Português (Brasil)</option>
-                <option value="fil">Filipino (Tagalog)</option>
+                <option value="ja">日本語</option>
+                <option value="pt">Português</option>
+                <option value="fil">Filipino</option>
               </select>
             </div>
 
-
+            {/* CTA Button */}
             <a
               href="/create-clan"
-              className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all flex items-center space-x-1.5 cursor-pointer border-0 text-decoration-none active:scale-95"
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                color: "white", padding: "9px 18px", borderRadius: "10px",
+                fontSize: "13px", fontWeight: 700, textDecoration: "none",
+                boxShadow: "0 4px 16px rgba(139,92,246,0.3)",
+                transition: "all 0.2s ease", border: "none",
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 24px rgba(139,92,246,0.45)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(139,92,246,0.3)";
+              }}
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>{t.createClan}</span>
+              <Plus style={{ width: "15px", height: "15px", strokeWidth: 3 }} />
+              <span>{tt.createClan || "Create Clan"}</span>
             </a>
-          </div>
+          </nav>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-16 sm:pt-24 sm:pb-24 px-4 text-center">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span>{t.badge}</span>
+      {/* ─── HERO SECTION ─── */}
+      <section style={{ position: "relative", zIndex: 1, padding: "100px 1.5rem 80px", textAlign: "center" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          {/* Badge */}
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "8px",
+            background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.22)",
+            borderRadius: "100px", padding: "6px 16px", marginBottom: "32px",
+          }}>
+            <Sparkles style={{ width: "13px", height: "13px", color: "#8b5cf6" }} />
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "#7c3aed", letterSpacing: "0.02em" }}>
+              {tt.badge}
+            </span>
           </div>
 
-          <h1 className="text-3xl sm:text-6xl font-black tracking-tight text-slate-900 leading-[1.15]">
-            {t.heroTitle}{" "}
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-              {t.minutes}
-            </span>
+          {/* Headline */}
+          <h1 style={{
+            fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 900, lineHeight: 1.1,
+            letterSpacing: "-2px", color: "#1e1b4b", marginBottom: "16px",
+          }}>
+            {tt.heroTitle || "Your Private Social Network,"}
+          </h1>
+          <h1 style={{
+            fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 900, lineHeight: 1.1,
+            letterSpacing: "-2px", marginBottom: "28px",
+            background: "linear-gradient(135deg, #8b5cf6 0%, #f97316 100%)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}>
+            {tt.heroHighlight || "Live in Minutes"}
           </h1>
 
-          <p className="text-slate-600 text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed font-normal">
-            {t.heroDesc}
+          <p style={{
+            fontSize: "clamp(1rem, 2vw, 1.15rem)", color: "#64748b",
+            maxWidth: "680px", margin: "0 auto 40px", lineHeight: 1.75, fontWeight: 400,
+          }}>
+            {tt.heroDesc}
           </p>
 
-          {/* Social Proof Strip */}
-          <div className="pt-2 flex items-center justify-center space-x-3">
-            <div className="flex -space-x-2 overflow-hidden p-0.5">
-              <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-[10px] flex items-center justify-center shadow-xs">
-                CU
-              </span>
-              <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-[10px] flex items-center justify-center shadow-xs">
-                AL
-              </span>
-              <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-gradient-to-br from-violet-500 to-pink-500 text-white font-bold text-[10px] flex items-center justify-center shadow-xs">
-                NG
-              </span>
-              <span className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold text-[10px] flex items-center justify-center shadow-xs">
-                +15k
-              </span>
+          {/* Social Proof */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "12px",
+            marginBottom: "40px",
+          }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {[220, 250, 280].map((hue, i) => (
+                <div key={i} style={{
+                  width: "34px", height: "34px", borderRadius: "50%",
+                  border: "2.5px solid white",
+                  background: `hsl(${hue}, 65%, 58%)`,
+                  marginLeft: i > 0 ? "-10px" : "0",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "11px", fontWeight: 700, color: "white",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                }}>
+                  {["CU", "AL", "NG"][i]}
+                </div>
+              ))}
             </div>
-            <div className="text-left text-xs">
-              <div className="font-extrabold text-slate-800 flex items-center space-x-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-                <span>{t.verifiedBadge}</span>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <ShieldCheck style={{ width: "14px", height: "14px", color: "#14b8a6" }} />
+                <span style={{ fontSize: "13px", fontWeight: 700, color: "#1e1b4b" }}>{tt.verifiedBadge}</span>
               </div>
-              <p className="text-[11px] text-slate-500">{t.verifiedSub}</p>
+              <p style={{ fontSize: "11px", color: "#94a3b8", marginTop: "1px" }}>{tt.verifiedSub}</p>
             </div>
           </div>
 
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* CTA Buttons */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "center" }}>
             <a
               href="/create-clan"
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-2xl font-black text-sm shadow-xl shadow-indigo-600/25 hover:shadow-indigo-600/35 transition-all flex items-center justify-center space-x-2 cursor-pointer border-0 text-decoration-none active:scale-95"
+              style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                color: "white", padding: "14px 28px", borderRadius: "14px",
+                fontSize: "15px", fontWeight: 800, textDecoration: "none",
+                boxShadow: "0 8px 28px rgba(139,92,246,0.35)",
+                transition: "all 0.25s ease",
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 44px rgba(139,92,246,0.45)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(139,92,246,0.35)";
+              }}
             >
-              <span>{t.buildSubdomain}</span>
-              <ArrowRight className="w-4 h-4 stroke-[3]" />
+              <span>{tt.buildSubdomain}</span>
+              <ArrowRight style={{ width: "16px", height: "16px", strokeWidth: 2.5 }} />
             </a>
-
             <a
-              href="#audiences"
-              className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-sm transition-all shadow-sm flex items-center justify-center space-x-2 text-decoration-none"
+              href="#showcase"
+              style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                background: "white", border: "1.5px solid rgba(139,92,246,0.2)",
+                color: "#4c1d95", padding: "14px 28px", borderRadius: "14px",
+                fontSize: "15px", fontWeight: 700, textDecoration: "none",
+                transition: "all 0.25s ease",
+                boxShadow: "0 2px 12px rgba(139,92,246,0.1)",
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.4)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px rgba(139,92,246,0.18)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.2)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(139,92,246,0.1)";
+              }}
             >
-              <Users className="w-4 h-4 text-indigo-600" />
-              <span>{t.audiencesTitle}</span>
+              <Globe style={{ width: "15px", height: "15px", color: "#8b5cf6" }} />
+              <span>{tt.exploreCommunities}</span>
             </a>
           </div>
         </div>
       </section>
 
-      {/* Target Audiences Grid Section */}
-      <section id="audiences" className="max-w-6xl mx-auto px-4 py-16 border-t border-slate-200/80">
-        <div className="text-center space-y-2 mb-12">
-          <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold shadow-2xs">
-            <Users className="w-3.5 h-3.5 text-indigo-600" />
-            <span>{t.audiencesBadge}</span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900">{t.audiencesTitle}</h2>
-          <p className="text-slate-600 text-xs sm:text-sm max-w-xl mx-auto">{t.audiencesSubtitle}</p>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {targetAudiences.map((aud) => {
-            const Icon = aud.icon;
-            return (
-              <div
-                key={aud.id}
-                className="bg-white border border-slate-200/80 rounded-3xl p-6 hover:border-indigo-400/60 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group duration-200 flex flex-col justify-between"
-              >
-                <div>
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${aud.color} text-white flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                    {aud.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{aud.desc}</p>
-                </div>
-                <a
-                  href="/create-clan"
-                  className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600 text-decoration-none group-hover:text-indigo-700"
-                >
-                  <span>Custom Subdomain & Feed</span>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </a>
-              </div>
-            );
-          })}
 
-          {/* Language Agnostic Card */}
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 hover:border-indigo-400/60 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group duration-200 flex flex-col justify-between">
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform">
-                <Languages className="w-6 h-6" />
-              </div>
-              <span className="text-[10px] uppercase font-extrabold tracking-widest text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200/80 inline-block mb-3">
-                {t.langAgnosticBadge}
+      {/* ─── TARGET AUDIENCES ─── */}
+      <section id="audiences" style={{ position: "relative", zIndex: 1, padding: "80px 1.5rem" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "56px" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "7px",
+              background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)",
+              borderRadius: "100px", padding: "5px 14px", marginBottom: "16px",
+            }}>
+              <Users style={{ width: "13px", height: "13px", color: "#8b5cf6" }} />
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                {tt.audiencesBadge}
               </span>
-              <h3 className="text-lg font-extrabold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                {t.langAgnosticTitle}
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">{t.langAgnosticDesc}</p>
             </div>
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center space-x-2 text-xs font-bold text-indigo-600">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Native Multi-Lingual Interface Support</span>
-            </div>
+            <h2 style={{
+              fontSize: "clamp(1.8rem, 4vw, 3rem)", fontWeight: 900, color: "#1e1b4b",
+              letterSpacing: "-1px", marginBottom: "14px",
+            }}>
+              {tt.audiencesTitle}
+            </h2>
+            <p style={{ fontSize: "15px", color: "#64748b", maxWidth: "540px", margin: "0 auto", lineHeight: 1.65 }}>
+              {tt.audiencesSubtitle}
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* Closed Network Benefits Section */}
-      <section className="max-w-6xl mx-auto px-4 py-16 border-t border-slate-200/80 bg-white/50 rounded-3xl my-8 border border-slate-200/60 shadow-xs">
-        <div className="text-center space-y-2 mb-12">
-          <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold shadow-2xs">
-            <Shield className="w-3.5 h-3.5 text-indigo-600" />
-            <span>{t.whyClosedBadge}</span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900">{t.whyClosedTitle}</h2>
-          <p className="text-slate-600 text-xs sm:text-sm max-w-2xl mx-auto">{t.whyClosedSubtitle}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {closedNetworkBenefits.map((b, idx) => {
-            const Icon = b.icon;
-            return (
-              <div
-                key={idx}
-                className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-indigo-400/50 hover:shadow-md transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 mb-2">{b.title}</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{b.desc}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Feature Modules Grid */}
-      <section className="max-w-6xl mx-auto px-4 py-16 border-t border-slate-200/80">
-        <div className="text-center space-y-2 mb-12">
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold">
-            <Activity className="w-3.5 h-3.5 text-indigo-600" />
-            <span>{t.modulesBadge}</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900">{t.modulesTitle}</h2>
-          <p className="text-slate-600 text-xs sm:text-sm max-w-xl mx-auto">{t.modulesSubtitle}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {moduleItems.map((m) => {
-            const Icon = m.icon;
-            return (
-              <div
-                key={m.key}
-                className="bg-white border border-slate-200/80 rounded-3xl p-6 hover:border-indigo-400/60 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group duration-200"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-gradient-to-tr group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white transition-all shadow-2xs">
-                  <Icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                  {m.title}
-                </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">{m.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Live Communities Gallery Showcase */}
-      <section id="showcase" className="max-w-6xl mx-auto px-4 py-16 border-t border-slate-200/80">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
-          <div>
-            <div className="inline-flex items-center space-x-1 text-indigo-600 text-xs font-bold uppercase tracking-wider mb-2">
-              <Globe className="w-3.5 h-3.5" />
-              <span>{t.showcaseBadge}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">{t.showcaseTitle}</h2>
-          </div>
-          <a
-            href="/create-clan"
-            className="text-xs font-extrabold text-indigo-600 hover:text-indigo-700 flex items-center space-x-1 cursor-pointer bg-transparent border-0 text-decoration-none"
-          >
-            <span>{t.buildSubdomain}</span>
-            <ChevronRight className="w-4 h-4" />
-          </a>
-        </div>
-
-        {loadingCommunities ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
-          </div>
-        ) : communities.length === 0 ? (
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-8 text-center max-w-md mx-auto shadow-sm">
-            <Globe className="w-10 h-10 text-indigo-400 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-900 mb-1">No Public Communities Provisioned Yet</h3>
-            <p className="text-xs text-slate-600 mb-4">Be the first clan to request your custom subdomain on MySocialClan!</p>
-            <a
-              href="/create-clan"
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 text-decoration-none inline-block"
-            >
-              Request Community Setup
-            </a>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {communities.map((c) => {
-              const originHost = mounted && typeof window !== "undefined" ? window.location.host : "mysocialclan.com";
-              const isLocalhost = originHost.includes("localhost");
-              const fullDomain = isLocalhost
-                ? `${c.subdomain}.localhost:3000`
-                : `${c.subdomain}.mysocialclan.com`;
-              const fullUrl = isLocalhost ? `http://${fullDomain}` : `https://${fullDomain}`;
-
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+            gap: "20px",
+          }}>
+            {targetAudiences.map((aud) => {
+              const Icon = aud.icon;
+              const iconBg = aud.gradient.includes("blue") ? "#3b82f6" : aud.gradient.includes("violet") ? "#8b5cf6" : aud.gradient.includes("indigo") ? "#6366f1" : aud.gradient.includes("emerald") ? "#10b981" : aud.gradient.includes("rose") ? "#f43f5e" : "#06b6d4";
               return (
                 <div
-                  key={c._id}
-                  className="bg-white border border-slate-200/80 rounded-3xl p-5 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/5 transition-all flex flex-col justify-between group"
+                  key={aud.id}
+                  style={{
+                    background: "white", border: "1.5px solid rgba(139,92,246,0.1)",
+                    borderRadius: "20px", padding: "28px", cursor: "pointer",
+                    transition: "all 0.25s ease", position: "relative", overflow: "hidden",
+                    boxShadow: "0 2px 16px rgba(139,92,246,0.06)",
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.borderColor = "rgba(139,92,246,0.3)";
+                    el.style.transform = "translateY(-3px)";
+                    el.style.boxShadow = "0 16px 40px rgba(139,92,246,0.12)";
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.borderColor = "rgba(139,92,246,0.1)";
+                    el.style.transform = "translateY(0)";
+                    el.style.boxShadow = "0 2px 16px rgba(139,92,246,0.06)";
+                  }}
                 >
-                  <div>
-                    <div className="flex items-center space-x-3.5 mb-3">
-                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 overflow-hidden flex items-center justify-center shrink-0 border border-indigo-100 group-hover:scale-105 transition-transform">
-                        {c.logo ? (
-                          <img src={c.logo} alt={c.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <Building2 className="w-6 h-6 text-indigo-600" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                          {c.name}
-                        </h3>
-                        <p className="text-[11px] font-mono text-indigo-600 font-semibold">{fullDomain}</p>
-                      </div>
-                    </div>
-
-                    {c.description && (
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-4">{c.description}</p>
-                    )}
+                  <div style={{
+                    width: "48px", height: "48px", borderRadius: "14px",
+                    background: `linear-gradient(135deg, ${iconBg} 0%, ${iconBg}cc 100%)`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    marginBottom: "18px", boxShadow: `0 4px 14px ${iconBg}44`,
+                  }}>
+                    <Icon style={{ width: "24px", height: "24px", color: "white" }} />
                   </div>
-
+                  <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#1e1b4b", marginBottom: "10px" }}>
+                    {aud.title}
+                  </h3>
+                  <p style={{ fontSize: "13px", color: "#64748b", lineHeight: 1.65, marginBottom: "20px" }}>
+                    {aud.desc}
+                  </p>
                   <a
-                    href={fullUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-4 bg-slate-100 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white text-slate-700 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center space-x-2 text-decoration-none shadow-2xs"
+                    href="/create-clan"
+                    style={{
+                      display: "flex", alignItems: "center", gap: "6px", textDecoration: "none",
+                      fontSize: "12px", fontWeight: 700, color: "#7c3aed",
+                    }}
                   >
-                    <span>Open Community App</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Get Started</span>
+                    <ChevronRight style={{ width: "14px", height: "14px" }} />
                   </a>
                 </div>
               );
             })}
           </div>
-        )}
+        </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 py-8 px-4 text-center text-xs text-slate-500 space-y-3">
-        <div className="flex items-center justify-center space-x-3">
-          <Languages className="w-4 h-4 text-indigo-600" />
-          <span className="font-bold text-slate-700">International Language Selector:</span>
-          <select
-            value={lang}
-            onChange={(e) => setLang(e.target.value as SupportedLang)}
-            className="bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-lg px-2.5 py-1 outline-none cursor-pointer shadow-2xs"
-          >
-            <option value="en">English (EN)</option>
-            <option value="ar">العربية (Arabic - GCC)</option>
-            <option value="hi">हिन्दी (Hindi)</option>
-            <option value="ur">اردو (Urdu)</option>
-            <option value="ml">മലയാളം (Malayalam)</option>
-            <option value="es">Español (ES)</option>
-            <option value="fr">Français (FR)</option>
-            <option value="de">Deutsch (DE)</option>
-            <option value="ja">日本語 (Japanese)</option>
-            <option value="pt">Português (Brasil)</option>
-            <option value="fil">Filipino (Tagalog)</option>
-          </select>
+      {/* ─── CLOSED NETWORK BENEFITS ─── */}
+      <section style={{ position: "relative", zIndex: 1, padding: "80px 1.5rem" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "56px" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "7px",
+              background: "rgba(20,184,166,0.08)", border: "1px solid rgba(20,184,166,0.22)",
+              borderRadius: "100px", padding: "5px 14px", marginBottom: "16px",
+            }}>
+              <Shield style={{ width: "13px", height: "13px", color: "#0d9488" }} />
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "#0f766e", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                {tt.whyClosedBadge}
+              </span>
+            </div>
+            <h2 style={{
+              fontSize: "clamp(1.8rem, 4vw, 3rem)", fontWeight: 900, color: "#1e1b4b",
+              letterSpacing: "-1px", marginBottom: "14px", maxWidth: "680px", margin: "0 auto 14px",
+            }}>
+              {tt.whyClosedTitle}
+            </h2>
+            <p style={{ fontSize: "15px", color: "#64748b", maxWidth: "580px", margin: "0 auto", lineHeight: 1.65 }}>
+              {tt.whyClosedSubtitle}
+            </p>
+          </div>
+
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "16px",
+          }}>
+            {closedNetworkBenefits.map((b, idx) => {
+              const Icon = b.icon;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex", gap: "16px", padding: "24px",
+                    background: "white", border: "1.5px solid rgba(20,184,166,0.12)",
+                    borderRadius: "16px", transition: "all 0.2s ease",
+                    boxShadow: "0 2px 12px rgba(20,184,166,0.06)",
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(20,184,166,0.3)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(20,184,166,0.12)";
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(20,184,166,0.12)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(20,184,166,0.06)";
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                  }}
+                >
+                  <div style={{
+                    width: "40px", height: "40px", borderRadius: "12px",
+                    background: "rgba(20,184,166,0.1)", border: "1px solid rgba(20,184,166,0.18)",
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}>
+                    <Icon style={{ width: "18px", height: "18px", color: "#0d9488" }} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e1b4b", marginBottom: "6px" }}>
+                      {b.title}
+                    </h3>
+                    <p style={{ fontSize: "12px", color: "#64748b", lineHeight: 1.6 }}>
+                      {b.desc}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <p>© 2026 Vyanamics Technologies Pvt. Ltd India</p>
+      </section>
+
+      {/* ─── FEATURE MODULES ─── */}
+      <section style={{ position: "relative", zIndex: 1, padding: "80px 1.5rem" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "56px" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "7px",
+              background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.22)",
+              borderRadius: "100px", padding: "5px 14px", marginBottom: "16px",
+            }}>
+              <Zap style={{ width: "13px", height: "13px", color: "#f97316" }} />
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "#ea580c", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                {tt.modulesBadge}
+              </span>
+            </div>
+            <h2 style={{
+              fontSize: "clamp(1.8rem, 4vw, 3rem)", fontWeight: 900, color: "#1e1b4b",
+              letterSpacing: "-1px", marginBottom: "14px",
+            }}>
+              {tt.modulesTitle}
+            </h2>
+            <p style={{ fontSize: "15px", color: "#64748b", maxWidth: "480px", margin: "0 auto", lineHeight: 1.65 }}>
+              {tt.modulesSubtitle}
+            </p>
+          </div>
+
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: "20px",
+          }}>
+            {moduleItems.map((m) => {
+              const Icon = m.icon;
+              const iconColor = m.color.includes("blue") ? "#3b82f6" : m.color.includes("emerald") ? "#10b981" : m.color.includes("amber") ? "#f59e0b" : m.color.includes("violet") ? "#8b5cf6" : m.color.includes("pink") ? "#ec4899" : "#f43f5e";
+              const iconBgColor = m.color.includes("blue") ? "rgba(59,130,246,0.1)" : m.color.includes("emerald") ? "rgba(16,185,129,0.1)" : m.color.includes("amber") ? "rgba(245,158,11,0.1)" : m.color.includes("violet") ? "rgba(139,92,246,0.1)" : m.color.includes("pink") ? "rgba(236,72,153,0.1)" : "rgba(244,63,94,0.1)";
+              return (
+                <div
+                  key={m.key}
+                  style={{
+                    padding: "28px", background: "white",
+                    border: "1.5px solid rgba(139,92,246,0.1)", borderRadius: "20px",
+                    transition: "all 0.25s ease", boxShadow: "0 2px 16px rgba(139,92,246,0.06)",
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.borderColor = "rgba(249,115,22,0.25)";
+                    el.style.transform = "translateY(-3px)";
+                    el.style.boxShadow = "0 16px 40px rgba(249,115,22,0.1)";
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.borderColor = "rgba(139,92,246,0.1)";
+                    el.style.transform = "translateY(0)";
+                    el.style.boxShadow = "0 2px 16px rgba(139,92,246,0.06)";
+                  }}
+                >
+                  <div style={{
+                    width: "48px", height: "48px", borderRadius: "14px",
+                    background: iconBgColor, border: `1px solid ${iconColor}30`,
+                    display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "18px",
+                  }}>
+                    <Icon style={{ width: "22px", height: "22px", color: iconColor }} />
+                  </div>
+                  <h3 style={{ fontSize: "15px", fontWeight: 800, color: "#1e1b4b", marginBottom: "10px" }}>
+                    {m.title}
+                  </h3>
+                  <p style={{ fontSize: "13px", color: "#64748b", lineHeight: 1.65 }}>
+                    {m.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── LANGUAGE AGNOSTIC BANNER ─── */}
+      <section style={{ position: "relative", zIndex: 1, padding: "0 1.5rem 80px" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+          <div style={{
+            background: "linear-gradient(135deg, rgba(139,92,246,0.07) 0%, rgba(99,102,241,0.05) 50%, rgba(249,115,22,0.06) 100%)",
+            border: "1.5px solid rgba(139,92,246,0.15)", borderRadius: "24px",
+            padding: "48px 40px", display: "flex", flexWrap: "wrap", gap: "32px",
+            alignItems: "center", justifyContent: "space-between",
+            boxShadow: "0 4px 32px rgba(139,92,246,0.08)",
+          }}>
+            <div style={{ flex: "1", minWidth: "260px" }}>
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: "7px",
+                background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.22)",
+                borderRadius: "100px", padding: "5px 14px", marginBottom: "18px",
+              }}>
+                <Languages style={{ width: "13px", height: "13px", color: "#8b5cf6" }} />
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {tt.langAgnosticBadge}
+                </span>
+              </div>
+              <h2 style={{
+                fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 900, color: "#1e1b4b",
+                letterSpacing: "-0.5px", marginBottom: "14px", lineHeight: 1.2,
+              }}>
+                {tt.langAgnosticTitle}
+              </h2>
+              <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7, maxWidth: "480px" }}>
+                {tt.langAgnosticDesc}
+              </p>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", maxWidth: "340px" }}>
+              {[
+                { flag: "🇬🇧", label: "English" }, { flag: "🇸🇦", label: "العربية" }, { flag: "🇮🇳", label: "हिन्दी" },
+                { flag: "🇵🇰", label: "اردو" }, { flag: "🇮🇳", label: "മലയാളം" }, { flag: "🇪🇸", label: "Español" },
+                { flag: "🇫🇷", label: "Français" }, { flag: "🇩🇪", label: "Deutsch" }, { flag: "🇯🇵", label: "日本語" },
+                { flag: "🇧🇷", label: "Português" }, { flag: "🇵🇭", label: "Filipino" },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", gap: "6px",
+                  background: "white", border: "1px solid rgba(139,92,246,0.15)",
+                  borderRadius: "100px", padding: "5px 10px",
+                  boxShadow: "0 1px 4px rgba(139,92,246,0.08)",
+                }}>
+                  <span style={{ fontSize: "14px" }}>{item.flag}</span>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#4c1d95" }}>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── LIVE COMMUNITIES SHOWCASE ─── */}
+      <section id="showcase" style={{ position: "relative", zIndex: 1, padding: "80px 1.5rem" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+          <div style={{
+            display: "flex", flexWrap: "wrap", alignItems: "flex-end",
+            justifyContent: "space-between", gap: "16px", marginBottom: "40px",
+          }}>
+            <div>
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: "7px",
+                marginBottom: "12px",
+              }}>
+                <Activity style={{ width: "14px", height: "14px", color: "#0d9488" }} />
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#0f766e", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {tt.showcaseBadge}
+                </span>
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: "5px",
+                  background: "rgba(20,184,166,0.1)", border: "1px solid rgba(20,184,166,0.25)",
+                  borderRadius: "100px", padding: "2px 8px",
+                  fontSize: "10px", fontWeight: 700, color: "#0d9488",
+                }}>
+                  <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#14b8a6", display: "inline-block", animation: "pulse 2s infinite" }} />
+                  LIVE
+                </span>
+              </div>
+              <h2 style={{
+                fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, color: "#1e1b4b", letterSpacing: "-1px",
+              }}>
+                {tt.showcaseTitle}
+              </h2>
+            </div>
+            <a
+              href="/create-clan"
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                fontSize: "13px", fontWeight: 700, color: "#7c3aed", textDecoration: "none",
+              }}
+            >
+              <span>{tt.buildSubdomain}</span>
+              <ChevronRight style={{ width: "15px", height: "15px" }} />
+            </a>
+          </div>
+
+          {loadingCommunities ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 0" }}>
+              <div style={{
+                width: "40px", height: "40px", borderRadius: "50%",
+                border: "3px solid rgba(139,92,246,0.15)", borderTopColor: "#8b5cf6",
+                animation: "spin 0.8s linear infinite",
+              }} />
+            </div>
+          ) : communities.length === 0 ? (
+            <div style={{
+              background: "white", border: "1.5px solid rgba(139,92,246,0.12)",
+              borderRadius: "20px", padding: "60px 32px", textAlign: "center", maxWidth: "420px", margin: "0 auto",
+              boxShadow: "0 4px 24px rgba(139,92,246,0.08)",
+            }}>
+              <Globe style={{ width: "40px", height: "40px", color: "#8b5cf6", margin: "0 auto 16px" }} />
+              <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#1e1b4b", marginBottom: "8px" }}>
+                No Public Communities Yet
+              </h3>
+              <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "24px", lineHeight: 1.6 }}>
+                Be the first clan to request your custom subdomain on MySocialClan!
+              </p>
+              <a
+                href="/create-clan"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "8px",
+                  background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                  color: "white", padding: "11px 24px", borderRadius: "12px",
+                  fontSize: "13px", fontWeight: 700, textDecoration: "none",
+                  boxShadow: "0 4px 20px rgba(139,92,246,0.3)",
+                }}
+              >
+                Request Community Setup
+              </a>
+            </div>
+          ) : (
+            <div style={{
+              display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "18px",
+            }}>
+              {communities.map((c) => {
+                const originHost = mounted && typeof window !== "undefined" ? window.location.host : "mysocialclan.com";
+                const isLocalhost = originHost.includes("localhost");
+                const fullDomain = isLocalhost
+                  ? `${c.subdomain}.localhost:3000`
+                  : `${c.subdomain}.mysocialclan.com`;
+                const fullUrl = isLocalhost ? `http://${fullDomain}` : `https://${fullDomain}`;
+
+                return (
+                  <div
+                    key={c._id}
+                    style={{
+                      background: "white", border: "1.5px solid rgba(139,92,246,0.1)",
+                      borderRadius: "18px", padding: "22px", transition: "all 0.25s ease",
+                      display: "flex", flexDirection: "column", justifyContent: "space-between",
+                      boxShadow: "0 2px 16px rgba(139,92,246,0.06)",
+                    }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLElement;
+                      el.style.borderColor = "rgba(139,92,246,0.3)";
+                      el.style.transform = "translateY(-3px)";
+                      el.style.boxShadow = "0 16px 40px rgba(139,92,246,0.12)";
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLElement;
+                      el.style.borderColor = "rgba(139,92,246,0.1)";
+                      el.style.transform = "translateY(0)";
+                      el.style.boxShadow = "0 2px 16px rgba(139,92,246,0.06)";
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "14px" }}>
+                        <div style={{
+                          width: "48px", height: "48px", borderRadius: "14px", flexShrink: 0,
+                          background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.15)",
+                          display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+                        }}>
+                          {c.logo ? (
+                            <img src={c.logo} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            <Building2 style={{ width: "22px", height: "22px", color: "#8b5cf6" }} />
+                          )}
+                        </div>
+                        <div>
+                          <h3 style={{ fontSize: "15px", fontWeight: 800, color: "#1e1b4b", lineHeight: 1.2 }}>
+                            {c.name}
+                          </h3>
+                          <p style={{ fontSize: "11px", fontFamily: "monospace", color: "#7c3aed", fontWeight: 600, marginTop: "3px" }}>
+                            {fullDomain}
+                          </p>
+                        </div>
+                      </div>
+                      {c.description && (
+                        <p style={{
+                          fontSize: "12px", color: "#64748b", lineHeight: 1.6,
+                          marginBottom: "18px", display: "-webkit-box", WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical", overflow: "hidden",
+                        }}>
+                          {c.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <a
+                      href={fullUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: "7px",
+                        padding: "10px 18px", borderRadius: "10px",
+                        background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.18)",
+                        color: "#7c3aed", fontSize: "12px", fontWeight: 700, textDecoration: "none",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement).style.background = "rgba(139,92,246,0.15)";
+                        (e.currentTarget as HTMLElement).style.color = "#4c1d95";
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.background = "rgba(139,92,246,0.07)";
+                        (e.currentTarget as HTMLElement).style.color = "#7c3aed";
+                      }}
+                    >
+                      <span>Open Community App</span>
+                      <ExternalLink style={{ width: "13px", height: "13px" }} />
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ─── CTA BANNER ─── */}
+      <section style={{ position: "relative", zIndex: 1, padding: "80px 1.5rem" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
+          <div style={{
+            background: "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(99,102,241,0.06) 50%, rgba(249,115,22,0.07) 100%)",
+            border: "1.5px solid rgba(139,92,246,0.18)", borderRadius: "28px",
+            padding: "64px 40px",
+            boxShadow: "0 8px 60px rgba(139,92,246,0.1)",
+          }}>
+            <div style={{
+              width: "60px", height: "60px", borderRadius: "20px", margin: "0 auto 24px",
+              background: "linear-gradient(135deg, #8b5cf6 0%, #f97316 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 8px 28px rgba(139,92,246,0.35)",
+            }}>
+              <Sparkles style={{ width: "28px", height: "28px", color: "white" }} />
+            </div>
+            <h2 style={{
+              fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, color: "#1e1b4b",
+              letterSpacing: "-1px", marginBottom: "16px",
+            }}>
+              {tt.ctaTitle || "Ready to Launch Your Community?"}
+            </h2>
+            <p style={{
+              fontSize: "15px", color: "#64748b", maxWidth: "500px",
+              margin: "0 auto 36px", lineHeight: 1.7,
+            }}>
+              {tt.ctaDesc || "Set up your private social network in minutes — no technical expertise required."}
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "center" }}>
+              <a
+                href="/create-clan"
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                  color: "white", padding: "14px 32px", borderRadius: "14px",
+                  fontSize: "15px", fontWeight: 800, textDecoration: "none",
+                  boxShadow: "0 8px 28px rgba(139,92,246,0.35)",
+                  transition: "all 0.25s ease",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 44px rgba(139,92,246,0.45)";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(139,92,246,0.35)";
+                }}
+              >
+                <span>{tt.buildSubdomain}</span>
+                <ArrowRight style={{ width: "16px", height: "16px" }} />
+              </a>
+              <a
+                href="#audiences"
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  background: "white", border: "1.5px solid rgba(139,92,246,0.2)",
+                  color: "#4c1d95", padding: "14px 28px", borderRadius: "14px",
+                  fontSize: "15px", fontWeight: 700, textDecoration: "none",
+                  transition: "all 0.25s ease",
+                  boxShadow: "0 2px 12px rgba(139,92,246,0.1)",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.35)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px rgba(139,92,246,0.16)";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.2)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(139,92,246,0.1)";
+                }}
+              >
+                <Users style={{ width: "15px", height: "15px", color: "#8b5cf6" }} />
+                <span>See Who It's For</span>
+              </a>
+            </div>
+
+            <div style={{
+              display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center",
+              gap: "20px", marginTop: "36px", paddingTop: "28px",
+              borderTop: "1px solid rgba(139,92,246,0.12)",
+            }}>
+              {[
+                { icon: ShieldCheck, label: "Admin-Verified Members" },
+                { icon: Lock, label: "No Public Sign-ups" },
+                { icon: Zap, label: "Instant Setup" },
+              ].map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                    <Icon style={{ width: "15px", height: "15px", color: "#0d9488" }} />
+                    <span style={{ fontSize: "12px", fontWeight: 600, color: "#475569" }}>
+                      {item.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FOOTER ─── */}
+      <footer style={{
+        position: "relative", zIndex: 1,
+        borderTop: "1px solid rgba(139,92,246,0.1)",
+        padding: "40px 1.5rem",
+        background: "rgba(255,255,255,0.6)",
+        backdropFilter: "blur(12px)",
+      }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+          <div style={{
+            display: "flex", flexWrap: "wrap", alignItems: "center",
+            justifyContent: "space-between", gap: "20px",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{
+                width: "32px", height: "32px", borderRadius: "10px",
+                background: "linear-gradient(135deg, #8b5cf6 0%, #f97316 100%)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(139,92,246,0.25)",
+              }}>
+                <Globe style={{ width: "16px", height: "16px", color: "white" }} />
+              </div>
+              <div>
+                <div style={{ fontSize: "15px", fontWeight: 800, color: "#1e1b4b" }}>MySocialClan</div>
+                <div style={{ fontSize: "10px", color: "#94a3b8" }}>
+                  © 2026 Vyanamics Technologies Pvt. Ltd. India
+                </div>
+              </div>
+            </div>
+
+            <div style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.16)",
+              borderRadius: "10px", padding: "8px 12px",
+            }}>
+              <Languages style={{ width: "14px", height: "14px", color: "#8b5cf6", flexShrink: 0 }} />
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value as SupportedLang)}
+                style={{
+                  background: "transparent", color: "#4c1d95", fontSize: "12px",
+                  fontWeight: 600, outline: "none", cursor: "pointer", border: "none",
+                }}
+              >
+                <option value="en">English (EN)</option>
+                <option value="ar">العربية (Arabic)</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+                <option value="ur">اردو (Urdu)</option>
+                <option value="ml">മലയാളം</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="ja">日本語</option>
+                <option value="pt">Português</option>
+                <option value="fil">Filipino</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </footer>
+
+      {/* Inline Keyframe Styles */}
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @media (min-width: 640px) { .sm-show { display: inline-block !important; } }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        a { transition: all 0.2s ease; }
+      `}</style>
     </div>
   );
 }
