@@ -42,7 +42,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-
     return Response.json({
       ...reqDoc,
       activationToken: tenantUser?.activationToken,
@@ -96,11 +95,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         await Community.create({
           name: reqDoc.name,
           subdomain: reqDoc.subdomain,
+          communityType: reqDoc.communityType || "college",
           description: reqDoc.description,
           logo: reqDoc.logo,
+          website: reqDoc.website,
           primaryLanguage: reqDoc.primaryLanguage || "en",
           country: reqDoc.country,
           cities: reqDoc.cities,
+          taxonomy1Title: reqDoc.taxonomy1Title,
+          taxonomy1Items: reqDoc.taxonomy1Items || reqDoc.gotras,
+          taxonomy2Title: reqDoc.taxonomy2Title,
+          taxonomy2Items: reqDoc.taxonomy2Items || reqDoc.kulDevis,
           gotras: reqDoc.gotras,
           kulDevis: reqDoc.kulDevis,
           upiId: reqDoc.upiId,
@@ -108,6 +113,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           adminName: reqDoc.adminName || "Community Admin",
           adminEmail: reqDoc.adminEmail || `admin@${reqDoc.subdomain}.com`,
           adminMobile: reqDoc.adminMobile || "",
+          adminRole: reqDoc.adminRole || "Admin",
           isActive: true,
         });
       }
@@ -115,7 +121,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       // Provision Community Admin account & activation token
       provisionData = await provisionCommunityAdmin(reqDoc, request);
     }
-
 
     return Response.json({
       ...reqDoc.toObject(),

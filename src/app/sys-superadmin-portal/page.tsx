@@ -40,6 +40,11 @@ import {
   Megaphone,
   AlertCircle,
   Upload,
+  GraduationCap,
+  Award,
+  Briefcase,
+  HeartHandshake,
+  BookOpen,
 } from "lucide-react";
 
 import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
@@ -49,24 +54,33 @@ interface Community {
   _id: string;
   name: string;
   subdomain: string;
+  communityType?: string;
   description?: string;
   logo?: string;
+  website?: string;
   primaryLanguage?: string;
   country?: string;
   cities?: string[];
+  taxonomy1Title?: string;
+  taxonomy1Items?: string[];
+  taxonomy2Title?: string;
+  taxonomy2Items?: string[];
   gotras?: string[];
   kulDevis?: string[];
   upiId?: string;
   adminName?: string;
   adminEmail?: string;
   adminMobile?: string;
+  adminRole?: string;
   modules?: {
     directory?: boolean;
-    marketplace?: boolean;
-    panchang?: boolean;
+    opportunities?: boolean;
+    calendar?: boolean;
     booking?: boolean;
     events?: boolean;
     donations?: boolean;
+    marketplace?: boolean;
+    panchang?: boolean;
   };
   isActive: boolean;
   createdAt: string;
@@ -76,11 +90,20 @@ interface CommunityRequestItem {
   _id: string;
   name: string;
   subdomain: string;
+  communityType?: string;
   description?: string;
+  website?: string;
   primaryLanguage?: string;
+  taxonomy1Title?: string;
+  taxonomy1Items?: string[];
+  taxonomy2Title?: string;
+  taxonomy2Items?: string[];
+  gotras?: string[];
+  kulDevis?: string[];
   adminName: string;
   adminEmail?: string;
   adminMobile: string;
+  adminRole?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   activationToken?: string;
@@ -115,77 +138,45 @@ export default function PlatformAdminPage() {
   const [editStep, setEditStep] = useState<1 | 2 | 3 | 4>(1);
   const [editName, setEditName] = useState("");
   const [editSubdomain, setEditSubdomain] = useState("");
+  const [editCommunityType, setEditCommunityType] = useState("college");
   const [editLogo, setEditLogo] = useState("");
   const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null);
   const editLogoInputRef = useRef<HTMLInputElement>(null);
   const [editDescription, setEditDescription] = useState("");
+  const [editWebsite, setEditWebsite] = useState("");
   const [editPrimaryLanguage, setEditPrimaryLanguage] = useState("en");
   const [editCountryCode, setEditCountryCode] = useState("IN");
   const [editSelectedCities, setEditSelectedCities] = useState<string[]>([]);
   const [editCustomCityInput, setEditCustomCityInput] = useState("");
-  const [editGotras, setEditGotras] = useState("");
-  const [editKulDevis, setEditKulDevis] = useState("");
+
+  const [editTaxonomy1Title, setEditTaxonomy1Title] = useState("Academic Departments & Batches");
+  const [editTaxonomy1, setEditTaxonomy1] = useState("");
+  const [editTaxonomy2Title, setEditTaxonomy2Title] = useState("Campus Blocks & Centers");
+  const [editTaxonomy2, setEditTaxonomy2] = useState("");
   const [editUpiId, setEditUpiId] = useState("");
 
   const [editAdminName, setEditAdminName] = useState("");
   const [editAdminEmail, setEditAdminEmail] = useState("");
   const [editAdminMobile, setEditAdminMobile] = useState("");
+  const [editAdminRole, setEditAdminRole] = useState("Dean / Principal");
 
   const [editModules, setEditModules] = useState({
     directory: true,
-    marketplace: true,
-    panchang: true,
+    opportunities: true,
+    calendar: true,
     booking: true,
     events: true,
     donations: true,
+    panchang: false,
+    marketplace: false,
   });
   const [editIsActive, setEditIsActive] = useState(true);
   const [savingAdmin, setSavingAdmin] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
-  const loadEditCountryCities = async (code: string) => {
-    const countryObj = COUNTRY_OPTIONS.find((c) => c.code === code);
-    const baseCities = countryObj ? [...countryObj.cities] : [];
-
-    try {
-      const res = await fetch(`/api/communities/cities?country=${encodeURIComponent(code)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.cities && Array.isArray(data.cities)) {
-          data.cities.forEach((customCity: string) => {
-            if (customCity && !baseCities.includes(customCity)) {
-              baseCities.push(customCity);
-            }
-          });
-        }
-      }
-    } catch {}
-
-    setEditSelectedCities(baseCities);
-  };
-
-  const handleEditCountryChange = (newCode: string) => {
-    setEditCountryCode(newCode);
-    loadEditCountryCities(newCode);
-  };
-
-  const handleAddEditCustomCity = () => {
-    const trimmed = editCustomCityInput.trim();
-    if (trimmed && !editSelectedCities.includes(trimmed)) {
-      setEditSelectedCities([...editSelectedCities, trimmed]);
-      setEditCustomCityInput("");
-    }
-  };
-
-  const handleRemoveEditCity = (cityToRemove: string) => {
-    setEditSelectedCities(editSelectedCities.filter((c) => c !== cityToRemove));
-  };
-
-  const handleRestoreEditDefaultCities = () => {
-    loadEditCountryCities(editCountryCode);
-  };
-
-  // WhatsApp & Onboarding Dispatch Modal State
+  // Request Action Loading States
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [reinvitingId, setReinvitingId] = useState<string | null>(null);
   const [dispatchData, setDispatchData] = useState<{
     communityName: string;
     subdomain: string;
@@ -196,83 +187,49 @@ export default function PlatformAdminPage() {
     whatsappUrl: string;
   } | null>(null);
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    showToast("Onboarding link copied to clipboard!");
-    setTimeout(() => setCopiedId(null), 2500);
-  };
-
-  // Check auth status on mount
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const res = await fetch("/api/admin/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          if (data.authenticated) {
-            setIsAuthenticated(true);
-            setAdminUsername(data.username || "Super Admin");
-            fetchData();
-          } else {
-            setIsAuthenticated(false);
-          }
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
     checkSession();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const checkSession = async () => {
     try {
-      const [comRes, reqRes] = await Promise.all([
-        fetch("/api/admin/communities"),
-        fetch("/api/admin/community-requests"),
-      ]);
-      if (comRes.ok) setCommunities(await comRes.json());
-      if (reqRes.ok) setCreationRequests(await reqRes.json());
-    } catch (e) {
-      console.error("Failed to fetch admin data", e);
+      const res = await fetch("/api/admin/communities");
+      if (res.ok) {
+        setIsAuthenticated(true);
+        setAdminUsername("SuperAdmin");
+        fetchData();
+      } else {
+        setIsAuthenticated(false);
+      }
+    } catch {
+      setIsAuthenticated(false);
     } finally {
-      setLoading(false);
+      setCheckingAuth(false);
     }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginError(null);
     setLoggingIn(true);
+    setLoginError(null);
 
     try {
-      const res = await fetch("/api/admin/auth/login", {
+      const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username.trim(), password: password.trim() }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
-      if (res.ok && data.success) {
+      if (res.ok) {
         setIsAuthenticated(true);
         setAdminUsername(data.username || username);
-        setPassword("");
         fetchData();
       } else {
-        setLoginError(data.error || t.invalidCredentialsMsg || "Invalid username or password");
+        setLoginError(data.error || "Authentication failed. Please verify credentials.");
       }
     } catch {
-      setLoginError("Authentication failed. Please check your server connection.");
+      setLoginError("Failed to connect to authentication server.");
     } finally {
       setLoggingIn(false);
     }
@@ -280,131 +237,58 @@ export default function PlatformAdminPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/auth/logout", { method: "POST" });
+      await fetch("/api/admin/login", { method: "DELETE" });
     } catch {}
     setIsAuthenticated(false);
-    setAdminUsername("");
     setUsername("");
     setPassword("");
+    setCommunities([]);
+    setCreationRequests([]);
   };
 
-  const [approvingId, setApprovingId] = useState<string | null>(null);
-  const [reinvitingId, setReinvitingId] = useState<string | null>(null);
-
-  const handleRegenerateInvite = async (id: string) => {
-    setReinvitingId(id);
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      const res = await fetch(`/api/admin/communities/${id}/reinvite`, {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        showToast("Fresh onboarding invite link generated!");
-        setDispatchData({
-          communityName: data.communityName,
-          subdomain: data.subdomain,
-          adminName: data.adminName,
-          adminEmail: data.adminEmail,
-          adminMobile: data.adminMobile,
-          activationUrl: data.activationUrl,
-          whatsappUrl: data.whatsappUrl,
-        });
-        fetchData();
-      } else {
-        alert(data.error || "Failed to regenerate invite link");
+      const [commsRes, reqsRes] = await Promise.all([
+        fetch("/api/admin/communities"),
+        fetch("/api/admin/community-requests"),
+      ]);
+
+      if (commsRes.ok) {
+        const commsData = await commsRes.json();
+        setCommunities(commsData);
       }
-    } catch (e: any) {
-      alert("Network Error: " + e.message);
-    } finally {
-      setReinvitingId(null);
-    }
-  };
-
-
-  const handleApproveRequest = async (reqId: string, provisionNow: boolean = true) => {
-    setApprovingId(reqId);
-    try {
-      const res = await fetch(`/api/admin/community-requests/${reqId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: "approved",
-          provisionNow,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        showToast("Request approved & Community Admin account provisioned!");
-        fetchData();
-
-        if (data.activationUrl && data.whatsappUrl) {
-          setDispatchData({
-            communityName: data.name || data.subdomain,
-            subdomain: data.subdomain,
-            adminName: data.adminName || "Admin",
-            adminEmail: data.adminEmail || "",
-            adminMobile: data.adminMobile || "",
-            activationUrl: data.activationUrl,
-            whatsappUrl: data.whatsappUrl,
-          });
-        }
-      } else {
-        alert("Approval failed: " + (data.error || "Server returned error status " + res.status));
-      }
-    } catch (err: any) {
-      alert("Network Error: " + err.message);
-    } finally {
-      setApprovingId(null);
-    }
-  };
-
-  const handleRejectRequest = async (reqId: string) => {
-    if (!confirm("Reject this community creation request?")) return;
-    try {
-      const res = await fetch(`/api/admin/community-requests/${reqId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "rejected" }),
-      });
-      if (res.ok) {
-        showToast("Request rejected");
-        fetchData();
+      if (reqsRes.ok) {
+        const reqsData = await reqsRes.json();
+        setCreationRequests(reqsData);
       }
     } catch {}
+    setLoading(false);
   };
 
-  const handleDeleteRequest = async (reqId: string, reqName: string) => {
-    if (!confirm(`Are you sure you want to permanently delete the community request for "${reqName}"?`)) return;
-    try {
-      const res = await fetch(`/api/admin/community-requests/${reqId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        showToast("Community creation request deleted");
-        fetchData();
-      } else {
-        const data = await res.json();
-        alert(data.error || "Failed to delete request");
-      }
-    } catch {
-      alert("Failed to delete request. Please check network connection.");
-    }
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2500);
   };
 
   const handleEditLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      alert("Logo image size must be under 5MB");
+      alert("Logo file size must be less than 5MB");
       return;
     }
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      if (dataUrl) {
-        setEditLogo(dataUrl);
-        setEditLogoPreview(dataUrl);
-      }
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      setEditLogo(base64);
+      setEditLogoPreview(base64);
     };
     reader.readAsDataURL(file);
   };
@@ -415,16 +299,17 @@ export default function PlatformAdminPage() {
     setEditError(null);
     setEditName(c.name || "");
     setEditSubdomain(c.subdomain || "");
+    setEditCommunityType(c.communityType || "college");
     setEditLogo(c.logo || "");
     setEditLogoPreview(c.logo || null);
     setEditDescription(c.description || "");
+    setEditWebsite(c.website || "");
     setEditPrimaryLanguage(c.primaryLanguage || "en");
 
     const foundCountry = COUNTRY_OPTIONS.find(
-      (co) => co.label === c.country || co.code === c.country
+      (co) => co.label.toLowerCase() === (c.country || "").toLowerCase() || co.code === c.country
     );
-    const initialCode = foundCountry ? foundCountry.code : "IN";
-    setEditCountryCode(initialCode);
+    setEditCountryCode(foundCountry?.code || "IN");
 
     setEditSelectedCities(
       Array.isArray(c.cities) && c.cities.length > 0
@@ -435,21 +320,36 @@ export default function PlatformAdminPage() {
     );
     setEditCustomCityInput("");
 
-    setEditGotras(Array.isArray(c.gotras) ? c.gotras.join(", ") : "");
-    setEditKulDevis(Array.isArray(c.kulDevis) ? c.kulDevis.join(", ") : "");
-    setEditUpiId(c.upiId || "");
+    setEditTaxonomy1Title(c.taxonomy1Title || (c.communityType === "college" ? "Academic Departments & Batches" : "Gotras / Chapters"));
+    const tax1 = Array.isArray(c.taxonomy1Items) && c.taxonomy1Items.length > 0
+      ? c.taxonomy1Items
+      : Array.isArray(c.gotras) ? c.gotras : [];
+    setEditTaxonomy1(tax1.join(", "));
 
+    setEditTaxonomy2Title(c.taxonomy2Title || (c.communityType === "college" ? "Campus Blocks & Centers" : "Regional Hubs"));
+    const tax2 = Array.isArray(c.taxonomy2Items) && c.taxonomy2Items.length > 0
+      ? c.taxonomy2Items
+      : Array.isArray(c.kulDevis) ? c.kulDevis : [];
+    setEditTaxonomy2(tax2.join(", "));
+
+    setEditUpiId(c.upiId || "");
     setEditAdminName(c.adminName || "");
     setEditAdminEmail(c.adminEmail || "");
     setEditAdminMobile(c.adminMobile || "");
+    setEditAdminRole(c.adminRole || "Dean / Principal");
+
+    const opps = c.modules?.opportunities ?? c.modules?.marketplace ?? true;
+    const cal = c.modules?.calendar ?? c.modules?.panchang ?? true;
 
     setEditModules({
       directory: c.modules?.directory ?? true,
-      marketplace: c.modules?.marketplace ?? true,
-      panchang: c.modules?.panchang ?? true,
+      opportunities: opps,
+      calendar: cal,
       booking: c.modules?.booking ?? true,
       events: c.modules?.events ?? true,
       donations: c.modules?.donations ?? true,
+      panchang: c.modules?.panchang ?? false,
+      marketplace: c.modules?.marketplace ?? false,
     });
     setEditIsActive(c.isActive !== false);
   };
@@ -464,22 +364,32 @@ export default function PlatformAdminPage() {
     const selectedCountryObj = COUNTRY_OPTIONS.find((c) => c.code === editCountryCode);
 
     try {
+      const parsedTax1 = editTaxonomy1.split(",").map((s) => s.trim()).filter(Boolean);
+      const parsedTax2 = editTaxonomy2.split(",").map((s) => s.trim()).filter(Boolean);
+
       const res = await fetch(`/api/admin/communities/${editingCommunity._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editName.trim(),
+          communityType: editCommunityType,
           logo: editLogo.trim() || undefined,
           description: editDescription.trim(),
+          website: editWebsite.trim() || undefined,
           primaryLanguage: editPrimaryLanguage,
           country: selectedCountryObj?.label || editCountryCode,
           cities: editSelectedCities,
-          gotras: editGotras.split(",").map((s) => s.trim()).filter(Boolean),
-          kulDevis: editKulDevis.split(",").map((s) => s.trim()).filter(Boolean),
+          taxonomy1Title: editTaxonomy1Title.trim(),
+          taxonomy1Items: parsedTax1,
+          taxonomy2Title: editTaxonomy2Title.trim(),
+          taxonomy2Items: parsedTax2,
+          gotras: parsedTax1,
+          kulDevis: parsedTax2,
           upiId: editUpiId.trim(),
           adminName: editAdminName.trim(),
           adminEmail: editAdminEmail.trim().toLowerCase(),
           adminMobile: editAdminMobile.trim(),
+          adminRole: editAdminRole.trim(),
           modules: editModules,
           isActive: editIsActive,
         }),
@@ -499,7 +409,6 @@ export default function PlatformAdminPage() {
       setSavingAdmin(false);
     }
   };
-
 
   const handleToggleCommunityStatus = async (c: Community) => {
     const newStatus = !c.isActive;
@@ -521,69 +430,164 @@ export default function PlatformAdminPage() {
     try {
       const res = await fetch(`/api/admin/communities/${c._id}`, { method: "DELETE" });
       if (res.ok) {
-        showToast("Community deleted");
+        showToast("Community deleted permanently");
         fetchData();
       }
     } catch {}
   };
 
-  // Loading Screen while checking auth
+  const handleApproveRequest = async (id: string, provisionNow = true) => {
+    setApprovingId(id);
+    try {
+      const res = await fetch(`/api/admin/community-requests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "approved", provisionNow }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showToast("Request Approved & Admin Account Seeded!");
+        if (data.activationUrl) {
+          setDispatchData({
+            communityName: data.name,
+            subdomain: data.subdomain,
+            adminName: data.adminName || "Community Admin",
+            adminEmail: data.adminEmail || "",
+            adminMobile: data.adminMobile || "",
+            activationUrl: data.activationUrl,
+            whatsappUrl: data.whatsappUrl,
+          });
+        }
+        fetchData();
+      } else {
+        alert(data.error || "Approval failed");
+      }
+    } catch {
+      alert("Failed to connect to approval service");
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  const handleRejectRequest = async (id: string) => {
+    if (!confirm("Are you sure you want to reject this community creation request?")) return;
+    try {
+      const res = await fetch(`/api/admin/community-requests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "rejected" }),
+      });
+      if (res.ok) {
+        showToast("Request Rejected");
+        fetchData();
+      }
+    } catch {}
+  };
+
+  const handleDeleteRequest = async (id: string, name: string) => {
+    if (!confirm(`Delete creation request for "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/community-requests/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        showToast("Request deleted");
+        fetchData();
+      }
+    } catch {}
+  };
+
+  const handleRegenerateInvite = async (requestIdOrCommId: string) => {
+    setReinvitingId(requestIdOrCommId);
+    try {
+      const res = await fetch(`/api/admin/community-requests/${requestIdOrCommId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.activationUrl) {
+          setDispatchData({
+            communityName: data.name,
+            subdomain: data.subdomain,
+            adminName: data.adminName || "Admin",
+            adminEmail: data.adminEmail || "",
+            adminMobile: data.adminMobile || "",
+            activationUrl: data.activationUrl,
+            whatsappUrl: data.whatsappUrl,
+          });
+        } else {
+          showToast("Admin account already active or link expired. Please regenerate via reset.");
+        }
+      }
+    } catch {}
+    setReinvitingId(null);
+  };
+
+  const getCommunityTypeBadge = (type?: string) => {
+    switch (type) {
+      case "college":
+        return { label: "College / Campus", color: "bg-blue-50 text-blue-700 border-blue-200" };
+      case "alumni":
+        return { label: "Alumni Network", color: "bg-violet-50 text-violet-700 border-violet-200" };
+      case "cultural":
+        return { label: "Cultural Clan", color: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+      case "industry":
+        return { label: "Industry Guild", color: "bg-indigo-50 text-indigo-700 border-indigo-200" };
+      case "ngo":
+        return { label: "NGO / Impact", color: "bg-rose-50 text-rose-700 border-rose-200" };
+      default:
+        return { label: "Community", color: "bg-slate-100 text-slate-700 border-slate-200" };
+    }
+  };
+
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white p-4 font-sans">
-        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-bold text-slate-400 tracking-wider uppercase">Verifying Authorization...</p>
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
+        <div className="flex items-center space-x-3">
+          <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium">Verifying super admin security authorization...</span>
+        </div>
       </div>
     );
   }
 
-  // Unauthenticated Login UI
+  // Unauthenticated Login Modal
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between p-4 sm:p-6 font-sans relative overflow-hidden">
-        {/* Background Subtle Gradient Spheres */}
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between p-6 relative overflow-hidden font-sans">
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Top Bar */}
-        <div className="max-w-5xl w-full mx-auto flex items-center justify-between z-10 py-2">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-extrabold text-sm tracking-tight text-white">MySocialClan</span>
-          </div>
-          <LanguageDropdown className="bg-slate-900/80 border-slate-800 text-white" />
+        <div className="flex items-center justify-between z-10 max-w-5xl mx-auto w-full">
+          <a
+            href="/"
+            className="flex items-center space-x-2 text-xs font-bold text-slate-400 hover:text-white transition-colors text-decoration-none"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            <span>{t.backHome}</span>
+          </a>
+          <LanguageDropdown />
         </div>
 
-        {/* Main Login Form Container */}
-        <div className="max-w-md w-full mx-auto my-auto z-10 py-8">
-          <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl shadow-black/50 space-y-6">
+        <div className="max-w-md w-full mx-auto my-auto z-10 py-10">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl space-y-6">
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto text-indigo-400 mb-4">
-                <Lock className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 mx-auto shadow-lg shadow-indigo-500/20">
+                <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6 text-indigo-400" />
+                </div>
               </div>
-              <h1 className="text-xl font-black tracking-tight text-white">
-                {t.adminLoginTitle || "Super Admin Portal"}
-              </h1>
-              <p className="text-xs text-slate-400">
-                {t.adminLoginSub || "Please sign in with authorized credentials to access platform controls."}
-              </p>
+              <h1 className="text-xl font-black text-white tracking-tight">Super Admin Portal</h1>
+              <p className="text-xs text-slate-400">Restricted multi-tenant SaaS provisioning & control</p>
             </div>
 
             {loginError && (
-              <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 flex items-center space-x-3 text-rose-400 text-xs font-semibold animate-shake">
-                <ShieldAlert className="w-5 h-5 shrink-0" />
+              <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-2xl text-xs flex items-center space-x-2.5">
+                <ShieldAlert className="w-4 h-4 shrink-0" />
                 <span>{loginError}</span>
               </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-4">
-              {/* Username Input */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-300">
-                  {t.usernameLabel || "Admin Username"}
-                </label>
+                <label className="block text-xs font-bold text-slate-300">Admin Username</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                     <User className="w-4 h-4" />
@@ -594,16 +598,13 @@ export default function PlatformAdminPage() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter admin username"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all font-medium"
                   />
                 </div>
               </div>
 
-              {/* Password Input */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-300">
-                  {t.passwordLabel || "Security Password"}
-                </label>
+                <label className="block text-xs font-bold text-slate-300">Security Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                     <Lock className="w-4 h-4" />
@@ -614,7 +615,7 @@ export default function PlatformAdminPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter security password"
-                    className="w-full pl-10 pr-10 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium"
+                    className="w-full pl-10 pr-10 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all font-medium"
                   />
                   <button
                     type="button"
@@ -626,17 +627,16 @@ export default function PlatformAdminPage() {
                 </div>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loggingIn}
-                className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all cursor-pointer border-0 flex items-center justify-center space-x-2 active:scale-98 disabled:opacity-50"
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-indigo-600/30 transition-all cursor-pointer border-0 flex items-center justify-center space-x-2 disabled:opacity-50"
               >
                 {loggingIn ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>{t.loginBtn || "Authenticate & Access Portal"}</span>
+                    <span>Authenticate & Access Portal</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -645,7 +645,6 @@ export default function PlatformAdminPage() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="text-center text-[11px] text-slate-600 z-10">
           Protected Area · Authorized Personnel Only
         </div>
@@ -703,7 +702,6 @@ export default function PlatformAdminPage() {
             <div className="space-y-3">
               <p className="text-xs font-bold text-slate-700">Choose Invitation Method:</p>
 
-              {/* Direct WhatsApp Invite Button */}
               <a
                 href={dispatchData.whatsappUrl}
                 target="_blank"
@@ -715,7 +713,6 @@ export default function PlatformAdminPage() {
                 <ExternalLink className="w-3.5 h-3.5 opacity-80" />
               </a>
 
-              {/* Copy Onboarding Link Button */}
               <button
                 type="button"
                 onClick={() => copyToClipboard(dispatchData.activationUrl, "modal-dispatch")}
@@ -775,61 +772,36 @@ export default function PlatformAdminPage() {
               </button>
             </div>
 
-            {/* Progress Header & Step Tabs */}
-            <div className="bg-slate-50/80 border border-slate-200/80 p-4 rounded-2xl space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-600 mb-1">
-                <span>Wizard Configuration Step</span>
-                <span className="font-mono text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
-                  Step {editStep} of 4
-                </span>
-              </div>
-
-              {/* Step Tab Buttons */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  { num: 1 as const, title: "Subdomain (Locked)" },
-                  { num: 2 as const, title: "Organization Info" },
-                  { num: 3 as const, title: "Admin Contact" },
-                  { num: 4 as const, title: "Social Modules" },
-                ].map((tab) => (
-                  <button
-                    key={tab.num}
-                    type="button"
-                    onClick={() => setEditStep(tab.num)}
-                    className={`flex items-center space-x-2 p-2 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
-                      editStep === tab.num
-                        ? "bg-indigo-600 border-indigo-600 text-white shadow-xs"
-                        : editStep > tab.num
-                        ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
+            {/* Step Indicators */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { num: 1 as const, title: "Subdomain (Locked)" },
+                { num: 2 as const, title: "Organization Info" },
+                { num: 3 as const, title: "Admin Contact" },
+                { num: 4 as const, title: "Modules & Status" },
+              ].map((tab) => (
+                <button
+                  key={tab.num}
+                  type="button"
+                  onClick={() => setEditStep(tab.num)}
+                  className={`flex items-center space-x-2 p-2 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
+                    editStep === tab.num
+                      ? "bg-indigo-600 border-indigo-600 text-white shadow-xs"
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 font-extrabold ${
+                      editStep === tab.num ? "bg-white text-indigo-600" : "bg-slate-200 text-slate-600"
                     }`}
                   >
-                    <div
-                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 font-extrabold ${
-                        editStep === tab.num
-                          ? "bg-white text-indigo-600"
-                          : editStep > tab.num
-                          ? "bg-indigo-600 text-white"
-                          : "bg-slate-200 text-slate-600"
-                      }`}
-                    >
-                      {editStep > tab.num ? <Check className="w-3 h-3 stroke-[3]" /> : tab.num}
-                    </div>
-                    <span className="truncate">{tab.title}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Linear Progress Bar */}
-              <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 h-full transition-all duration-300"
-                  style={{ width: `${(editStep / 4) * 100}%` }}
-                />
-              </div>
+                    {tab.num}
+                  </div>
+                  <span className="truncate">{tab.title}</span>
+                </button>
+              ))}
             </div>
 
-            {/* Error banner if any */}
             {editError && (
               <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs font-semibold flex items-center space-x-2">
                 <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
@@ -837,341 +809,161 @@ export default function PlatformAdminPage() {
               </div>
             )}
 
-            {/* STEP 1: SUBDOMAIN (READ-ONLY / LOCKED) */}
+            {/* STEP 1: SUBDOMAIN */}
             {editStep === 1 && (
               <div className="space-y-5">
                 <div>
-                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Step 1: Subdomain Identifier (Locked)</span>
-                  </div>
                   <h4 className="text-lg font-black text-slate-900">Community Subdomain Hostname</h4>
                   <p className="text-xs text-slate-600 mt-1">
-                    Subdomains are fixed network identifiers and cannot be altered after creation. All other details in steps 2, 3, and 4 are fully editable.
+                    Subdomains are permanent tenant identifiers bound to offline DB routing.
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Subdomain Hostname (Read-Only)
-                  </label>
-                  <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-100/90 overflow-hidden cursor-not-allowed opacity-90">
-                    <input
-                      type="text"
-                      disabled
-                      value={editSubdomain}
-                      className="w-full px-4 py-3.5 bg-transparent text-sm font-mono font-bold text-slate-700 outline-none border-0 cursor-not-allowed"
-                    />
-                    <span className="px-4 py-3.5 bg-slate-200/80 border-l border-slate-200 text-xs font-mono font-bold text-indigo-700 whitespace-nowrap select-none shrink-0">
-                      .mysocialclan.com
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start space-x-3 text-xs text-amber-900 leading-relaxed font-medium">
-                  <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold block text-amber-950 mb-0.5">Subdomain is Permanent</span>
-                    <span>
-                      The subdomain <strong>{editSubdomain}.mysocialclan.com</strong> is bound to the community database tenant and offline SSL routing. Click <strong>Next</strong> to edit organization details, admin contacts, and feature modules.
-                    </span>
-                  </div>
+                <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-100/90 overflow-hidden opacity-90">
+                  <input
+                    type="text"
+                    disabled
+                    value={editSubdomain}
+                    className="w-full px-4 py-3.5 bg-transparent text-sm font-mono font-bold text-slate-700 outline-none border-0"
+                  />
+                  <span className="px-4 py-3.5 bg-slate-200/80 border-l border-slate-200 text-xs font-mono font-bold text-indigo-700 whitespace-nowrap select-none shrink-0">
+                    .mysocialclan.com
+                  </span>
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 flex justify-end">
                   <button
                     type="button"
                     onClick={() => setEditStep(2)}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-black text-xs shadow-lg shadow-indigo-600/25 border-0 cursor-pointer transition-all flex items-center justify-center space-x-2"
+                    className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black text-xs shadow-md border-0 cursor-pointer"
                   >
                     <span>Next: Organization Details</span>
-                    <ChevronRight className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 2: ORGANIZATION DETAILS */}
+            {/* STEP 2: ORG DETAILS & DYNAMIC TAXONOMY */}
             {editStep === 2 && (
-              <div className="space-y-5">
-                <div>
-                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
-                    <Building2 className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Step 2: Organization Info</span>
-                  </div>
-                  <h4 className="text-lg font-black text-slate-900">Community & Regional Details</h4>
-                </div>
-
-                {/* Logo Image URL / Device Upload */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Community Logo URL / Image Link
-                  </label>
-                  <input
-                    type="file"
-                    ref={editLogoInputRef}
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleEditLogoFileUpload}
-                  />
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <div
-                      onClick={() => editLogoInputRef.current?.click()}
-                      className="relative w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer transition-all group shadow-2xs"
-                      title="Click to upload logo from device"
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Community / Network Type
+                    </label>
+                    <select
+                      value={editCommunityType}
+                      onChange={(e) => setEditCommunityType(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-indigo-600 cursor-pointer"
                     >
-                      {editLogoPreview || editLogo ? (
-                        <>
-                          <img
-                            src={editLogoPreview || editLogo}
-                            alt="Community Logo"
-                            className="w-full h-full object-cover"
-                            onError={() => setEditLogoPreview(null)}
-                          />
-                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                            <Upload className="w-4 h-4 text-white" />
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center text-slate-400 group-hover:text-indigo-600 transition-colors">
-                          <ImagePlus className="w-5 h-5" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="text"
-                          placeholder="Paste image URL (https://...) or click Upload"
-                          value={editLogo.startsWith("data:") ? "Local Image File Loaded" : editLogo}
-                          onChange={(e) => {
-                            setEditLogo(e.target.value);
-                            setEditLogoPreview(e.target.value);
-                          }}
-                          className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => editLogoInputRef.current?.click()}
-                          className="px-3.5 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-all flex items-center shrink-0 cursor-pointer"
-                        >
-                          <Upload className="w-3.5 h-3.5 mr-1.5" />
-                          Upload
-                        </button>
-                        {(editLogo || editLogoPreview) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditLogo("");
-                              setEditLogoPreview(null);
-                              if (editLogoInputRef.current) editLogoInputRef.current.value = "";
-                            }}
-                            className="p-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-xl transition-all shrink-0 cursor-pointer"
-                            title="Remove Logo"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-[11px] font-medium text-slate-500">
-                        Upload an image file from your device (PNG, JPG, SVG up to 5MB) or enter a direct image URL.
-                      </p>
-                    </div>
+                      <option value="college">Colleges & Academic Institutions</option>
+                      <option value="alumni">Alumni Associations</option>
+                      <option value="cultural">Cultural & Clan Trusts</option>
+                      <option value="industry">Industry & Trade Associations</option>
+                      <option value="ngo">NGOs & Non-Profits</option>
+                      <option value="custom">Custom Network</option>
+                    </select>
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Community Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Global Alumni Association / NDS Clan"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                  />
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Community Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Country *
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Website URL
                     </label>
-                    <select
-                      value={editCountryCode}
-                      onChange={(e) => handleEditCountryChange(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
-                    >
-                      {COUNTRY_OPTIONS.map((c) => (
-                        <option key={c.code} value={c.code}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      value={editWebsite}
+                      onChange={(e) => setEditWebsite(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
+                    />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Primary Language
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Description / Motto
                     </label>
-                    <select
-                      value={editPrimaryLanguage}
-                      onChange={(e) => setEditPrimaryLanguage(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
-                    >
-                      <option value="en">English (EN)</option>
-                      <option value="ar">العربية (Arabic - GCC)</option>
-                      <option value="hi">हिन्दी (Hindi)</option>
-                      <option value="ur">اردو (Urdu)</option>
-                      <option value="ml">മലയാളം (Malayalam)</option>
-                      <option value="es">Español (ES)</option>
-                      <option value="fr">Français (FR)</option>
-                      <option value="de">Deutsch (DE)</option>
-                      <option value="ja">日本語 (Japanese)</option>
-                      <option value="pt">Português (Brasil)</option>
-                      <option value="fil">Filipino (Tagalog)</option>
-                    </select>
+                    <input
+                      type="text"
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
+                    />
                   </div>
                 </div>
 
-                {/* Predefined Regional Cities Chip Selector */}
-                <div className="space-y-2.5 p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                {/* Dynamic Taxonomy 1 */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Predefined Regional Cities</span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleRestoreEditDefaultCities}
-                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center space-x-1 border-0 bg-transparent cursor-pointer"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>Reset to Country Defaults</span>
-                    </button>
-                  </div>
-
-                  {/* Active Chips */}
-                  <div className="flex flex-wrap gap-1.5 min-h-[32px] items-center">
-                    {editSelectedCities.map((city) => (
-                      <span
-                        key={city}
-                        className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white border border-indigo-200 text-indigo-900 text-xs font-bold shadow-2xs group"
-                      >
-                        <span>{city}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveEditCity(city)}
-                          className="w-4 h-4 rounded-full bg-slate-100 group-hover:bg-rose-500 group-hover:text-white text-slate-500 transition-colors flex items-center justify-center border-0 cursor-pointer text-[10px]"
-                        >
-                          <X className="w-2.5 h-2.5 stroke-[3]" />
-                        </button>
-                      </span>
-                    ))}
-                    {editSelectedCities.length === 0 && (
-                      <span className="text-xs text-slate-400 italic">No cities selected. Type below to add custom cities.</span>
-                    )}
-                  </div>
-
-                  {/* Add Custom City Input */}
-                  <div className="flex items-center space-x-2 pt-1">
-                    <input
-                      type="text"
-                      placeholder="Add custom city (e.g. Jaipur, Dubai, San Jose)..."
-                      value={editCustomCityInput}
-                      onChange={(e) => setEditCustomCityInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddEditCustomCity();
-                        }
-                      }}
-                      className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 transition-all placeholder:text-slate-400"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddEditCustomCity}
-                      disabled={!editCustomCityInput.trim()}
-                      className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-1 shadow-2xs shrink-0"
-                    >
-                      <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                      <span>Add City</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Gotras / Guild Chapters (comma separated)
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Taxonomy 1 (e.g. Departments / Batches / Gotras)
                     </label>
                     <input
                       type="text"
-                      value={editGotras}
-                      onChange={(e) => setEditGotras(e.target.value)}
-                      placeholder="Chapter A, Guild North, Guild South"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                      value={editTaxonomy1Title}
+                      onChange={(e) => setEditTaxonomy1Title(e.target.value)}
+                      className="text-[11px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-slate-200 outline-none"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      KulDevis / Regional Hubs (comma separated)
-                    </label>
-                    <input
-                      type="text"
-                      value={editKulDevis}
-                      onChange={(e) => setEditKulDevis(e.target.value)}
-                      placeholder="Primary Hub, Secondary Board"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Community Description / Tagline
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Short description or tagline of this community network"
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white resize-none transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    UPI ID (Member Donations / Fees)
-                  </label>
                   <input
                     type="text"
-                    placeholder="e.g. organization@bank / upi"
-                    value={editUpiId}
-                    onChange={(e) => setEditUpiId(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                    placeholder="Comma-separated items (e.g. Computer Science, Mechanical, MBA)"
+                    value={editTaxonomy1}
+                    onChange={(e) => setEditTaxonomy1(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
                   />
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                {/* Dynamic Taxonomy 2 */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Taxonomy 2 (e.g. Campus Blocks / Regional Hubs / Chapters)
+                    </label>
+                    <input
+                      type="text"
+                      value={editTaxonomy2Title}
+                      onChange={(e) => setEditTaxonomy2Title(e.target.value)}
+                      className="text-[11px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-slate-200 outline-none"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Comma-separated items (e.g. Main Academic Block, North Wing)"
+                    value={editTaxonomy2}
+                    onChange={(e) => setEditTaxonomy2(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setEditStep(1)}
-                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
+                    className="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer"
                   >
                     Back
                   </button>
                   <button
                     type="button"
-                    disabled={!editName.trim()}
                     onClick={() => setEditStep(3)}
-                    className="px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
+                    className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-xs border-0 cursor-pointer"
                   >
-                    <span>Next: Admin Details</span>
-                    <ChevronRight className="w-4 h-4 stroke-[3]" />
+                    Next: Admin Contact
                   </button>
                 </div>
               </div>
@@ -1179,124 +971,105 @@ export default function PlatformAdminPage() {
 
             {/* STEP 3: ADMIN CONTACT */}
             {editStep === 3 && (
-              <div className="space-y-5">
-                <div>
-                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
-                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Step 3: Admin Contact</span>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Admin Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editAdminName}
+                      onChange={(e) => setEditAdminName(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
+                    />
                   </div>
-                  <h4 className="text-lg font-black text-slate-900">Community Lead Contact Information</h4>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Admin Role / Designation
+                    </label>
+                    <input
+                      type="text"
+                      value={editAdminRole}
+                      onChange={(e) => setEditAdminRole(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Community Admin Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. John Doe / Dr. Rajesh Shah"
-                    value={editAdminName}
-                    onChange={(e) => setEditAdminName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Admin Email
+                    </label>
+                    <input
+                      type="email"
+                      value={editAdminEmail}
+                      onChange={(e) => setEditAdminEmail(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Admin Mobile / WhatsApp
+                    </label>
+                    <input
+                      type="tel"
+                      value={editAdminMobile}
+                      onChange={(e) => setEditAdminMobile(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Admin Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="e.g. admin@organization.com"
-                    value={editAdminEmail}
-                    onChange={(e) => setEditAdminEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                  />
-                  {editAdminEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editAdminEmail.trim()) && (
-                    <p className="text-[11px] text-rose-500 font-semibold mt-1">Please enter a valid email address (e.g., admin@domain.com)</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Admin Mobile / WhatsApp Number *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="Contact mobile / WhatsApp number"
-                    value={editAdminMobile}
-                    onChange={(e) => setEditAdminMobile(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                  />
-                </div>
-
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setEditStep(2)}
-                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
+                    className="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer"
                   >
                     Back
                   </button>
                   <button
                     type="button"
-                    disabled={!editAdminName.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editAdminEmail.trim()) || !editAdminMobile.trim()}
                     onClick={() => setEditStep(4)}
-                    className="px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
+                    className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-xs border-0 cursor-pointer"
                   >
-                    <span>Next: Social Modules</span>
-                    <ChevronRight className="w-4 h-4 stroke-[3]" />
+                    Next: Modules & Status
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 4: SOCIAL MODULES & ACTIVE STATUS */}
+            {/* STEP 4: MODULES & STATUS */}
             {editStep === 4 && (
-              <div className="space-y-5">
-                <div>
-                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Step 4: Social Modules & Status</span>
-                  </div>
-                  <h4 className="text-lg font-black text-slate-900">Feature Modules & Activation Status</h4>
-                </div>
-
-                <div className="space-y-2.5">
+              <div className="space-y-4">
+                <div className="space-y-2">
                   {[
-                    { key: "directory" as const, label: "Verified Member Feed & Directory", icon: Users, desc: "Private member profiles, family trees, and verified identity badges." },
-                    { key: "marketplace" as const, label: "Social Business & Opportunities", icon: ShoppingBag, desc: "Community marketplace, business directory, and job listings." },
-                    { key: "panchang" as const, label: "Community Calendar & Timelines", icon: Calendar, desc: "Event schedules, daily updates, and auspicious dates." },
-                    { key: "booking" as const, label: "Venue & Space Bookings", icon: Landmark, desc: "Community hall & venue reservations with instant approval." },
-                    { key: "events" as const, label: "Announcements & Events Hub", icon: Megaphone, desc: "Official updates, member discussions, and event RSVPs." },
-                    { key: "donations" as const, label: "Direct Member Support Payments", icon: Heart, desc: "0% fee contributions directly into your organization's account." },
+                    { key: "directory" as const, label: "Verified Member / Student Directory", desc: "Private profiles, batch tags, roll-number verification, and campus feeds." },
+                    { key: "opportunities" as const, label: "Internships, Career Referrals & Opportunities Hub", desc: "Campus drives, verified internships, and peer job referrals." },
+                    { key: "calendar" as const, label: "Academic Calendar, Timelines & Schedules", desc: "Exam schedules, deadlines, hackathons, and fest calendars." },
+                    { key: "booking" as const, label: "Labs, Auditoriums & Venue Bookings", desc: "Reserve campus labs, halls, and meeting spaces." },
+                    { key: "events" as const, label: "Campus Notices & Announcements Hub", desc: "Official updates, fest announcements, and event RSVPs." },
+                    { key: "donations" as const, label: "0% Fee Direct Contributions & Grants", desc: "Direct support for fests, clubs, and research grants." },
                   ].map((mod) => {
-                    const Icon = mod.icon;
                     const isChecked = editModules[mod.key];
                     return (
                       <label
                         key={mod.key}
                         onClick={() => setEditModules({ ...editModules, [mod.key]: !isChecked })}
-                        className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
-                          isChecked
-                            ? "bg-indigo-50/80 border-indigo-300 text-slate-900 shadow-2xs"
-                            : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                        className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                          isChecked ? "bg-indigo-50/80 border-indigo-300 text-slate-900" : "bg-slate-50 border-slate-200 text-slate-600"
                         }`}
                       >
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-2 rounded-xl ${isChecked ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-500"}`}>
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold block">{mod.label}</span>
-                            <span className="text-[11px] text-slate-500">{mod.desc}</span>
-                          </div>
+                        <div>
+                          <span className="text-xs font-bold block">{mod.label}</span>
+                          <span className="text-[10px] text-slate-500">{mod.desc}</span>
                         </div>
                         <div
-                          className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                          className={`w-5 h-5 rounded-md border flex items-center justify-center ${
                             isChecked ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 bg-white"
                           }`}
                         >
@@ -1307,12 +1080,8 @@ export default function PlatformAdminPage() {
                   })}
                 </div>
 
-                {/* Active Status Toggle */}
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
-                  <div>
-                    <span className="font-bold text-xs text-slate-800 block">Community Active Status</span>
-                    <span className="text-[11px] text-slate-500">Disabled communities cannot be accessed by members</span>
-                  </div>
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                  <span className="font-bold text-xs text-slate-800">Community Active Status</span>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -1324,11 +1093,11 @@ export default function PlatformAdminPage() {
                   </label>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setEditStep(3)}
-                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
+                    className="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer"
                   >
                     Back
                   </button>
@@ -1336,10 +1105,10 @@ export default function PlatformAdminPage() {
                     type="button"
                     disabled={savingAdmin}
                     onClick={() => handleSaveCommunity()}
-                    className="px-8 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-black rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-2 shadow-lg shadow-indigo-600/25"
+                    className="px-8 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black rounded-xl border-0 cursor-pointer flex items-center space-x-2"
                   >
                     {savingAdmin ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Saving...</span>
                     ) : (
                       <>
                         <Save className="w-4 h-4" />
@@ -1353,7 +1122,6 @@ export default function PlatformAdminPage() {
           </div>
         </div>
       )}
-
 
       {/* Header */}
       <div className="max-w-5xl mx-auto flex items-center justify-between pb-6 border-b border-slate-200 mb-8 gap-4 flex-wrap sm:flex-nowrap">
@@ -1378,19 +1146,19 @@ export default function PlatformAdminPage() {
             className="flex items-center space-x-1.5 text-xs font-bold text-rose-700 hover:text-white px-3.5 py-2 bg-rose-50 hover:bg-rose-600 rounded-xl border border-rose-200 transition-all cursor-pointer shadow-2xs"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>{t.logoutBtn || "Sign Out"}</span>
+            <span>Sign Out</span>
           </button>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto space-y-8">
-        {/* Pending Offline Creation Requests */}
+        {/* Pending Creation Requests */}
         <div className="bg-white border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 rounded-full bg-amber-500 animate-ping" />
               <h2 className="text-base font-black text-slate-900">
-                {t.pendingRequestsTitle} ({creationRequests.filter((r) => r.status === "pending").length})
+                Pending Creation Requests ({creationRequests.filter((r) => r.status === "pending").length})
               </h2>
             </div>
           </div>
@@ -1401,121 +1169,108 @@ export default function PlatformAdminPage() {
             <p className="text-xs text-slate-500 italic py-2">{t.noPendingRequests}</p>
           ) : (
             <div className="space-y-3">
-              {creationRequests.map((req) => (
-                <div
-                  key={req._id}
-                  className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs"
-                >
-                  <div>
-                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                      <span className="font-black text-slate-900 text-sm">{req.name}</span>
-                      <span className="font-mono text-indigo-600 font-bold bg-indigo-50 px-2.5 py-0.5 rounded-md text-[11px] border border-indigo-200/60">
-                        {req.subdomain}.mysocialclan.com
-                      </span>
-                      {req.primaryLanguage && (
-                        <span className="uppercase text-[10px] font-extrabold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md">
-                          LANG: {req.primaryLanguage}
+              {creationRequests.map((req) => {
+                const typeBadge = getCommunityTypeBadge(req.communityType);
+                return (
+                  <div
+                    key={req._id}
+                    className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs"
+                  >
+                    <div>
+                      <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                        <span className="font-black text-slate-900 text-sm">{req.name}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${typeBadge.color}`}>
+                          {typeBadge.label}
                         </span>
-                      )}
+                        <span className="font-mono text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md text-[11px] border border-indigo-200/60">
+                          {req.subdomain}.mysocialclan.com
+                        </span>
+                      </div>
+                      <p className="text-slate-600 mt-1.5">
+                        Applicant: <strong className="text-slate-900">{req.adminName}</strong>
+                        {req.adminRole && <span> ({req.adminRole})</span>}
+                        <span> · Email: <strong className="text-indigo-700 font-mono text-[11px]">{req.adminEmail || "Email missing"}</strong></span>
+                        <span> · Phone: <strong className="text-slate-900">{req.adminMobile}</strong></span>
+                      </p>
+                      <p className="text-[11px] text-slate-500 mt-1" suppressHydrationWarning>
+                        Submitted: {new Date(req.createdAt).toLocaleString()} · Status:{" "}
+                        <strong
+                          className={
+                            req.status === "approved"
+                              ? "text-emerald-600"
+                              : req.status === "rejected"
+                              ? "text-rose-600"
+                              : "text-amber-600"
+                          }
+                        >
+                          {req.status.toUpperCase()}
+                        </strong>
+                      </p>
                     </div>
-                    <p className="text-slate-600 mt-1.5">
-                      Applicant: <strong className="text-slate-900">{req.adminName || "Community Admin"}</strong>
-                      <span> · Email: <strong className={req.adminEmail ? "text-indigo-700 font-mono text-[11px]" : "text-rose-500 italic"}>{req.adminEmail || "Email missing"}</strong></span>
-                      <span> · Phone: <strong className={req.adminMobile ? "text-slate-900" : "text-slate-400 italic"}>{req.adminMobile || "Phone missing"}</strong></span>
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-1" suppressHydrationWarning>
-                      Submitted: {new Date(req.createdAt).toLocaleString()} · Status:{" "}
-                      <strong
-                        className={
-                          req.status === "approved"
-                            ? "text-emerald-600"
-                            : req.status === "rejected"
-                            ? "text-rose-600"
-                            : "text-amber-600"
-                        }
-                      >
-                        {req.status.toUpperCase()}
-                      </strong>
-                    </p>
-                  </div>
 
-                  <div className="flex items-center space-x-2 shrink-0">
-                    {req.status === "pending" && (
-                      <>
-                        <button
-                          onClick={() => handleApproveRequest(req._id, true)}
-                          disabled={approvingId === req._id}
-                          className="py-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-xl text-xs border-0 cursor-pointer transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50 flex items-center space-x-1.5"
-                        >
-                          {approvingId === req._id ? (
-                            <>
-                              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              <span>Approving...</span>
-                            </>
-                          ) : (
-                            <span>{t.approveRegisterBtn}</span>
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleRejectRequest(req._id)}
-                          className="py-2 px-3 bg-slate-200 hover:bg-rose-100 hover:text-rose-600 text-slate-700 font-bold rounded-xl text-xs border-0 cursor-pointer transition-all"
-                        >
-                          {t.rejectBtn}
-                        </button>
-                      </>
-                    )}
-
-                    {req.status === "approved" && (
-                      <>
-                        <button
-                          onClick={() => handleRegenerateInvite(req._id)}
-                          disabled={reinvitingId === req._id}
-                          title="Generate Fresh Onboarding Link"
-                          className="py-2 px-3 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold rounded-xl border border-indigo-200 transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
-                        >
-                          {reinvitingId === req._id ? (
-                            <div className="w-3.5 h-3.5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <RotateCcw className="w-3.5 h-3.5" />
-                              <span>Re-Invite</span>
-                            </>
-                          )}
-                        </button>
-
-                        {req.whatsappUrl && (
-                          <a
-                            href={req.whatsappUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="py-2 px-3 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold rounded-xl border border-emerald-200 transition-all flex items-center space-x-1.5 text-decoration-none"
+                    <div className="flex items-center space-x-2 shrink-0">
+                      {req.status === "pending" && (
+                        <>
+                          <button
+                            onClick={() => handleApproveRequest(req._id, true)}
+                            disabled={approvingId === req._id}
+                            className="py-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black rounded-xl text-xs border-0 cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
                           >
-                            <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>WhatsApp</span>
-                          </a>
-                        )}
-                      </>
-                    )}
+                            {approvingId === req._id ? <span>Approving...</span> : <span>Approve & Provision</span>}
+                          </button>
+                          <button
+                            onClick={() => handleRejectRequest(req._id)}
+                            className="py-2 px-3 bg-slate-200 hover:bg-rose-100 text-slate-700 font-bold rounded-xl text-xs border-0 cursor-pointer"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
 
-                    <button
-                      onClick={() => handleDeleteRequest(req._id, req.name)}
-                      title="Delete Request"
-                      className="py-2 px-2.5 bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 font-bold rounded-xl border border-slate-200 transition-all cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                      {req.status === "approved" && (
+                        <>
+                          <button
+                            onClick={() => handleRegenerateInvite(req._id)}
+                            disabled={reinvitingId === req._id}
+                            className="py-2 px-3 bg-indigo-50 text-indigo-700 font-bold rounded-xl border border-indigo-200 flex items-center space-x-1.5 cursor-pointer"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Re-Invite</span>
+                          </button>
+
+                          {req.whatsappUrl && (
+                            <a
+                              href={req.whatsappUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="py-2 px-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl border border-emerald-200 flex items-center space-x-1.5 text-decoration-none"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>WhatsApp</span>
+                            </a>
+                          )}
+                        </>
+                      )}
+
+                      <button
+                        onClick={() => handleDeleteRequest(req._id, req.name)}
+                        className="py-2 px-2.5 bg-slate-100 hover:bg-rose-100 text-slate-500 rounded-xl border border-slate-200 cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* Provisioned Active Communities & Community Admin Management */}
+        {/* Provisioned Active Communities */}
         <div className="bg-white border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-black text-slate-900">
-              {t.activeCommunitiesTitle} ({communities.length})
+              Active Community Networks ({communities.length})
             </h2>
             <span className="text-xs text-slate-500 font-medium">Manage provisioned community admins & status</span>
           </div>
@@ -1524,114 +1279,97 @@ export default function PlatformAdminPage() {
             <p className="text-xs text-slate-500 italic py-2">{t.noCommunities}</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {communities.map((c) => (
-                <div
-                  key={c._id}
-                  className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3 flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-extrabold text-slate-900 text-sm flex items-center space-x-2">
-                        <span>{c.name}</span>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+              {communities.map((c) => {
+                const typeBadge = getCommunityTypeBadge(c.communityType);
+                return (
+                  <div
+                    key={c._id}
+                    className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3 flex flex-col justify-between"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-extrabold text-slate-900 text-sm flex items-center space-x-2">
+                          <span>{c.name}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${typeBadge.color}`}>
+                            {typeBadge.label}
+                          </span>
+                        </h3>
+                        <span className="text-[10px] font-mono text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200/60 shrink-0">
+                          {c.subdomain}.mysocialclan.com
+                        </span>
+                      </div>
+
+                      {c.description && <p className="text-xs text-slate-600">{c.description}</p>}
+
+                      <div className="mt-3 p-3 bg-white rounded-xl border border-slate-200/80 text-xs space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                          <span className="flex items-center space-x-1">
+                            <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>Community Admin</span>
+                          </span>
+                          {c.adminRole && <span className="text-indigo-600 font-semibold">{c.adminRole}</span>}
+                        </div>
+
+                        <div className="flex items-center space-x-2 text-slate-900 font-bold">
+                          <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{c.adminName || "Not assigned"}</span>
+                        </div>
+
+                        <div className="flex items-center space-x-2 text-slate-600">
+                          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="font-medium text-indigo-700 font-mono text-[11px]">
+                            {c.adminEmail || "Email missing"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-2 text-slate-600">
+                          <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{c.adminMobile || "Phone missing"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-between gap-2 border-t border-slate-200/60 text-xs">
+                      <button
+                        onClick={() => openEditModal(c)}
+                        className="py-1.5 px-3 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold rounded-xl border border-indigo-200/80 cursor-pointer transition-all flex items-center space-x-1.5"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Community</span>
+                      </button>
+
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleRegenerateInvite(c._id)}
+                          disabled={reinvitingId === c._id}
+                          className="py-1.5 px-2.5 bg-emerald-50 text-emerald-700 font-bold rounded-xl border border-emerald-200 cursor-pointer"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={() => handleToggleCommunityStatus(c)}
+                          className={`py-1.5 px-2.5 font-bold rounded-xl border cursor-pointer ${
                             c.isActive !== false
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : "bg-slate-200 text-slate-600 border-slate-300"
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : "bg-emerald-50 text-emerald-700 border-emerald-200"
                           }`}
                         >
-                          {c.isActive !== false ? "Active" : "Disabled"}
-                        </span>
-                      </h3>
-                      <span className="text-[10px] font-mono text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200/60 shrink-0">
-                        {c.subdomain}.mysocialclan.com
-                      </span>
-                    </div>
+                          <Power className="w-3.5 h-3.5" />
+                          <span>{c.isActive !== false ? "Disable" : "Enable"}</span>
+                        </button>
 
-                    {c.description && <p className="text-xs text-slate-600">{c.description}</p>}
-
-                    {/* Community Admin Contact Box */}
-                    <div className="mt-3 p-3 bg-white rounded-xl border border-slate-200/80 text-xs space-y-1.5">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                        <span className="flex items-center space-x-1">
-                          <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
-                          <span>Community Admin</span>
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-2 text-slate-900 font-bold">
-                        <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{c.adminName || "Not assigned"}</span>
-                      </div>
-
-                      <div className="flex items-center space-x-2 text-slate-600">
-                        <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className={c.adminEmail ? "font-medium text-indigo-700 font-mono text-[11px]" : "text-rose-500 italic font-medium"}>
-                          {c.adminEmail || "Email missing (Not set)"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-2 text-slate-600">
-                        <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className={c.adminMobile ? "" : "text-slate-400 italic"}>
-                          {c.adminMobile || "Phone missing"}
-                        </span>
+                        <button
+                          onClick={() => handleDeleteCommunity(c)}
+                          className="py-1.5 px-2 bg-slate-100 hover:bg-rose-100 text-slate-500 rounded-xl border border-slate-200 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   </div>
-
-                  {/* Actions Bar */}
-                  <div className="pt-2 flex items-center justify-between gap-2 border-t border-slate-200/60 text-xs">
-                    <button
-                      onClick={() => openEditModal(c)}
-                      className="py-1.5 px-3 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold rounded-xl border border-indigo-200/80 cursor-pointer transition-all flex items-center space-x-1.5"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>Edit Community</span>
-                    </button>
-
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleRegenerateInvite(c._id)}
-                        disabled={reinvitingId === c._id}
-                        title="Generate Fresh Onboarding Link"
-                        className="py-1.5 px-2.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold rounded-xl border border-emerald-200 transition-all flex items-center space-x-1 cursor-pointer disabled:opacity-50"
-                      >
-                        {reinvitingId === c._id ? (
-                          <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            <span>Re-Invite</span>
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => handleToggleCommunityStatus(c)}
-                        title={c.isActive !== false ? "Disable Community" : "Activate Community"}
-                        className={`py-1.5 px-2.5 font-bold rounded-xl border cursor-pointer transition-all flex items-center space-x-1 ${
-                          c.isActive !== false
-                            ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
-                            : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                        }`}
-                      >
-                        <Power className="w-3.5 h-3.5" />
-                        <span>{c.isActive !== false ? "Disable" : "Enable"}</span>
-                      </button>
-
-
-                      <button
-                        onClick={() => handleDeleteCommunity(c)}
-                        title="Delete Community"
-                        className="py-1.5 px-2 bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 rounded-xl border border-slate-200 transition-all cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

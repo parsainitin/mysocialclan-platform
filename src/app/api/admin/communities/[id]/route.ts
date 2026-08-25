@@ -36,33 +36,53 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         community.subdomain = cleanSub;
       }
     }
+    if (typeof updates.communityType === "string") community.communityType = updates.communityType.trim();
     if (typeof updates.logo === "string") community.logo = updates.logo.trim();
+    if (typeof updates.website === "string") community.website = updates.website.trim();
     if (typeof updates.description === "string") community.description = updates.description.trim();
     if (typeof updates.primaryLanguage === "string") community.primaryLanguage = updates.primaryLanguage.trim();
     if (typeof updates.country === "string") community.country = updates.country.trim();
     if (Array.isArray(updates.cities)) {
       community.cities = updates.cities.map((c: string) => c.trim()).filter(Boolean);
     }
-    if (Array.isArray(updates.gotras)) {
+    
+    if (typeof updates.taxonomy1Title === "string") community.taxonomy1Title = updates.taxonomy1Title.trim();
+    if (Array.isArray(updates.taxonomy1Items)) {
+      community.taxonomy1Items = updates.taxonomy1Items.map((g: string) => g.trim()).filter(Boolean);
+      community.gotras = community.taxonomy1Items;
+    } else if (Array.isArray(updates.gotras)) {
       community.gotras = updates.gotras.map((g: string) => g.trim()).filter(Boolean);
+      community.taxonomy1Items = community.gotras;
     }
-    if (Array.isArray(updates.kulDevis)) {
+
+    if (typeof updates.taxonomy2Title === "string") community.taxonomy2Title = updates.taxonomy2Title.trim();
+    if (Array.isArray(updates.taxonomy2Items)) {
+      community.taxonomy2Items = updates.taxonomy2Items.map((k: string) => k.trim()).filter(Boolean);
+      community.kulDevis = community.taxonomy2Items;
+    } else if (Array.isArray(updates.kulDevis)) {
       community.kulDevis = updates.kulDevis.map((k: string) => k.trim()).filter(Boolean);
+      community.taxonomy2Items = community.kulDevis;
     }
+
     if (typeof updates.upiId === "string") community.upiId = updates.upiId.trim();
 
     if (typeof updates.adminName === "string") community.adminName = updates.adminName.trim();
     if (typeof updates.adminEmail === "string") community.adminEmail = updates.adminEmail.trim().toLowerCase();
     if (typeof updates.adminMobile === "string") community.adminMobile = updates.adminMobile.trim();
+    if (typeof updates.adminRole === "string") community.adminRole = updates.adminRole.trim();
 
     if (updates.modules && typeof updates.modules === "object") {
+      const opps = updates.modules.opportunities ?? updates.modules.marketplace ?? true;
+      const cal = updates.modules.calendar ?? updates.modules.panchang ?? true;
       community.modules = {
         directory: !!updates.modules.directory,
-        marketplace: !!updates.modules.marketplace,
-        panchang: !!updates.modules.panchang,
+        opportunities: !!opps,
+        calendar: !!cal,
         booking: !!updates.modules.booking,
         events: !!updates.modules.events,
         donations: !!updates.modules.donations,
+        marketplace: !!opps,
+        panchang: !!updates.modules.panchang,
       };
     }
 
@@ -74,7 +94,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
-
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const session = verifyAdminSession(request);

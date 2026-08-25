@@ -25,35 +25,537 @@ import {
   Plus,
   X,
   RotateCcw,
+  GraduationCap,
+  Award,
+  Briefcase,
+  HeartHandshake,
+  BookOpen,
+  Layers,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 import { useLanguage, LanguageDropdown } from "@/context/LanguageContext";
 import { COUNTRY_OPTIONS } from "@/lib/countryOptions";
 
+export type CommunityTypeKey = "college" | "alumni" | "cultural" | "industry" | "ngo" | "custom";
+
+interface CommunityTypeConfig {
+  id: CommunityTypeKey;
+  title: string;
+  badge: string;
+  icon: any;
+  desc: string;
+  nameLabel: string;
+  namePlaceholder: string;
+  emailPlaceholder: string;
+  taxonomy1Title: string;
+  defaultTaxonomy1Items: string[];
+  taxonomy2Title: string;
+  defaultTaxonomy2Items: string[];
+  adminRoles: string[];
+  defaultModules: {
+    directory: boolean;
+    opportunities: boolean;
+    calendar: boolean;
+    booking: boolean;
+    events: boolean;
+    donations: boolean;
+    panchang: boolean;
+    marketplace: boolean;
+  };
+  moduleLabels: {
+    directory: { label: string; desc: string; icon: any };
+    opportunities: { label: string; desc: string; icon: any };
+    calendar: { label: string; desc: string; icon: any };
+    booking: { label: string; desc: string; icon: any };
+    events: { label: string; desc: string; icon: any };
+    donations: { label: string; desc: string; icon: any };
+  };
+}
+
+const COMMUNITY_TYPE_CONFIGS: Record<CommunityTypeKey, CommunityTypeConfig> = {
+  college: {
+    id: "college",
+    title: "Colleges & Academic Institutions",
+    badge: "Universities & Campuses",
+    icon: GraduationCap,
+    desc: "Department boards, student clubs, placement cell, internship & referral networks, and exam schedules.",
+    nameLabel: "College / University Name *",
+    namePlaceholder: "e.g. Stanford University / Indian Institute of Technology / Oxford College",
+    emailPlaceholder: "e.g. dean.office@university.edu or admin@college.ac.in",
+    taxonomy1Title: "Academic Departments & Batches",
+    defaultTaxonomy1Items: [
+      "Computer Science & Engg",
+      "Data Science & AI",
+      "Electronics & Comm",
+      "Mechanical Engg",
+      "MBA & Management",
+      "Information Tech",
+    ],
+    taxonomy2Title: "Campus Blocks & Research Centers",
+    defaultTaxonomy2Items: [
+      "Main Academic Block",
+      "Innovation & Lab Center",
+      "North Campus Wing",
+      "Central Auditorium",
+    ],
+    adminRoles: [
+      "Dean / Principal",
+      "Campus Placement Officer (TPO)",
+      "Head of Department (HOD)",
+      "Student Council President",
+      "Faculty Administrator",
+    ],
+    defaultModules: {
+      directory: true,
+      opportunities: true,
+      calendar: true,
+      booking: true,
+      events: true,
+      donations: true,
+      panchang: false,
+      marketplace: false,
+    },
+    moduleLabels: {
+      directory: {
+        label: "Verified Student, Faculty & Alumni Directory",
+        desc: "Private student profiles, batch tags, roll-number verification, and campus feeds.",
+        icon: Users,
+      },
+      opportunities: {
+        label: "Campus Placement, Internships & Career Referrals Hub",
+        desc: "Share verified internship opportunities, campus drives, interview experiences, and peer job referrals.",
+        icon: Briefcase,
+      },
+      calendar: {
+        label: "Academic Calendar & Exam/Fest Timelines",
+        desc: "Semester schedules, exam timetables, assignment deadlines, and hackathon dates.",
+        icon: Calendar,
+      },
+      booking: {
+        label: "Lab, Seminar Hall & Auditorium Bookings",
+        desc: "Real-time reservation system for college auditoriums, computer labs, and conference rooms.",
+        icon: Landmark,
+      },
+      events: {
+        label: "Campus Notice Board & Student Club Announcements",
+        desc: "Official dean notices, tech fests, cultural events, and club RSVP tracking.",
+        icon: Megaphone,
+      },
+      donations: {
+        label: "Fest Sponsorships, Club Funds & Alumni Grants",
+        desc: "Direct 0% platform fee collections for campus clubs, annual fests, and research grants.",
+        icon: Heart,
+      },
+    },
+  },
+  alumni: {
+    id: "alumni",
+    title: "Alumni Associations",
+    badge: "Graduates & Mentors",
+    icon: Award,
+    desc: "Global graduation chapters, career mentorship, job referrals, reunion drives, and alumni registries.",
+    nameLabel: "Alumni Association Name *",
+    namePlaceholder: "e.g. Global Alumni Network / Harvard Alumni Association",
+    emailPlaceholder: "e.g. alumni.relations@network.org",
+    taxonomy1Title: "Graduation Batches & Programs",
+    defaultTaxonomy1Items: [
+      "Batch of 2024",
+      "Batch of 2020",
+      "Batch of 2015",
+      "Batch of 2010",
+      "MBA Cohort",
+    ],
+    taxonomy2Title: "Global Chapters & Regions",
+    defaultTaxonomy2Items: [
+      "Bay Area Chapter",
+      "London & Europe Chapter",
+      "Bangalore Chapter",
+      "Singapore Chapter",
+    ],
+    adminRoles: [
+      "Alumni Relations Director",
+      "Alumni Association President",
+      "Chapter Lead",
+      "Alumni Coordinator",
+    ],
+    defaultModules: {
+      directory: true,
+      opportunities: true,
+      calendar: true,
+      booking: true,
+      events: true,
+      donations: true,
+      panchang: false,
+      marketplace: false,
+    },
+    moduleLabels: {
+      directory: {
+        label: "Global Alumni Directory & Career Registry",
+        desc: "Verified graduate profiles, current company affiliations, and batch search.",
+        icon: Users,
+      },
+      opportunities: {
+        label: "Alumni Job Referrals & Mentorship Board",
+        desc: "Direct employee referrals, 1-on-1 mentorship requests, and executive opportunities.",
+        icon: Briefcase,
+      },
+      calendar: {
+        label: "Reunion Schedules & Global Webinars",
+        desc: "Annual alumni meets, homecoming dates, and keynote webinars.",
+        icon: Calendar,
+      },
+      booking: {
+        label: "Alumni Lounge & Event Venue Reservations",
+        desc: "Book alumni clubhouses and reunion banquet spaces.",
+        icon: Landmark,
+      },
+      events: {
+        label: "Homecoming Fests & Regional Meetups",
+        desc: "Official reunion RSVPs, chapter dinners, and networking drives.",
+        icon: Megaphone,
+      },
+      donations: {
+        label: "Alumni Endowment & Scholarship Fund",
+        desc: "Direct donations towards university infrastructure and student scholarships.",
+        icon: Heart,
+      },
+    },
+  },
+  cultural: {
+    id: "cultural",
+    title: "Cultural Clans & Regional Trusts",
+    badge: "Heritage & Community",
+    icon: Users,
+    desc: "Community trusts, family directories, gotra lineages, cultural calendars, and community halls.",
+    nameLabel: "Clan / Community Trust Name *",
+    namePlaceholder: "e.g. Global Maheshwari Clan / Rajput Mahasabha / Heritage Foundation",
+    emailPlaceholder: "e.g. trust.office@community.org",
+    taxonomy1Title: "Gotras / Guild Chapters",
+    defaultTaxonomy1Items: ["Chapter A", "Chapter B", "Chapter C", "Guild North", "Guild South"],
+    taxonomy2Title: "KulDevis / Regional Hubs",
+    defaultTaxonomy2Items: ["Primary Hub", "Secondary Hub", "Regional Board"],
+    adminRoles: ["Community Trust President", "General Secretary", "Clan Coordinator", "Trustee"],
+    defaultModules: {
+      directory: true,
+      opportunities: false,
+      calendar: true,
+      booking: true,
+      events: true,
+      donations: true,
+      panchang: true,
+      marketplace: true,
+    },
+    moduleLabels: {
+      directory: {
+        label: "Family & Community Member Directory",
+        desc: "Verified member profiles, family lineage records, and elder badges.",
+        icon: Users,
+      },
+      opportunities: {
+        label: "Community Business & Classifieds Marketplace",
+        desc: "Trusted member business directory, trade offers, and community services.",
+        icon: ShoppingBag,
+      },
+      calendar: {
+        label: "Cultural Panchang & Hijri Calendar",
+        desc: "Auspicious tithis, festival timings, and regional observance alerts.",
+        icon: Calendar,
+      },
+      booking: {
+        label: "Community Hall & Venue Bookings",
+        desc: "Reserve community dharamshalas, banquet halls, and meeting rooms.",
+        icon: Landmark,
+      },
+      events: {
+        label: "Cultural Festivals & Community Gatherings",
+        desc: "Annual sabha notices, festival invitations, and RSVP management.",
+        icon: Megaphone,
+      },
+      donations: {
+        label: "Community Welfare & Trust Contributions",
+        desc: "Direct support for trust welfare projects and community development.",
+        icon: Heart,
+      },
+    },
+  },
+  industry: {
+    id: "industry",
+    title: "Industry & Trade Associations",
+    badge: "Professional Syndicates",
+    icon: Briefcase,
+    desc: "Professional syndicates, trade associations, corporate alumni networks, and verified member directories.",
+    nameLabel: "Industry Association Name *",
+    namePlaceholder: "e.g. National Tech Guild / Healthcare Syndicate / Chamber of Commerce",
+    emailPlaceholder: "e.g. secretariat@industryguild.org",
+    taxonomy1Title: "Industry Sectors & Verticals",
+    defaultTaxonomy1Items: [
+      "Software & Tech",
+      "Healthcare & Biotech",
+      "Manufacturing",
+      "Finance & Fintech",
+      "Consulting",
+    ],
+    taxonomy2Title: "Regional Chapters & Zones",
+    defaultTaxonomy2Items: ["National HQ", "North Zone Chapter", "West Zone Chapter", "Global Liaison"],
+    adminRoles: [
+      "Executive Director",
+      "Association Secretary",
+      "Trade Committee Lead",
+      "Industry President",
+    ],
+    defaultModules: {
+      directory: true,
+      opportunities: true,
+      calendar: true,
+      booking: true,
+      events: true,
+      donations: true,
+      panchang: false,
+      marketplace: false,
+    },
+    moduleLabels: {
+      directory: {
+        label: "Verified Professional Directory",
+        desc: "Credentialed industry members, company profiles, and executive credentials.",
+        icon: Users,
+      },
+      opportunities: {
+        label: "B2B Deals, RFPs & High-Value Job Openings",
+        desc: "Post industry RFPs, trade contracts, and executive job openings.",
+        icon: Briefcase,
+      },
+      calendar: {
+        label: "Conference & Expo Timelines",
+        desc: "Annual industry summits, trade expos, and regulatory deadlines.",
+        icon: Calendar,
+      },
+      booking: {
+        label: "Conference Rooms & Exhibition Booths",
+        desc: "Reserve syndicate halls, booth spaces, and private boardrooms.",
+        icon: Landmark,
+      },
+      events: {
+        label: "Trade Summits & Networking Roundtables",
+        desc: "Official association communiqués, webinars, and delegate RSVPs.",
+        icon: Megaphone,
+      },
+      donations: {
+        label: "Industry Development & Research Fund",
+        desc: "Sponsorships and contributions for policy research and training.",
+        icon: Heart,
+      },
+    },
+  },
+  ngo: {
+    id: "ngo",
+    title: "NGOs & Non-Profit Foundations",
+    badge: "Social Impact",
+    icon: HeartHandshake,
+    desc: "Volunteer networks, donation drives with 0% fee, campaign coordination, and impact reports.",
+    nameLabel: "NGO / Foundation Name *",
+    namePlaceholder: "e.g. Hope Global Foundation / Clean Earth Initiative",
+    emailPlaceholder: "e.g. contact@foundation.org",
+    taxonomy1Title: "Causes & Initiative Wings",
+    defaultTaxonomy1Items: [
+      "Education & Literacy",
+      "Healthcare Drives",
+      "Environment & Green",
+      "Disaster Relief",
+      "Youth Empowerment",
+    ],
+    taxonomy2Title: "Field Units & Operation Centers",
+    defaultTaxonomy2Items: ["Central Operations Hub", "Regional Field Unit A", "Regional Field Unit B"],
+    adminRoles: ["Managing Trustee", "Program Director", "Volunteer Coordinator", "Founder"],
+    defaultModules: {
+      directory: true,
+      opportunities: true,
+      calendar: true,
+      booking: true,
+      events: true,
+      donations: true,
+      panchang: false,
+      marketplace: false,
+    },
+    moduleLabels: {
+      directory: {
+        label: "Verified Volunteers & Donors Network",
+        desc: "Volunteer profiles, skill sets, and contributor badges.",
+        icon: Users,
+      },
+      opportunities: {
+        label: "Volunteer Openings & NGO Partnerships",
+        desc: "Post volunteer requirements, CSR partnerships, and grant requests.",
+        icon: Briefcase,
+      },
+      calendar: {
+        label: "Drive Dates & Campaign Timelines",
+        desc: "Field drive schedules, training sessions, and campaign milestones.",
+        icon: Calendar,
+      },
+      booking: {
+        label: "Field Vehicles & Community Space Reservations",
+        desc: "Reserve logistics equipment, relief centers, and workshop spaces.",
+        icon: Landmark,
+      },
+      events: {
+        label: "Volunteer Drives & Public Campaigns",
+        desc: "Relief drives, fundraising galas, and volunteer attendance.",
+        icon: Megaphone,
+      },
+      donations: {
+        label: "Direct 0% Fee Impact Donations",
+        desc: "Direct member donations into NGO bank/UPI with instant receipt records.",
+        icon: Heart,
+      },
+    },
+  },
+  custom: {
+    id: "custom",
+    title: "Custom Community / Private Club",
+    badge: "Flexible Network",
+    icon: Layers,
+    desc: "Tailored private social network with fully customizable modules for residential societies, clubs, and creator hubs.",
+    nameLabel: "Community / Club Name *",
+    namePlaceholder: "e.g. Palm Meadows Residents Club / Apex Creators Network",
+    emailPlaceholder: "e.g. admin@mycommunity.com",
+    taxonomy1Title: "Primary Sections / Categories",
+    defaultTaxonomy1Items: ["Section A", "Section B", "Section C", "Core Group"],
+    taxonomy2Title: "Regional Hubs / Units",
+    defaultTaxonomy2Items: ["Main Unit", "Sub Unit 1", "Sub Unit 2"],
+    adminRoles: ["Community Lead", "General Secretary", "Coordinator", "Founder"],
+    defaultModules: {
+      directory: true,
+      opportunities: true,
+      calendar: true,
+      booking: true,
+      events: true,
+      donations: true,
+      panchang: false,
+      marketplace: true,
+    },
+    moduleLabels: {
+      directory: {
+        label: "Verified Member Feed & Directory",
+        desc: "Private member profiles, badges, and verified network feeds.",
+        icon: Users,
+      },
+      opportunities: {
+        label: "Opportunities, Jobs & Referrals Hub",
+        desc: "Community opportunities, career referrals, and collaboration boards.",
+        icon: Briefcase,
+      },
+      calendar: {
+        label: "Community Timelines & Calendar",
+        desc: "Event schedules, key milestones, and group deadlines.",
+        icon: Calendar,
+      },
+      booking: {
+        label: "Facilities & Space Bookings",
+        desc: "Community facility, room, and space reservations with instant approval.",
+        icon: Landmark,
+      },
+      events: {
+        label: "Announcements & Event RSVPs",
+        desc: "Official broadcasts, community meetups, and RSVP tracking.",
+        icon: Megaphone,
+      },
+      donations: {
+        label: "Direct Member Support Payments",
+        desc: "0% fee contributions directly into your organization's bank/UPI.",
+        icon: Heart,
+      },
+    },
+  },
+};
+
 export default function CreateClanPage() {
-  const { t, isRtl } = useLanguage();
+  const { t } = useLanguage();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
-  // Step 1: Subdomain
+  // Step 1: Community Type & Subdomain
+  const [communityType, setCommunityType] = useState<CommunityTypeKey>("college");
   const [subdomain, setSubdomain] = useState("");
   const [checkingSubdomain, setCheckingSubdomain] = useState(false);
   const [subdomainAvailable, setSubdomainAvailable] = useState<boolean | null>(null);
   const [subdomainError, setSubdomainError] = useState<string | null>(null);
 
-  // Step 2: Community Details
+  // Step 2: Community & Taxonomy Details
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [website, setWebsite] = useState("");
   const [primaryLanguage, setPrimaryLanguage] = useState<string>("en");
   const [countryCode, setCountryCode] = useState<string>("IN");
   const [selectedCities, setSelectedCities] = useState<string[]>(COUNTRY_OPTIONS[0].cities);
   const [customCityInput, setCustomCityInput] = useState<string>("");
-  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [gotras, setGotras] = useState("Chapter A, Chapter B, Chapter C, Guild North, Guild South");
-  const [kulDevis, setKulDevis] = useState("Primary Hub, Secondary Hub, Regional Board");
   const [upiId, setUpiId] = useState("");
   const logoInputRef = useRef<HTMLInputElement>(null);
   const subdomainInputRef = useRef<HTMLInputElement>(null);
+
+  // Dynamic Taxonomies
+  const [taxonomy1Title, setTaxonomy1Title] = useState(
+    COMMUNITY_TYPE_CONFIGS.college.taxonomy1Title
+  );
+  const [taxonomy1Items, setTaxonomy1Items] = useState<string[]>(
+    COMMUNITY_TYPE_CONFIGS.college.defaultTaxonomy1Items
+  );
+  const [newTaxonomy1Input, setNewTaxonomy1Input] = useState("");
+
+  const [taxonomy2Title, setTaxonomy2Title] = useState(
+    COMMUNITY_TYPE_CONFIGS.college.taxonomy2Title
+  );
+  const [taxonomy2Items, setTaxonomy2Items] = useState<string[]>(
+    COMMUNITY_TYPE_CONFIGS.college.defaultTaxonomy2Items
+  );
+  const [newTaxonomy2Input, setNewTaxonomy2Input] = useState("");
+
+  // Step 3: Admin Account
+  const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminMobile, setAdminMobile] = useState("");
+  const [adminRole, setAdminRole] = useState(
+    COMMUNITY_TYPE_CONFIGS.college.adminRoles[0]
+  );
+  const [customRoleInput, setCustomRoleInput] = useState("");
+
+  // Step 4: Modules Configuration
+  const [modules, setModules] = useState({
+    directory: true,
+    opportunities: true,
+    calendar: true,
+    booking: true,
+    events: true,
+    donations: true,
+    panchang: false,
+    marketplace: false,
+  });
+
+  const [showAdvancedModules, setShowAdvancedModules] = useState(false);
+
+  // Terms & Conditions State
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
+  // Step 5: Submission & Result
+  const [submitting, setSubmitting] = useState(false);
+  const [creationError, setCreationError] = useState<string | null>(null);
+  const [createdCommunityName, setCreatedCommunityName] = useState<string | null>(null);
+
+  const activeConfig = COMMUNITY_TYPE_CONFIGS[communityType];
+
+  // When communityType changes, update default taxonomies, roles, and modules
+  const handleCommunityTypeSelect = (type: CommunityTypeKey) => {
+    setCommunityType(type);
+    const cfg = COMMUNITY_TYPE_CONFIGS[type];
+    setTaxonomy1Title(cfg.taxonomy1Title);
+    setTaxonomy1Items([...cfg.defaultTaxonomy1Items]);
+    setTaxonomy2Title(cfg.taxonomy2Title);
+    setTaxonomy2Items([...cfg.defaultTaxonomy2Items]);
+    setAdminRole(cfg.adminRoles[0]);
+    setModules({ ...cfg.defaultModules });
+  };
 
   useEffect(() => {
     subdomainInputRef.current?.focus();
@@ -102,31 +604,29 @@ export default function CreateClanPage() {
     loadCountryCities(countryCode);
   };
 
+  const handleAddTaxonomy1 = () => {
+    const trimmed = newTaxonomy1Input.trim();
+    if (trimmed && !taxonomy1Items.includes(trimmed)) {
+      setTaxonomy1Items([...taxonomy1Items, trimmed]);
+      setNewTaxonomy1Input("");
+    }
+  };
 
-  // Step 3: Admin Account
-  const [adminName, setAdminName] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminMobile, setAdminMobile] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
+  const handleRemoveTaxonomy1 = (item: string) => {
+    setTaxonomy1Items(taxonomy1Items.filter((i) => i !== item));
+  };
 
-  // Step 4: Modules Configuration
-  const [modules, setModules] = useState({
-    directory: true,
-    marketplace: true,
-    panchang: true,
-    booking: true,
-    events: true,
-    donations: true,
-  });
+  const handleAddTaxonomy2 = () => {
+    const trimmed = newTaxonomy2Input.trim();
+    if (trimmed && !taxonomy2Items.includes(trimmed)) {
+      setTaxonomy2Items([...taxonomy2Items, trimmed]);
+      setNewTaxonomy2Input("");
+    }
+  };
 
-  // Terms & Conditions State
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
-
-  // Step 5: Submission & Result
-  const [submitting, setSubmitting] = useState(false);
-  const [creationError, setCreationError] = useState<string | null>(null);
-  const [createdCommunityName, setCreatedCommunityName] = useState<string | null>(null);
+  const handleRemoveTaxonomy2 = (item: string) => {
+    setTaxonomy2Items(taxonomy2Items.filter((i) => i !== item));
+  };
 
   // Debounced subdomain availability check
   useEffect(() => {
@@ -183,13 +683,11 @@ export default function CreateClanPage() {
     };
   }, [subdomain, step]);
 
-
   const handleLogoUpload = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
       alert("Logo image must be under 5MB");
       return;
     }
-    setLogoFile(file);
     setLogoPreview(URL.createObjectURL(file));
   };
 
@@ -198,28 +696,38 @@ export default function CreateClanPage() {
     setCreationError(null);
 
     try {
-      let logoUrl: string | undefined = undefined;
       const selectedCountryObj = COUNTRY_OPTIONS.find((c) => c.code === countryCode);
+
+      const effectiveRole = adminRole === "Custom" ? customRoleInput.trim() : adminRole;
 
       const res = await fetch("/api/communities/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
+          name: name.trim(),
           subdomain: subdomain.trim().toLowerCase(),
-          description,
-          logo: logoUrl,
+          communityType,
+          description: description.trim(),
+          website: website.trim(),
+          logo: logoPreview || undefined,
           primaryLanguage,
           country: selectedCountryObj?.label || countryCode,
           cities: selectedCities,
-          gotras: gotras.split(",").map((s) => s.trim()).filter(Boolean),
-          kulDevis: kulDevis.split(",").map((s) => s.trim()).filter(Boolean),
+
+          taxonomy1Title: taxonomy1Title.trim(),
+          taxonomy1Items,
+          taxonomy2Title: taxonomy2Title.trim(),
+          taxonomy2Items,
+
+          gotras: taxonomy1Items,
+          kulDevis: taxonomy2Items,
+
           upiId: upiId.trim(),
           modules,
-          adminName,
-          adminEmail,
-          adminMobile,
-          adminPassword,
+          adminName: adminName.trim(),
+          adminEmail: adminEmail.trim().toLowerCase(),
+          adminMobile: adminMobile.trim(),
+          adminRole: effectiveRole || "Administrator",
           termsAccepted: acceptedTerms,
         }),
       });
@@ -230,7 +738,9 @@ export default function CreateClanPage() {
         data = JSON.parse(responseText);
       } catch {
         if (res.status === 504 || responseText.includes("504")) {
-          throw new Error("Server connection timed out (504 Gateway Timeout). Please verify MONGODB_URI connectivity or network whitelist.");
+          throw new Error(
+            "Server connection timed out (504 Gateway Timeout). Please verify MONGODB_URI connectivity or network whitelist."
+          );
         }
         throw new Error(`Server returned status ${res.status}. Please try again later.`);
       }
@@ -248,12 +758,11 @@ export default function CreateClanPage() {
     }
   };
 
-
   const stepTabs = [
-    { num: 1, title: "Subdomain" },
-    { num: 2, title: "Organization Info" },
+    { num: 1, title: "Type & Subdomain" },
+    { num: 2, title: "Network Details" },
     { num: 3, title: "Admin Contact" },
-    { num: 4, title: "Social Modules" },
+    { num: 4, title: "Select Modules" },
   ];
 
   return (
@@ -281,7 +790,7 @@ export default function CreateClanPage() {
                 </div>
               </div>
               <span className="hidden md:inline-block text-sm font-black tracking-tight bg-gradient-to-r from-blue-700 via-indigo-600 to-slate-900 bg-clip-text text-transparent">
-                {t.wizardTitle}
+                Launch Private Community Network
               </span>
             </div>
             <LanguageDropdown />
@@ -294,14 +803,14 @@ export default function CreateClanPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-10">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
         {/* Wizard Card Wrapper */}
         <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xl overflow-hidden">
           {/* Progress Bar Header */}
           {step < 5 && (
-            <div className="bg-slate-50/80 border-b border-slate-100 p-6">
+            <div className="bg-slate-50/80 border-b border-slate-100 p-5 sm:p-6">
               {/* Step Tab Indicators */}
-              <div className="grid grid-cols-4 gap-2 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
                 {stepTabs.map((tab) => (
                   <div
                     key={tab.num}
@@ -327,7 +836,7 @@ export default function CreateClanPage() {
                     >
                       {step > tab.num ? <Check className="w-3 h-3 stroke-[3]" /> : tab.num}
                     </div>
-                    <span className="hidden sm:inline truncate">{tab.title}</span>
+                    <span className="truncate">{tab.title}</span>
                   </div>
                 ))}
               </div>
@@ -344,29 +853,90 @@ export default function CreateClanPage() {
 
           {/* Form Step Contents */}
           <div className="p-6 sm:p-8 space-y-6">
-            {/* STEP 1: SUBDOMAIN SELECTION */}
+            {/* STEP 1: COMMUNITY TYPE & SUBDOMAIN */}
             {step === 1 && (
               <div className="space-y-6">
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
                     <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>{t.wizardSubdomainStep}</span>
+                    <span>Choose Network Type & Subdomain</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">{t.wizardSubdomainTitle}</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                    What type of private social network are you building?
+                  </h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    {t.wizardSubdomainDesc}
+                    Select your organization type. The platform will automatically customize modules,
+                    departments, taxonomies, and permissions for your use-case.
                   </p>
                 </div>
 
+                {/* Community Type Cards */}
                 <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                    1. Select Community / Network Type *
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {(Object.keys(COMMUNITY_TYPE_CONFIGS) as CommunityTypeKey[]).map((key) => {
+                      const cfg = COMMUNITY_TYPE_CONFIGS[key];
+                      const Icon = cfg.icon;
+                      const isSelected = communityType === key;
+                      return (
+                        <div
+                          key={key}
+                          onClick={() => handleCommunityTypeSelect(key)}
+                          className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative flex flex-col justify-between ${
+                            isSelected
+                              ? "bg-indigo-50/90 border-indigo-600 shadow-md ring-2 ring-indigo-500/20"
+                              : "bg-slate-50/80 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
+                          }`}
+                        >
+                          {isSelected && (
+                            <span className="absolute top-3 right-3 w-5 h-5 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs shadow-xs">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                            </span>
+                          )}
+                          <div className="space-y-2">
+                            <div
+                              className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                                isSelected ? "bg-indigo-600 text-white" : "bg-white text-slate-700 border border-slate-200"
+                              }`}
+                            >
+                              <Icon className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="text-sm font-extrabold text-slate-900 block">
+                                {cfg.title}
+                              </span>
+                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded-md mt-0.5">
+                                {cfg.badge}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 leading-relaxed">
+                              {cfg.desc}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Subdomain Input */}
+                <div className="pt-2">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    {t.subdomainLabel}
+                    2. Choose Your Dedicated Subdomain *
                   </label>
                   <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-indigo-600 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
                     <input
                       ref={subdomainInputRef}
                       type="text"
-                      placeholder="e.g. college"
+                      placeholder={
+                        communityType === "college"
+                          ? "e.g. stanford, mit, iitdelhi, harvard"
+                          : communityType === "alumni"
+                          ? "e.g. oxford-alumni, stanford-grads"
+                          : "e.g. apex-club, community"
+                      }
                       value={subdomain}
                       onChange={(e) =>
                         setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
@@ -384,13 +954,15 @@ export default function CreateClanPage() {
                     {checkingSubdomain && (
                       <p className="text-xs text-slate-500 flex items-center space-x-2 animate-pulse font-semibold">
                         <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping" />
-                        <span>{t.checkingAvailability}</span>
+                        <span>Checking subdomain availability...</span>
                       </p>
                     )}
                     {!checkingSubdomain && subdomainAvailable === true && (
                       <p className="text-xs text-emerald-600 font-bold flex items-center space-x-1.5">
                         <CheckCircle2 className="w-4.5 h-4.5" />
-                        <span>Subdomain <strong>{subdomain}.mysocialclan.com</strong> {t.subdomainAvailableMsg}</span>
+                        <span>
+                          Subdomain <strong>{subdomain}.mysocialclan.com</strong> is available!
+                        </span>
                       </p>
                     )}
                     {!checkingSubdomain && subdomainAvailable === false && (
@@ -408,31 +980,34 @@ export default function CreateClanPage() {
                     onClick={() => setStep(2)}
                     className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-600/25 border-0 cursor-pointer transition-all flex items-center justify-center space-x-2"
                   >
-                    <span>{t.nextOrgDetails}</span>
+                    <span>Continue to Organization Details</span>
                     <ChevronRight className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 2: COMMUNITY DETAILS */}
+            {/* STEP 2: NETWORK & TAXONOMY DETAILS */}
             {step === 2 && (
               <div className="space-y-6">
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
                     <Building2 className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>{t.wizardOrgStep}</span>
+                    <span>{activeConfig.title} Setup</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">{t.wizardOrgTitle}</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                    Network Profile & Structure
+                  </h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    {t.wizardOrgDesc} (<strong>{subdomain}.mysocialclan.com</strong>).
+                    Provide the official profile and organizational structure for{" "}
+                    <strong>{subdomain}.mysocialclan.com</strong>.
                   </p>
                 </div>
 
                 {/* Logo Upload */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    {t.orgLogoLabel}
+                    Official Logo / Crest
                   </label>
                   <div className="flex items-center space-x-4">
                     <button
@@ -448,9 +1023,9 @@ export default function CreateClanPage() {
                     </button>
                     <div className="text-xs text-slate-600">
                       {logoPreview ? (
-                        <span className="text-indigo-600 font-bold block mb-1">Logo image uploaded!</span>
+                        <span className="text-indigo-600 font-bold block mb-1">Logo image selected!</span>
                       ) : (
-                        <span className="font-medium block mb-1">Click to select square logo</span>
+                        <span className="font-medium block mb-1">Upload institution/community logo</span>
                       )}
                       <span className="text-slate-400">PNG, JPG or WebP (Max 5MB)</span>
                     </div>
@@ -467,13 +1042,14 @@ export default function CreateClanPage() {
                   </div>
                 </div>
 
+                {/* Name */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.orgNameLabel}
+                    {activeConfig.nameLabel}
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Global Alumni Association / Tech Guild / NGO Foundation"
+                    placeholder={activeConfig.namePlaceholder}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-600 focus:bg-white transition-all"
@@ -481,24 +1057,38 @@ export default function CreateClanPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.adminEmailLabel} *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="e.g. admin@organization.com"
-                    value={adminEmail}
-                    onChange={(e) => setAdminEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                    suppressHydrationWarning
-                  />
-                  {adminEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim()) && (
-                    <p className="text-[11px] text-rose-500 font-semibold mt-1">Please enter a valid email address (e.g., admin@domain.com)</p>
-                  )}
+                {/* Website & Description */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Official Website (Optional)
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="e.g. https://www.university.edu"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                      suppressHydrationWarning
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Description / Tagline
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Short motto, campus location, or description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                      suppressHydrationWarning
+                    />
+                  </div>
                 </div>
 
+                {/* Country & Language */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -520,7 +1110,7 @@ export default function CreateClanPage() {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      {t.primaryLanguageLabel}
+                      Primary Interface Language
                     </label>
                     <select
                       value={primaryLanguage}
@@ -543,12 +1133,136 @@ export default function CreateClanPage() {
                   </div>
                 </div>
 
-                {/* Predefined Regional Cities Selection & Custom Addition */}
+                {/* Dynamic Taxonomy 1 Editor (e.g. Academic Departments & Batches) */}
+                <div className="space-y-3 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>{taxonomy1Title}</span>
+                    </label>
+                    <span className="text-[10px] text-slate-500 font-semibold">
+                      {taxonomy1Items.length} items configured
+                    </span>
+                  </div>
+
+                  {/* Active Chips */}
+                  <div className="flex flex-wrap gap-2 min-h-[36px] items-center">
+                    {taxonomy1Items.map((item) => (
+                      <span
+                        key={item}
+                        className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white border border-indigo-200 text-indigo-900 text-xs font-bold shadow-2xs group"
+                      >
+                        <span>{item}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTaxonomy1(item)}
+                          className="w-4 h-4 rounded-full bg-slate-100 group-hover:bg-rose-500 group-hover:text-white text-slate-500 transition-colors flex items-center justify-center border-0 cursor-pointer text-[10px]"
+                        >
+                          <X className="w-2.5 h-2.5 stroke-[3]" />
+                        </button>
+                      </span>
+                    ))}
+                    {taxonomy1Items.length === 0 && (
+                      <span className="text-xs text-slate-400 italic">No entries added. Type below to add.</span>
+                    )}
+                  </div>
+
+                  {/* Custom Input */}
+                  <div className="flex items-center space-x-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder={`Add ${taxonomy1Title.toLowerCase()} (e.g. Computer Science, MBA)...`}
+                      value={newTaxonomy1Input}
+                      onChange={(e) => setNewTaxonomy1Input(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddTaxonomy1();
+                        }
+                      }}
+                      className="flex-1 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 transition-all placeholder:text-slate-400"
+                      suppressHydrationWarning
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddTaxonomy1}
+                      disabled={!newTaxonomy1Input.trim()}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-1 shadow-2xs shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Dynamic Taxonomy 2 Editor (e.g. Campus Blocks & Centers) */}
+                <div className="space-y-3 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                      <Landmark className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>{taxonomy2Title}</span>
+                    </label>
+                    <span className="text-[10px] text-slate-500 font-semibold">
+                      {taxonomy2Items.length} items configured
+                    </span>
+                  </div>
+
+                  {/* Active Chips */}
+                  <div className="flex flex-wrap gap-2 min-h-[36px] items-center">
+                    {taxonomy2Items.map((item) => (
+                      <span
+                        key={item}
+                        className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white border border-indigo-200 text-indigo-900 text-xs font-bold shadow-2xs group"
+                      >
+                        <span>{item}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTaxonomy2(item)}
+                          className="w-4 h-4 rounded-full bg-slate-100 group-hover:bg-rose-500 group-hover:text-white text-slate-500 transition-colors flex items-center justify-center border-0 cursor-pointer text-[10px]"
+                        >
+                          <X className="w-2.5 h-2.5 stroke-[3]" />
+                        </button>
+                      </span>
+                    ))}
+                    {taxonomy2Items.length === 0 && (
+                      <span className="text-xs text-slate-400 italic">No entries added. Type below to add.</span>
+                    )}
+                  </div>
+
+                  {/* Custom Input */}
+                  <div className="flex items-center space-x-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder={`Add ${taxonomy2Title.toLowerCase()} (e.g. Innovation Center, North Wing)...`}
+                      value={newTaxonomy2Input}
+                      onChange={(e) => setNewTaxonomy2Input(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddTaxonomy2();
+                        }
+                      }}
+                      className="flex-1 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 transition-all placeholder:text-slate-400"
+                      suppressHydrationWarning
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddTaxonomy2}
+                      disabled={!newTaxonomy2Input.trim()}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl border-0 cursor-pointer transition-all flex items-center space-x-1 shadow-2xs shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cities & Locations */}
                 <div className="space-y-3 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
                       <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Predefined Regional Cities</span>
+                      <span>Campus & Regional Cities</span>
                     </label>
                     <button
                       type="button"
@@ -556,11 +1270,10 @@ export default function CreateClanPage() {
                       className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center space-x-1 border-0 bg-transparent cursor-pointer"
                     >
                       <RotateCcw className="w-3 h-3" />
-                      <span>Reset to Country Defaults</span>
+                      <span>Reset Defaults</span>
                     </button>
                   </div>
 
-                  {/* Active City Chips */}
                   <div className="flex flex-wrap gap-2 min-h-[36px] items-center">
                     {selectedCities.map((city) => (
                       <span
@@ -577,16 +1290,12 @@ export default function CreateClanPage() {
                         </button>
                       </span>
                     ))}
-                    {selectedCities.length === 0 && (
-                      <span className="text-xs text-slate-400 italic">No cities selected. Type below to add custom cities.</span>
-                    )}
                   </div>
 
-                  {/* Custom City Input & Add Button */}
                   <div className="flex items-center space-x-2 pt-1">
                     <input
                       type="text"
-                      placeholder="Add custom city (e.g. Jaipur, Dubai, San Jose)..."
+                      placeholder="Add custom city (e.g. Boston, Cambridge, New Delhi)..."
                       value={customCityInput}
                       onChange={(e) => setCustomCityInput(e.target.value)}
                       onKeyDown={(e) => {
@@ -610,32 +1319,22 @@ export default function CreateClanPage() {
                   </div>
                 </div>
 
+                {/* Direct Payment / UPI ID */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.orgDescLabel}
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Short description or tagline of this community network"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-600 focus:bg-white resize-none transition-all"
-                    suppressHydrationWarning
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.orgUpiLabel}
+                    Direct Payment / Fest / Donation Account ID (Optional)
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. organization@bank / upi"
+                    placeholder="e.g. college.events@bank / payments@institution.org"
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
                     suppressHydrationWarning
                   />
+                  <span className="text-[11px] text-slate-500 mt-1 block">
+                    0% platform fee direct member support directly to your institution account.
+                  </span>
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
@@ -643,14 +1342,14 @@ export default function CreateClanPage() {
                     onClick={() => setStep(1)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
                   >
-                    {t.backBtn}
+                    Back
                   </button>
                   <button
-                    disabled={!name.trim() || !adminEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim())}
+                    disabled={!name.trim()}
                     onClick={() => setStep(3)}
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
                   >
-                    <span>{t.nextAdminDetails}</span>
+                    <span>Next: Admin Account</span>
                     <ChevronRight className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
@@ -663,22 +1362,25 @@ export default function CreateClanPage() {
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
                     <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>{t.wizardAdminStep}</span>
+                    <span>Designated Administrator</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">{t.wizardAdminTitle}</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                    Administrator Profile & Role
+                  </h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    {t.wizardAdminDesc}
+                    The designated administrator receives primary authority and will be provisioned
+                    an activation link for initial network governance.
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.adminNameLabel} *
+                    Administrator Full Name *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. John Doe / Dr. Rajesh Shah"
+                    placeholder="e.g. Dr. Rajesh Shah / Prof. John Smith / Sarah Adams"
                     value={adminName}
                     onChange={(e) => setAdminName(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
@@ -686,37 +1388,86 @@ export default function CreateClanPage() {
                   />
                 </div>
 
+                {/* Admin Designation / Role */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.adminEmailLabel} *
+                    Designation / Organizational Role *
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                    {activeConfig.adminRoles.map((role) => (
+                      <button
+                        type="button"
+                        key={role}
+                        onClick={() => setAdminRole(role)}
+                        className={`p-3 rounded-xl border text-left text-xs font-bold transition-all cursor-pointer ${
+                          adminRole === role
+                            ? "bg-indigo-50 border-indigo-600 text-indigo-900 ring-2 ring-indigo-500/20"
+                            : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                        }`}
+                      >
+                        {role}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setAdminRole("Custom")}
+                      className={`p-3 rounded-xl border text-left text-xs font-bold transition-all cursor-pointer ${
+                        adminRole === "Custom"
+                          ? "bg-indigo-50 border-indigo-600 text-indigo-900 ring-2 ring-indigo-500/20"
+                          : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      Other / Custom Role...
+                    </button>
+                  </div>
+                  {adminRole === "Custom" && (
+                    <input
+                      type="text"
+                      placeholder="Enter custom designation (e.g. Campus Coordinator, Trustee)"
+                      value={customRoleInput}
+                      onChange={(e) => setCustomRoleInput(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white border border-indigo-300 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-indigo-600 transition-all"
+                      suppressHydrationWarning
+                    />
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Official Admin Email Address *
                   </label>
                   <input
                     type="email"
                     required
-                    placeholder="e.g. admin@organization.com"
+                    placeholder={activeConfig.emailPlaceholder}
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
                     suppressHydrationWarning
                   />
                   {adminEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim()) && (
-                    <p className="text-[11px] text-rose-500 font-semibold mt-1">Please enter a valid email address (e.g., admin@domain.com)</p>
+                    <p className="text-[11px] text-rose-500 font-semibold mt-1">
+                      Please enter a valid email address (e.g., admin@domain.com)
+                    </p>
                   )}
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t.adminMobileLabel} *
+                    Contact Mobile / WhatsApp Number *
                   </label>
                   <input
                     type="tel"
                     required
-                    placeholder="Contact mobile / WhatsApp number"
+                    placeholder="e.g. +1 555-0199 or +91 98765 43210"
                     value={adminMobile}
                     onChange={(e) => setAdminMobile(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all"
                     suppressHydrationWarning
                   />
+                  <span className="text-[11px] text-slate-500 mt-1 block">
+                    Your direct activation link will be delivered via WhatsApp and email.
+                  </span>
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
@@ -724,32 +1475,38 @@ export default function CreateClanPage() {
                     onClick={() => setStep(2)}
                     className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
                   >
-                    {t.backBtn}
+                    Back
                   </button>
                   <button
-                    disabled={!adminName.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim()) || !adminMobile.trim()}
+                    disabled={
+                      !adminName.trim() ||
+                      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail.trim()) ||
+                      !adminMobile.trim()
+                    }
                     onClick={() => setStep(4)}
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer shadow-md shadow-indigo-500/20 transition-all flex items-center space-x-1.5"
                   >
-                    <span>{t.nextModules}</span>
+                    <span>Next: Select Modules</span>
                     <ChevronRight className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
               </div>
             )}
 
-
-            {/* STEP 4: MODULE SELECTION */}
+            {/* STEP 4: MODULE CONFIGURATION & PRIVACY */}
             {step === 4 && (
               <div className="space-y-6">
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold mb-2">
                     <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>{t.wizardModulesStep}</span>
+                    <span>Modular Feature Selector</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">{t.wizardModulesTitle}</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                    Enable Modules for {name || "Your Network"}
+                  </h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    {t.wizardModulesDesc} (<strong>{name}</strong>).
+                    Select exactly which features to activate for your community. Irrelevant modules
+                    have been auto-excluded, and you can toggle each one freely.
                   </p>
                 </div>
 
@@ -761,12 +1518,30 @@ export default function CreateClanPage() {
 
                 <div className="space-y-3">
                   {[
-                    { key: "directory" as const, label: "Verified Member Feed & Directory", icon: Users, desc: "Private member profiles, family trees, and verified identity badges." },
-                    { key: "marketplace" as const, label: "Social Business & Opportunities", icon: ShoppingBag, desc: "Community marketplace, business directory, and job listings." },
-                    { key: "panchang" as const, label: "Community Calendar & Timelines", icon: Calendar, desc: "Event schedules, daily updates, and auspicious dates." },
-                    { key: "booking" as const, label: "Venue & Space Bookings", icon: Landmark, desc: "Community hall & venue reservations with instant approval." },
-                    { key: "events" as const, label: "Announcements & Events Hub", icon: Megaphone, desc: "Official updates, member discussions, and event RSVPs." },
-                    { key: "donations" as const, label: "Direct Member Support Payments", icon: Heart, desc: "0% fee contributions directly into your organization's account." },
+                    {
+                      key: "directory" as const,
+                      ...activeConfig.moduleLabels.directory,
+                    },
+                    {
+                      key: "opportunities" as const,
+                      ...activeConfig.moduleLabels.opportunities,
+                    },
+                    {
+                      key: "calendar" as const,
+                      ...activeConfig.moduleLabels.calendar,
+                    },
+                    {
+                      key: "booking" as const,
+                      ...activeConfig.moduleLabels.booking,
+                    },
+                    {
+                      key: "events" as const,
+                      ...activeConfig.moduleLabels.events,
+                    },
+                    {
+                      key: "donations" as const,
+                      ...activeConfig.moduleLabels.donations,
+                    },
                   ].map((mod) => {
                     const Icon = mod.icon;
                     const isChecked = modules[mod.key];
@@ -781,7 +1556,11 @@ export default function CreateClanPage() {
                         }`}
                       >
                         <div className="flex items-center space-x-3.5">
-                          <div className={`p-2.5 rounded-xl ${isChecked ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-500"}`}>
+                          <div
+                            className={`p-2.5 rounded-xl ${
+                              isChecked ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-500"
+                            }`}
+                          >
                             <Icon className="w-5 h-5" />
                           </div>
                           <div>
@@ -790,8 +1569,10 @@ export default function CreateClanPage() {
                           </div>
                         </div>
                         <div
-                          className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
-                            isChecked ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 bg-white"
+                          className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all shrink-0 ml-3 ${
+                            isChecked
+                              ? "bg-indigo-600 border-indigo-600 text-white"
+                              : "border-slate-300 bg-white"
                           }`}
                         >
                           {isChecked && <Check className="w-4 h-4 stroke-[3]" />}
@@ -799,6 +1580,70 @@ export default function CreateClanPage() {
                       </label>
                     );
                   })}
+                </div>
+
+                {/* Optional Advanced Modules toggle */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvancedModules(!showAdvancedModules)}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1.5 border-0 bg-transparent cursor-pointer p-0"
+                  >
+                    <span>
+                      {showAdvancedModules
+                        ? "Hide additional specialized modules"
+                        : "Show additional specialized modules (Panchang, Classifieds...)"}
+                    </span>
+                    {showAdvancedModules ? (
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    ) : (
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+
+                  {showAdvancedModules && (
+                    <div className="mt-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 animate-in fade-in duration-150">
+                      <label
+                        onClick={() => setModules({ ...modules, panchang: !modules.panchang })}
+                        className="flex items-center justify-between cursor-pointer"
+                      >
+                        <div>
+                          <span className="text-xs font-bold text-slate-800 block">
+                            Cultural Panchang & Regional Lunar Calendar
+                          </span>
+                          <span className="text-[11px] text-slate-500">
+                            Traditional Hindu Panchang & Islamic Hijri tithis/timings.
+                          </span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={modules.panchang}
+                          onChange={() => {}}
+                          className="w-4 h-4 text-indigo-600 rounded"
+                        />
+                      </label>
+
+                      <label
+                        onClick={() => setModules({ ...modules, marketplace: !modules.marketplace })}
+                        className="flex items-center justify-between cursor-pointer pt-2 border-t border-slate-200/60"
+                      >
+                        <div>
+                          <span className="text-xs font-bold text-slate-800 block">
+                            General Member Classifieds & Buy/Sell Listings
+                          </span>
+                          <span className="text-[11px] text-slate-500">
+                            Local member-to-member classifieds and business directory.
+                          </span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={modules.marketplace}
+                          onChange={() => {}}
+                          className="w-4 h-4 text-indigo-600 rounded"
+                        />
+                      </label>
+                    </div>
+                  )}
                 </div>
 
                 {/* Terms & Conditions Acceptance */}
@@ -817,13 +1662,14 @@ export default function CreateClanPage() {
                         onClick={() => setShowTermsModal(true)}
                         className="font-bold text-indigo-600 hover:text-indigo-800 underline border-0 bg-transparent cursor-pointer p-0"
                       >
-                        Terms & Conditions and Data Privacy Policy
+                        Terms & Conditions and Member Data Privacy Policy
                       </button>{" "}
-                      for creating and administering this community clan network. *
+                      for creating and administering this verified private network. *
                     </span>
                   </label>
                   <p className="text-[11px] text-amber-800/90 font-semibold pl-7">
-                    <strong>Mandatory:</strong> Community member data privacy, consent, and management are the sole responsibility of the community admin and its members.
+                    <strong>Mandatory:</strong> Personal member/student data privacy, consent, and
+                    department management are the designated responsibility of the network administrator.
                   </p>
                 </div>
 
@@ -832,7 +1678,7 @@ export default function CreateClanPage() {
                     onClick={() => setStep(3)}
                     className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
                   >
-                    {t.backBtn}
+                    Back
                   </button>
                   <button
                     disabled={submitting || !acceptedTerms}
@@ -840,10 +1686,10 @@ export default function CreateClanPage() {
                     className="px-8 py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white rounded-xl font-black text-xs shadow-lg shadow-indigo-600/25 border-0 cursor-pointer transition-all flex items-center space-x-2"
                   >
                     {submitting ? (
-                      <span>{t.submittingRequest}</span>
+                      <span>Submitting Provisioning Request...</span>
                     ) : (
                       <>
-                        <span>{t.submitSetupRequest}</span>
+                        <span>Submit & Provision Network</span>
                         <Sparkles className="w-4 h-4" />
                       </>
                     )}
@@ -859,22 +1705,37 @@ export default function CreateClanPage() {
                   <CheckCircle className="w-12 h-12 stroke-[2.5]" />
                 </div>
 
-                <h2 className="text-2xl font-black text-slate-900">{t.wizardSuccessTitle}</h2>
+                <h2 className="text-2xl font-black text-slate-900">Network Created Successfully!</h2>
                 <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                  {t.wizardSuccessDesc} (<strong>{createdCommunityName}</strong>)
+                  Your private social network request for <strong>{createdCommunityName}</strong> (
+                  <span className="capitalize">{communityType}</span> Network) has been registered.
                 </p>
 
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-3 max-w-md mx-auto">
                   <div>
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Requested Subdomain URL</div>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
+                      Assigned Subdomain URL
+                    </div>
                     <div className="text-sm font-mono text-indigo-600 font-bold overflow-hidden text-ellipsis">
                       {subdomain}.mysocialclan.com
                     </div>
                   </div>
+
+                  <div className="pt-2 border-t border-slate-200 text-xs text-slate-600 space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Network Type:</span>
+                      <span className="font-bold text-slate-800 capitalize">{communityType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Admin Contact:</span>
+                      <span className="font-bold text-slate-800">{adminEmail}</span>
+                    </div>
+                  </div>
+
                   <div className="pt-3 border-t border-slate-200 flex items-start space-x-2 text-xs text-slate-600 leading-relaxed">
                     <Lock className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                     <span>
-                      Our platform team will provision your <strong>dedicated database & subdomain hosting</strong> offline and notify you at <strong>{adminMobile}</strong> as soon as your deployment is live!
+                      Our platform team will provision your <strong>dedicated database & subdomain hosting</strong> and dispatch your activation link to <strong>{adminMobile}</strong>!
                     </span>
                   </div>
                 </div>
@@ -884,7 +1745,7 @@ export default function CreateClanPage() {
                     href="/"
                     className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-black text-xs border-0 text-decoration-none transition-all shadow-lg shadow-indigo-600/25"
                   >
-                    {t.doneReturnHome}
+                    Done - Return to Platform Home
                   </a>
                 </div>
               </div>
@@ -898,99 +1759,73 @@ export default function CreateClanPage() {
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-slate-200 space-y-5 relative my-8 animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
-                  <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-base sm:text-lg text-slate-900">
-                    Community Administration & Data Privacy Terms
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    MySocialClan Platform Service Agreement
-                  </p>
-                </div>
+              <div className="flex items-center space-x-2">
+                <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                <h3 className="text-lg font-black text-slate-900">
+                  Terms of Service & Data Privacy Policy
+                </h3>
               </div>
-              <button
-                onClick={() => setShowTermsModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer border-0"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="max-h-[60vh] overflow-y-auto space-y-4 text-xs text-slate-700 leading-relaxed pr-2 font-medium">
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 font-bold flex items-start space-x-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-black uppercase tracking-wider text-amber-800 mb-1">
-                    Data Privacy Responsibility Clause
-                  </p>
-                  <p className="text-xs font-semibold leading-relaxed">
-                    Community member data privacy, data collection, consent, member record safety, and data governance are the <strong>sole and exclusive responsibility of the community administrator and its members</strong>. MySocialClan provides technology hosting infrastructure but does not own, manage, or assume liability for member privacy compliance within your community.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-1">
-                  1. Member Data Governance & Consent
-                </h4>
-                <p>
-                  As the designated Community Admin, you explicitly represent and warrant that all personal data, family profiles, phone numbers, email addresses, gotra records, and member media uploaded into this platform are collected with the express knowledge and consent of the respective individuals.
-                </p>
-
-                <h4 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-1">
-                  2. Platform Infrastructure & Role
-                </h4>
-                <p>
-                  MySocialClan operates strictly as a Software-as-a-Service (SaaS) provider. The platform does not sell, trade, monetize, or harvest private member profiles. Data isolation is maintained across community subdomains, and data maintenance remains under the control of the community leadership.
-                </p>
-
-                <h4 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-1">
-                  3. Acceptable Use & Conduct
-                </h4>
-                <p>
-                  Communities must not utilize the platform for illegal activities, hate speech, unauthorized commercial solicitation, spamming members, or publishing non-consensual personal information. MySocialClan reserves the right to suspend or deactivate subdomains that violate these platform terms.
-                </p>
-
-                <h4 className="font-extrabold text-slate-900 text-sm border-b border-slate-100 pb-1">
-                  4. Security & Access Control
-                </h4>
-                <p>
-                  Community Admins are responsible for safeguarding their login credentials and administrative access. Any actions performed using admin credentials remain the responsibility of the community administration team.
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setShowTermsModal(false)}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs border-0 cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center border-0 cursor-pointer"
               >
-                Close
+                <X className="w-4 h-4 stroke-[2.5]" />
               </button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-y-auto pr-2 text-xs text-slate-600 space-y-4 leading-relaxed font-normal">
+              <div>
+                <h4 className="font-bold text-slate-900 mb-1">1. Private Network Administration</h4>
+                <p>
+                  By creating a private social network on MySocialClan, you represent that you are an
+                  authorized representative (Dean, Placement Officer, Trustee, Executive Lead, or
+                  Coordinator) of the respective college, alumni association, or organization.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 mb-1">2. Member Data Privacy & Consent</h4>
+                <p>
+                  As the designated Community Admin, you explicitly represent and warrant that all
+                  personal data, student directories, phone numbers, email addresses, department
+                  records, and member media uploaded into this platform are collected with the express
+                  knowledge and consent of the respective individuals.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 mb-1">3. Zero Platform Fee Guarantee</h4>
+                <p>
+                  Direct institutional contributions, fest sponsorships, and department grants go 100%
+                  directly to your organization bank/UPI account with zero platform commission or hidden cut.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 mb-1">4. Community Content & Moderation</h4>
+                <p>
+                  The community administrator retains the full authority and responsibility to moderate
+                  discussions, job postings, notice board broadcasts, and membership approvals.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={() => {
                   setAcceptedTerms(true);
                   setShowTermsModal(false);
                 }}
-                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-extrabold text-xs border-0 cursor-pointer transition-all shadow-md shadow-indigo-600/20 flex items-center space-x-1.5"
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs border-0 cursor-pointer shadow-sm transition-all"
               >
-                <Check className="w-4 h-4 stroke-[3]" />
-                <span>I Accept Terms & Conditions</span>
+                I Understand & Accept
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200 py-6 px-4 text-center text-xs text-slate-500">
-        <p>© 2026 Vyanamics Technologies Pvt. Ltd India</p>
-      </footer>
     </div>
   );
 }

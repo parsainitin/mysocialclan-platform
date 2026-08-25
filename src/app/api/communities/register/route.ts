@@ -16,11 +16,17 @@ export async function POST(request: NextRequest) {
     const {
       name,
       subdomain,
+      communityType,
       description,
       logo,
+      website,
       primaryLanguage,
       country,
       cities,
+      taxonomy1Title,
+      taxonomy1Items,
+      taxonomy2Title,
+      taxonomy2Items,
       gotras,
       kulDevis,
       upiId,
@@ -28,6 +34,7 @@ export async function POST(request: NextRequest) {
       adminName,
       adminEmail,
       adminMobile,
+      adminRole,
       termsAccepted,
     } = body;
 
@@ -62,6 +69,19 @@ export async function POST(request: NextRequest) {
     const cleanEmail = adminEmail.trim().toLowerCase();
     const cleanMobile = adminMobile.trim();
     const parsedCities = Array.isArray(cities) ? cities.map((c: string) => c.trim()).filter(Boolean) : [];
+
+    // Parse dynamic taxonomy items or fallback to gotras/kulDevis
+    const parsedTaxonomy1 = Array.isArray(taxonomy1Items)
+      ? taxonomy1Items.map((i: string) => i.trim()).filter(Boolean)
+      : Array.isArray(gotras)
+      ? gotras.map((g: string) => g.trim()).filter(Boolean)
+      : [];
+
+    const parsedTaxonomy2 = Array.isArray(taxonomy2Items)
+      ? taxonomy2Items.map((i: string) => i.trim()).filter(Boolean)
+      : Array.isArray(kulDevis)
+      ? kulDevis.map((k: string) => k.trim()).filter(Boolean)
+      : [];
 
     // 2. Perform DB operations with an 8-second timeout race to prevent 504 Gateway Timeouts
     const dbTask = (async () => {
@@ -99,26 +119,37 @@ export async function POST(request: NextRequest) {
       const creationRequest = await CommunityRequest.create({
         name: name.trim(),
         subdomain: slug,
+        communityType: communityType?.trim() || "college",
         description: description?.trim() || undefined,
         logo: logo?.trim() || undefined,
+        website: website?.trim() || undefined,
         primaryLanguage: primaryLanguage?.trim() || "en",
         country: country?.trim() || undefined,
         cities: parsedCities,
 
-        gotras: Array.isArray(gotras) ? gotras.map((g: string) => g.trim()).filter(Boolean) : [],
-        kulDevis: Array.isArray(kulDevis) ? kulDevis.map((k: string) => k.trim()).filter(Boolean) : [],
+        taxonomy1Title: taxonomy1Title?.trim() || (communityType === "college" ? "Academic Departments & Batches" : "Chapters / Units"),
+        taxonomy1Items: parsedTaxonomy1,
+        taxonomy2Title: taxonomy2Title?.trim() || (communityType === "college" ? "Campus Blocks & Centers" : "Regional Hubs"),
+        taxonomy2Items: parsedTaxonomy2,
+
+        gotras: parsedTaxonomy1,
+        kulDevis: parsedTaxonomy2,
         upiId: upiId?.trim() || undefined,
+
         modules: {
           directory: modules?.directory ?? true,
-          marketplace: modules?.marketplace ?? true,
-          panchang: modules?.panchang ?? true,
+          opportunities: modules?.opportunities ?? modules?.marketplace ?? true,
+          calendar: modules?.calendar ?? modules?.panchang ?? true,
           booking: modules?.booking ?? true,
           events: modules?.events ?? true,
           donations: modules?.donations ?? true,
+          marketplace: modules?.marketplace ?? modules?.opportunities ?? true,
+          panchang: modules?.panchang ?? false,
         },
         adminName: adminName.trim(),
         adminEmail: cleanEmail,
         adminMobile: cleanMobile,
+        adminRole: adminRole?.trim() || (communityType === "college" ? "Dean / Administrator" : "Community Lead"),
         termsAccepted: !!termsAccepted,
         termsAcceptedAt: new Date(),
         status: "pending",
@@ -134,10 +165,12 @@ export async function POST(request: NextRequest) {
             id: creationRequest._id,
             name: creationRequest.name,
             subdomain: creationRequest.subdomain,
+            communityType: creationRequest.communityType,
             primaryLanguage: creationRequest.primaryLanguage,
             adminName: creationRequest.adminName,
             adminEmail: creationRequest.adminEmail,
             adminMobile: creationRequest.adminMobile,
+            adminRole: creationRequest.adminRole,
           },
         },
       };
@@ -154,7 +187,6 @@ export async function POST(request: NextRequest) {
       )
     );
 
-
     const result: { status: number; error?: string; data?: any } = await Promise.race([dbTask, timeoutTask]);
 
     if (result.error) {
@@ -167,4 +199,3 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: e.message || "Failed to submit community request" }, { status: 500 });
   }
 }
-
